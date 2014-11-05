@@ -8,9 +8,9 @@ on a remote cloud platform. Currently under development in pre-alpha phase.
 
 ###Getting Started###
 
-For more details on how to download, setup and use CitizenGrid platform, check our [Getting Started] (citizengrid/wiki/GettingStarted) page.
+For more details on how to download, setup and use CitizenGrid platform, check our [Getting Started] (wiki/GettingStarted) page.
 
 ###Contributions###
 
 ###Tutorials###
-Check our tutorial pages for [Getting Started] (citizengrid/wiki/Tutorials)
+Check our tutorial pages for [Tutorials] (citizengrid/wiki/Tutorials) page.
