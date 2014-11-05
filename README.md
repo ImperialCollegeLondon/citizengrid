@@ -7,10 +7,10 @@ and participate in the applications by launching application clients on their lo
 on a remote cloud platform. Currently under development in pre-alpha phase.
 
 ###Getting Started###
-
-For more details on how to download, setup and use CitizenGrid platform, check our [Getting Started] (wiki/GettingStarted) page.
+For more details on how to download, setup and use CitizenGrid platform, check our [Getting Started] (https://github.com/ImperialCollegeLondon/citizengrid/wiki/GettingStarted) page.
 
 ###Contributions###
+Interested in Contributing the CitizenGrid Platform? Please check our [How to contribute](https://github.com/ImperialCollegeLondon/citizengrid/wiki/how-to-contribute) page.
 
 ###Tutorials###
-Check our tutorial pages for [Tutorials] (citizengrid/wiki/Tutorials) page.
+Check our tutorial pages for [Tutorials] (https://github.com/ImperialCollegeLondon/citizengrid/wiki/Tutorials) page.
