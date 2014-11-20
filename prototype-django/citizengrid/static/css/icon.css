@@ -1,0 +1,69 @@
+/**
+* Custom css icons. Place any icon css here
+*
+**/
+.icon.info,
+.icon.correct,
+.icon.wrong
+{
+    display: inline-block;
+    top: 0.15em;
+    width: 1em;
+    height: 1em;
+
+    overflow: hidden;
+    border: none;
+    border-radius: 0.5em;
+    box-shadow: #999 0 1px 1px;
+}
+
+.icon.info::after,
+.icon.correct::after,
+.icon.wrong::after
+{
+    display: block;
+    position: absolute;
+    top: 0.25em;
+    left: 0;
+    width: 100%;
+    text-align: center;
+    font-family: "Times New Roman", "Garamond", serif;
+    font-size: 0.65em;
+    color: white;
+}
+
+/* // info // */
+
+.icon.info {
+    background-color: #33c;
+	/*color : blue; */
+}
+
+.icon.info::after {
+    font-style: italic;
+    font-weight: bold;
+    content: "i";
+}
+
+
+/* // correct // */
+
+.icon.correct {
+    background-color: #393;
+}
+
+.icon.correct::after {
+    left: 0.012em;
+    content: "✓";
+}
+
+/* // wrong // */
+
+.icon.wrong {
+    background-color: #933;
+}
+
+.icon.wrong::after {
+    content: "×";
+    font-weight: bold;
+}

@@ -1,0 +1,70 @@
+{% extends "base.html" %}
+
+{% block container-content %}
+<div class="container">
+  <h2>Update User Account</h2>
+
+  <form class="form-horizontal" role="form" action="" method="post">
+    <div class="form-group">
+    	<label for="id_firstname" class="col-lg-2 control-label">Firstname</label>
+    	<div class="col-lg-4">
+    	  <input id="id_firstname" class="form-control" value="{% if form.first_name.value %}{{ form.first_name.value }}{% endif %}" type="text" maxlength="30" name="first_name">
+    	</div>
+    	<div class="col-lg-6 text-danger">
+    	  {% if form.first_name.errors %} <p class="help-block">{{ form.first_name.errors }}</p> {% endif %}
+    	</div>
+    </div>
+    <div class="form-group">
+    	<label for="id_lastname" class="col-lg-2 control-label">Surname</label>
+    	<div class="col-lg-4">
+    	  <input id="id_lastname" class="form-control" value="{% if form.last_name.value %}{{ form.last_name.value }}{% endif %}" type="text" maxlength="30" name="last_name">
+    	</div>
+    	<div class="col-lg-6 text-danger">
+    	  {% if form.last_name.errors %} <p class="help-block">{{ form.last_name.errors }}</p> {% endif %}
+    	</div>
+    </div>
+    <div class="form-group">
+    	<label for="id_email" class="col-lg-2 control-label">E-mail</label>
+    	<div class="col-lg-4">
+    	  <input id="id_email" class="form-control" value="{% if not form.email.errors and form.email.value %}{{ form.email.value }}{% endif %}" type="text" maxlength="30" name="email">
+    	</div>
+    	<div class="col-lg-6 text-danger">
+    	  {% if form.email.errors %} <p class="help-block">{{ form.email.errors }}</p> {% endif %}
+    	</div>
+    </div>
+    <div class="form-group">
+    	<label for="id_password1" class="col-lg-2 control-label">Password</label>
+    	<div class="col-lg-4">
+    	  <input id="id_password1" class="form-control" type="password" maxlength="30" name="password1">
+    	</div>
+    	<div class="col-lg-6 text-danger">
+    	  {% if form.password1.errors %} <p class="help-block">{{ form.password1.errors }}</p> {% endif %}
+    	</div>
+    </div>
+    <div class="form-group">
+    	<label for="id_password2" class="col-lg-2 control-label">Password confirmation</label>
+    	<div class="col-lg-4">
+    	  <input id="id_password2" class="form-control" type="password" maxlength="30" name="password2">
+    	</div>
+    	{% if form.password2.errors %} 
+    	<div class="col-lg-6 text-danger">
+    	  <p class="help-block">{{ form.password2.errors }}</p>
+    	</div>
+    	{% else %}
+    	<div class="col-lg-6">
+    	  <p class="help-block">Re-enter password for verification.</p>
+    	</div>
+    	{% endif %}
+    </div>
+  	{% csrf_token %}
+
+   <div class=col-lg-6>
+   	  <button class="navButton btn btn-primary start btn-align btn-first" type="submit" name="btn-save">Save Changes</button>
+      <button class="navButton btn btn-primary start btn-align btn-other " type="submit"name="btn-cancel">Cancel</button>
+    </div>
+
+  </form>
+</div>
+
+
+{% endblock %}

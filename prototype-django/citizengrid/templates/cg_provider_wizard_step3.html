@@ -1,0 +1,200 @@
+
+
+{% load i18n %}
+<script>
+//var pressed=null;
+$( document ).ready(function() {
+
+    $(".navButton").click(function (e) {
+    	console.log(this.id);
+        pressed= $(this).attr("id");
+
+    });
+
+     });
+</script>
+<style>
+table {
+    border-collapse: collapse;
+}
+
+td {
+    padding-top: .5em;
+    padding-bottom: .5em;
+}
+.white{
+color:white}
+</style>
+{% block head %}
+{{ wizard.form.media }}
+{% endblock %}
+
+{% block content %}
+<p>Step {{ wizard.steps.step1 }} of {{ wizard.steps.count }}</p> <br/>
+<b class="bottom-three" >Provide the main type of client image details in this page! For more images, go to <b> manage images </b> in application info section once the application is successfully created!  </b> <br/> <br>
+<form action="#" id="step3" method="post">{% csrf_token %}
+<table>
+{{ wizard.management_form }}
+{% if wizard.form.forms %}
+    {{ wizard.form.management_form }}
+    {% for form in wizard.form.forms %}
+        {{ form }}
+    {% endfor %}
+{% else %}
+<tbody>
+    {% for field in form %}
+	{% if field.label == 'Client image id' %}
+		<tr>
+			<th>Client image <br>id</th>
+			<td>
+				<div class="lg-col-12">
+				<input type="text" class="form-control input-medium col-md-4" id="{{ field.id_for_label }}" name="{{ field.html_name }}"/>
+				</div>
+			</td>
+		</tr>
+
+		{% elif field.label == 'Client image location' %}
+		<tr>
+			<th>Client image <br>location</th>
+			<td>
+				<div class="lg-col-12">
+					<input type="text" class="form-control input-medium col-md-4" id="{{ field.id_for_label }}" name="{{ field.html_name }}"/>
+				</div>
+			</td>
+		</tr>
+	          {% else %}
+		<tr>
+			<th>{{field.label}}</th>
+			<td>
+				{{field}}
+			</td>
+		</tr>
+          {% endif %}
+	 {% endfor %}
+    <tr class="fileuploadTR">
+    <th>
+    	Upload Image
+    </th>
+
+    <td class="col-lg-8">
+      <div class="col-lg-2"></div>
+<div class="row rowfileupload">
+    <div class="col-lg-2"></div>
+    <div id ="demo" class="well col-lg-18">
+    <div><h5>Upload an image</h5></div>
+    <form id="fileupload" class="form-horizontal" role="form">
+      <!-- Redirect browsers with JavaScript disabled to the origin page -->
+      <noscript><input type="hidden" name="redirect" value="/cg"></noscript>
+      <div class="form-group">
+		  <div>
+		    <div id="fileuploadblock" class="row fileupload-buttonbar col-lg-12" style="margin-left: 15px; margin-right: 15px;">
+	            <div class="col-lg-12">
+	                <!-- The fileinput-button span is used to style the file input field as button -->
+	                <span class="btn btn-success fileinput-button">
+	                    <i class="glyphicon glyphicon-plus white"></i>
+	                    <span>Add files...</span>
+	                    <input type="file" name="files[]" multiple>
+	                </span>
+
+	                <!-- The loading indicator is shown during file processing -->
+	                <span class="fileupload-loading"></span>
+	            </div>
+	            <!-- The global progress information -->
+	            <div class="col-lg-5 fileupload-progress fade">
+
+	            </div>
+	        </div>
+	        <!-- The table listing the files available for upload/download -->
+	        <table id="fileuploadtable" role="presentation" class="table table-striped"><tbody class="files"></tbody></table>
+        </div>
+   	  {% csrf_token %}
+   	  </div>
+    </form>
+    </div>
+    <div class="col-lg-2"></div>
+    </div>
+    </td>
+
+    </tr>
+    </tbody>
+{% endif %}
+</table>
+{% if wizard.steps.prev %}
+<button name="wizard_goto_step" class="navButton btn btn-primary start" type="submit" id="first" value="{{ wizard.steps.first }}">{% trans "First step" %}</button>
+<button name="wizard_goto_step" class="navButton btn btn-primary start" type="submit" id="prev" value="{{ wizard.steps.prev }}">{% trans "Prev step" %}</button>
+{% endif %}
+<input type="submit" class ="btn btn-primary start" value="{% trans "Submit" %}"/>
+</form>
+{% if form.errors %}
+    {% for field in form %}
+        {% for error in field.errors %}
+            <div class="alert alert-error">
+                <strong>{{ error|escape }}</strong>
+            </div>
+        {% endfor %}
+    {% endfor %}
+    {% for error in form.non_field_errors %}
+        <div class="alert alert-error">
+            <strong>{{ error|escape }}</strong>
+        </div>
+    {% endfor %}
+{% endif %}
+{% endblock %}
+<script>
+ $(function() {
+	    function toggle(id) {
+	         $('ul li input:checkbox').filter(function () {
+	            return this.checked;
+	        }).each(function () {
+	            $(this).attr('checked', false);
+	        });
+	        $("#"+id).prop("checked", true)
+	    }
+          $('input[type=file]').bootstrapFileInput();
+    $('.file-inputs').bootstrapFileInput();
+	    function toggle(id) {
+	         $('ul li input:checkbox').filter(function () {
+	            return this.checked;
+	        }).each(function () {
+	            $(this).attr('checked', false);
+	        });
+	        $("#"+id).prop("checked", true)
+	    }
+	    function displayDiv(id){
+
+	        var x= $("#"+id).attr("value")
+	        if(x=='Public' ||  x=='Private'){
+	        	console.log("hidden" +x)
+	        	//$('.fileuploadTR').hide()
+	        	//console.log($("#"+id).closest('tr').html());
+	        	//$('tr').not($("#"+id).closest('tr')).hide()
+	        	$('tr').not($("#"+id).closest('tr')).find(":input,:submit,:reset").removeAttr("disabled");
+	        	$('tr').not($("#"+id).closest('tr')).find(":file,:submit,:reset").attr("disabled","disabled");
+
+	        }
+	        else if (x=='NONE'){
+	        	$('tr').not($("#"+id).closest('tr')).find(":input,:submit,:reset").removeAttr("disabled");
+	        	$('tr').not($("#"+id).closest('tr')).find(":input,:file,:submit,:reset").attr("disabled","disabled");
+	        	$('tr').not($("#"+id).closest('tr')).find(":file").unbind('mouseenter mouseleave')
+	        }
+	        else if (x=='Local'){
+	        	//$('tr').not($("#"+id).closest('tr')).find("input").attr("disabled","disabled");
+	        	$('tr').not($("#"+id).closest('tr')).find(":input,:submit,:reset").removeAttr("disabled");
+	        	$('tr').not($("#"+id).closest('tr')).find(":text").attr("disabled","disabled");
+	        }
+	        else
+	        {
+	        	console.log("hiding "+x)
+	        	$('tr').not($("#"+id).closest('tr')).show();
+	        	$('tr').not($("#"+id).closest('tr')).find(":input,:submit,:reset").removeAttr("disabled");
+	        }
+	    }
+	    $('ul li input:checkbox').on('click', function () {
+	        toggle(this.id);
+	        displayDiv(this.id);
+	    });
+
+
+ });
+
+</script>

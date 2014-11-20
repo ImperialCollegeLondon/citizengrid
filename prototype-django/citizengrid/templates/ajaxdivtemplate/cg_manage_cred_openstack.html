@@ -1,0 +1,33 @@
+  <div id="oscred-info" class="row cred-info">
+  <div class="col-md-12">
+    <h3>OpenStack / Amazon EC2 / CitizenGrid Credentials</h3>
+    <hr style="width: 30%; align: left;"/>
+    {% if cloud_creds|length == 0 %}
+      <div class="alert alert-info" id="cloud-nocreds"><b>You do not have any OpenStack / Amazon EC2 / CitizenGrid credentials registered at present.</b></div>
+      <table class="table table-striped" id="cloud-table" style="display: none;">
+        <thead><tr><th>Cloud Platform</th><th>Keypair Alias</th><th>Access Key</th><th>Endpoint</th><th></th></tr></thead>
+        <tbody>
+        </tbody>
+      </table>
+    {% else %}
+      <table class="table table-striped" id="cloud-table">
+        <thead><tr><th>Cloud Platform</th><th>Keypair Alias</th><th>Access Key</th><th>Endpoint</th><th></th></tr></thead>
+        <tbody>
+        {% for cred in cloud_creds %}
+          <tr><td style="width: 220px;">{% if cred.host_cloud == "Public" %} Amazon EC2 {% elif cred.host_cloud == "Private" %}OpenStack{% elif cred.host_cloud == "CitizenGrid" %}CitizenGrid{% endif %} </td> <td style="width: 220px;">{{ cred.alias }}</td><td style="width: 300px;">{{ cred.access_key }}</td><td>{{ cred.endpoint }}</td>
+		<td style="width: 100px;">
+		  <div class="container">
+		    <div class="row">
+		    	<div class="delcreds col-md-1"><a href="javascript:void(0)" id="{{ cred.id }}" type="oscred" class="" title="edit image"><i class="glyphicon glyphicon-wrench"></i></a></div>
+		  		<div class="delcreds col-md-1"><a href="javascript:void(0)" id="{{ cred.id }}" type="oscred" class="" title="delete image"><i class="icon-trash icon-white"></i></a></div>
+		    </div>
+		  </div>
+		</td>
+          </tr>
+        {% endfor %}
+        </tbody>
+      </table>
+    {% endif %}
+    <a href="#cloudModal" data-toggle="modal">Add new OpenStack / Amazon EC2 / CitizenGrid credentials</a>
+  </div>
+</div>

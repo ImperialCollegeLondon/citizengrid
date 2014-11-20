@@ -1,0 +1,42 @@
+{% if credentials_registered %}
+
+		<div style="color: green;">
+			Your credentials with alias {{ alias }} have been successfully registered.
+			<input type="hidden" id ="hide" value="{{id}}">	
+		</div>
+
+{% else %}
+<!-- Modal content -->
+    <script>alert("Form Input Error"</script>
+        <form class="form-horizontal" data-async id="{{ modal_data.id }}" data-target="{{ modal_data.target }}" action="{{ modal_data.action }}" method="{{ modal_data.method }}">
+          <fieldset>
+            {{ form.non_field_errors }}
+            <div class="form-group">
+              <label for="osCloud">Platform </label>
+              <input type="text" id="osCloud" class="form-control {% if form.cloud.errors %}error-control{% endif %}" value="{% if form.cloud.value %}{{ form.cloud.value }}{% endif %}" placeholder="Cloud for these credentials" name="cloud">
+              {{ form.cloud.errors }}
+            </div>
+            <div class="form-group">
+              <label for="osAlias">Alias </label>
+              <input type="text" id="osAlias" class="form-control {% if form.alias.errors %}error-control{% endif %}" value="{% if form.alias.value %}{{ form.alias.value }}{% endif %}" placeholder="Alias for these credentials" name="alias">
+              {{ form.alias.errors }}
+            </div>
+            <div class="form-group">
+              <label for="osAccessKey">Access Key</label>
+              <input type="text" id="osAccessKey" class="form-control {% if form.access_key.errors %}error-control{% endif %}" value="{% if form.access_key.value %}{{ form.access_key.value }}{% endif %}" placeholder="Your account access key" name="access_key">
+              {{ form.access_key.errors }}
+            </div>
+            <div class="form-group">
+              <label for="osSecretKey">Secret Key</label>
+              <input type="text" id="osSecretKey" class="form-control {% if form.secret_key.errors %}error-control{% endif %}" value="{% if form.secret_key.value %}{{ form.secret_key.value }}{% endif %}" placeholder="Your account secret key" name="secret_key">
+              {{ form.secret_key.errors }}
+            </div>
+            <div class="form-group">
+              <label for="osEndpointUrl">Endpoint</label>
+              <input type="text" id="osEndpointUrl" class="form-control {% if form.endpoint.errors %}error-control{% endif %}" value="{% if form.endpoint.value %}{{ form.endpoint.value }}{% endif %}" placeholder="URL for the OpenStack service" name="endpoint">
+              {{ form.endpoint.errors }}
+            </div>
+            {% csrf_token %}
+          </fieldset>
+        </form>
+{% endif %}

@@ -1,0 +1,10 @@
+{% extends "base.html" %}{% load i18n %}
+{% block container-content %}
+     <div class="container top-two" align = "centre" >
+     <h4>
+    {% blocktrans with ago=timestamp|timesince %}An email was sent to <strong>{{ email }}</strong> {{ ago }} ago. Use the link in it to set a new password.
+    {% endblocktrans %}
+     </h4>
+    </div>
+{% endblock %}
+

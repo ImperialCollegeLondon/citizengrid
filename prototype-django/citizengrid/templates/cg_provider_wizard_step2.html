@@ -1,0 +1,199 @@
+
+
+{% load i18n %}
+
+<!-- CSS to style the file input field as button and adjust the Bootstrap progress bars -->
+<link rel="stylesheet" href="/css/jquery.fileupload-ui.css">
+<link rel="stylesheet" href="/css/bootstrap.min.css">
+<link rel="stylesheet" href="/css/bootstrapValidator.min.css">
+<link rel="stylesheet" href="/css/citizengrid.css">
+<link rel="stylesheet" href="/css/font-awesome.min.css">
+
+    <!-- Add Google Fonts collection -->
+<link href='http://fonts.googleapis.com/css?family=Exo:400,800|Share:400,700italic|Oxygen|Montserrat+Alternates:400,700|Libre+Baskerville:400,700' rel='stylesheet' type='text/css'>
+<script>
+var pressed=null;
+$( document ).ready(function() {
+
+    $(".navButton").click(function (e) {
+        pressed= $(this).attr("id");
+
+    });
+    console.log("function");
+    $("#demo").on('click',"#startupload",function(e){
+    	e.preventDefault();
+    });
+     });
+</script>
+<style>
+table {
+    border-collapse: collapse;
+}
+
+td {
+    padding-top: .5em;
+    padding-bottom: .5em;
+}
+.white{
+color:white}
+</style>
+  {% block head %}
+
+<!-- CSS adjustments for browsers with JavaScript disabled -->
+<noscript><link rel="stylesheet" href="/css/jquery.fileupload-ui-noscript.css"></noscript>
+
+<script src="//netdna.bootstrapcdn.com/bootstrap/3.1.1/js/bootstrap.min.js"></script>
+<script type="text/javascript" src="/js/bootstrapValidator.min.js"></script>
+<script src="/js/app-provider.js"></script>
+<script src="/js/bootstrap.file-input.js"></script>
+{{ wizard.form.media }}
+{% endblock %}
+
+{% block content %}
+<p>Step {{ wizard.steps.step1 }} of {{ wizard.steps.count }}</p> <br>
+<b>Provide Server image details in this page!</b>
+    <br>
+<form id="step2" action="#" method="post">{% csrf_token %}
+<table>
+{{ wizard.management_form }}
+{% if wizard.form.forms %}
+    {{ wizard.form.management_form }}
+    {% for form in wizard.form.forms %}
+        {{ form }}
+    {% endfor %}
+{% else %}
+    <!-- {{ wizard.form }} -->
+         <tbody>
+    {% for field in form %}
+	{% if field.label == 'Server image id' %}
+		<tr>
+			<th>Server image <br>id</th>
+			<td>
+				<div class="lg-col-12">
+				<input type="text" class="form-control input-medium col-md-4" id="{{ field.id_for_label }}" name="{{ field.html_name }}" value="{{field.value}}"/>
+				</div>
+			</td>
+		</tr>
+
+		{% elif field.label == 'Server image location' %}
+		<tr>
+			<th>Server image <br>location</th>
+			<td>
+				<div class="lg-col-12">
+					<input type="text" class="form-control input-medium col-md-4" id="{{ field.id_for_label }}" name="{{ field.html_name }}" value="{{field.value}}"/>
+				</div>
+			</td>
+		</tr>
+	          {% else %}
+		<tr>
+			<th valign="top">{{field.label}}</th>
+			<td>
+				{{field}}
+			</td>
+		</tr>
+          {% endif %}
+    {% endfor %}
+    <tr class="fileuploadTR">
+    <th>
+    	Upload Image
+    </th>
+
+    <td class="col-lg-8">
+      <div class="col-lg-2"></div>
+<div class="row rowfileupload">
+    <div class="col-lg-2"></div>
+    <div id ="demo" class="well col-lg-18">
+    <div><h5>Upload an image</h5></div>
+    <form id="fileupload" class="form-horizontal" role="form">
+      <!-- Redirect browsers with JavaScript disabled to the origin page -->
+      <noscript><input type="hidden" name="redirect" value="/cg"></noscript>
+      <div class="form-group">
+		  <div>
+		    <div id="fileuploadblock" class="row fileupload-buttonbar col-lg-12" style="margin-left: 15px; margin-right: 15px;">
+	            <div class="col-lg-12">
+	                <!-- The fileinput-button span is used to style the file input field as button -->
+	                <span class="btn btn-success fileinput-button">
+	                    <i class="glyphicon glyphicon-plus white"></i>
+	                    <span>Add files...</span>
+	                    <input type="file" name="files[]" multiple>
+	                </span>
+	                <!-- The loading indicator is shown during file processing -->
+	                <span class="fileupload-loading"></span>
+	            </div>
+	            <!-- The global progress information -->
+	            <div class="col-lg-5 fileupload-progress fade">
+
+	            </div>
+	        </div>
+	        <!-- The table listing the files available for upload/download -->
+	        <table id="fileuploadtable" role="presentation" class="table table-striped"><tbody class="files"></tbody></table>
+        </div>
+   	  {% csrf_token %}
+   	  </div>
+    </form>
+    </div>
+    <div class="col-lg-2"></div>
+    </div>
+    </td>
+
+    </tr>
+    </tbody>
+{% endif %}
+</table>
+{% if wizard.steps.prev %}
+<button name="wizard_goto_step" class="navButton btn btn-primary start" type="submit" id="first" value="{{ wizard.steps.first }}">{% trans "First step" %}</button>
+{#<button name="wizard_goto_step" class="navButton btn btn-primary start" type="submit" id="prev" value="{{ wizard.steps.prev }}">{% trans "Prev step" %}</button>#}
+{% endif %}
+<input type="submit" class ="btn btn-primary start" value="{% trans "Next" %}"/>
+</form>
+<script>
+ $(function() {
+     $('input[type=file]').bootstrapFileInput();
+    $('.file-inputs').bootstrapFileInput();
+	    function toggle(id) {
+	         $('ul li input:checkbox').filter(function () {
+	            return this.checked;
+	        }).each(function () {
+	            $(this).attr('checked', false);
+	        });
+	        $("#"+id).prop("checked", true)
+	    }
+	    function displayDiv(id){
+
+	        var x= $("#"+id).attr("value")
+	        if(x=='Public' ||  x=='Private'){
+	        	console.log("hidden" +x)
+	        	//$('.fileuploadTR').hide()
+	        	//console.log($("#"+id).closest('tr').html());
+	        	//$('tr').not($("#"+id).closest('tr')).hide()
+	        	$('tr').not($("#"+id).closest('tr')).find(":input,:submit,:reset").removeAttr("disabled");
+	        	$('tr').not($("#"+id).closest('tr')).find(":file,:submit,:reset").attr("disabled","disabled");
+
+	        }
+	        else if (x=='NONE'){
+	        	$('tr').not($("#"+id).closest('tr')).find(":input,:submit,:reset").removeAttr("disabled");
+	        	$('tr').not($("#"+id).closest('tr')).find(":input,:file,:submit,:reset").attr("disabled","disabled");
+	        	$('tr').not($("#"+id).closest('tr')).find(":file").unbind('mouseenter mouseleave')
+	        }
+	        else if (x=='Local'){
+	        	//$('tr').not($("#"+id).closest('tr')).find("input").attr("disabled","disabled");
+	        	$('tr').not($("#"+id).closest('tr')).find(":input,:submit,:reset").removeAttr("disabled");
+	        	$('tr').not($("#"+id).closest('tr')).find(":text").attr("disabled","disabled");
+	        }
+	        else
+	        {
+	        	console.log("hiding "+x)
+	        	$('tr').not($("#"+id).closest('tr')).show();
+	        	$('tr').not($("#"+id).closest('tr')).find(":input,:submit,:reset").removeAttr("disabled");
+	        }
+	    }
+	    $('ul li input:checkbox').on('click', function () {
+	        toggle(this.id);
+	        displayDiv(this.id);
+	    });
+
+
+ });
+
+</script>
+{% endblock %}

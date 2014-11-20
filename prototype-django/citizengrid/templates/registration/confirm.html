@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+
+{% block container-content %}
+<div class="container">
+    {% if action == "update" %}
+	<div class="text-success" style="padding-top:50px;">
+	  <h4>Congratulations, your {{action }} is successful !</h4>
+	</div>
+    {% elif action == "registration" %}
+    	<div class="text-success"style="padding-top:50px;">
+	  <h4>Congratulations, your {{action }} is successful and you're now registered to use CitizenGrid. Please sign in via the menu bar.</h4>
+	</div>
+     {% elif action == "cancel" %}
+        <div class="text-success"style="padding-top:50px;">
+     <h4>Your {{action }} request is successful !</h4>
+        </div>
+    {% endif %}
+</div>
+{% csrf_token %}
+	
+{% endblock %}

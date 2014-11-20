@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+{% block container-content %}
+
+        <div class="container" align = "centre">
+         <h5>Enter username or registered email-id for password recovering. </h5>
+        <form class =" navbar-form " method="post">
+        {% csrf_token %}
+        {{ form.as_p }}
+         <button type="submit">Submit</button>
+        </form>
+        </div>
+
+ {% endblock %}

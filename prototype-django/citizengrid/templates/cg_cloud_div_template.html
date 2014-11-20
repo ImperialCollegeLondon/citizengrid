@@ -1,0 +1,25 @@
+        <div id="cloudimage">
+    	{% if ec2_images|length == 0 and openstack_images|length == 0 %}
+    	  <div class="alert alert-info">You don't have any cloud images registered for this application.</div>
+    	{% else %}
+    	    <table class="table table-striped" id="cloud_image_table">
+    	    <thead><tr><th>Image type</th><th>Image ID</th><th>Endpoint</th><th>Server/Client Image</th></tr></thead>
+    	    <tbody>
+    		{% if ec2_images|length > 0 %}
+    			{% for ec2_image in ec2_images %}
+    			  <tr><td>Amazon EC2</td><td>{{ ec2_image.image_id }}</td><td style="width: 400px;">{{ ec2_image.zone_url }}</td><td>{% if ec2_image.image_type == 'C' %}Client Image{% else %}Server Image{% endif %}</td>
+    			  <td><div class="cloud"><a id="{{ec2_image.image_id}}" href="javascript:void(0)" type="ec2" class="" title="delete image"><i class="icon-trash icon-white"></i></a></div></td>
+    			  </tr>
+    			{% endfor %}
+    		{% endif %}
+    		{% if openstack_images|length > 0 %}
+    			{% for os_image in openstack_images %}
+    			  <tr><td>Openstack</td><td>{{ os_image.image_id }}</td><td style="width: 400px;">{{ os_image.zone_url }}</td><td>{% if os_image.image_type == 'C' %}Client Image{% else %}Server Image{% endif %}</td>
+    			  <td><div class="cloud"><a id="{{os_image.image_id}}" href="javascript:void(0)" type="os" class="" title="delete image"><i class="icon-trash icon-white"></i></a></div></td>
+    			  </tr>
+    			{% endfor %}
+    	    {% endif %}
+    	    </tbody>
+            </table>
+    	{% endif %}
+    	</div>

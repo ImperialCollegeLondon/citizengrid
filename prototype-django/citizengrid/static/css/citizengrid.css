@@ -1,0 +1,338 @@
+/*
+body {
+  padding-top: 60px;
+}
+*/
+
+.wrapper {
+	padding-top: 50px;
+	#background-color: #eee;
+}
+
+.navbar-cg {
+    background-color:#052D74;
+    color:#ffffff;
+    border-radius:0;
+}
+
+.navbar-cg .navbar-nav > li > a {
+    color:#fff;
+}
+
+.navbar-inverse .navbar-nav > .active > a, .navbar-inverse .navbar-nav > .active > a:hover, .navbar-inverse .navbar-nav > .active > a:focus {
+    background-color:#052D74;
+}
+
+.navbar-inverse .navbar-nav li > a:hover, .navbar-inverse .navbar-nav > .active > a:hover {
+	background-color:#7b9fe4;
+}
+
+.navbar-cg .navbar-nav > .active > a, .navbar-nav > .active > a:hover, .navbar-nav > .active > a:focus {
+    color: #ffffff;
+    background-color:transparent;
+}
+.navbar-cg .navbar-brand {
+    color:#eeeeee;
+}
+
+.cg-header {
+
+	padding:30px 0;
+	background-color:#7b9fe4;
+}
+
+h1, h2, h3, h4, h5, h6 {
+	font-family: 'Exo', sans-serif;
+}
+
+h1 {
+	font-size: 96px;
+	font-weight: bold;
+}
+
+h2 {
+	font-size: 36px;
+	#font-weight: bold;
+}
+
+h3 {
+	font-size: 24px;
+	#font-weight: bold;
+}
+
+h4 {
+	font-size: 18px;
+	#font-weight: bold;
+}
+
+# Styling for the user drop down
+
+.auth_dropdown a {
+	color: #fff;
+}
+
+.navbar-inverse .navbar-nav > .dropdown > a .caret {
+	border-top-color: #fff;
+	border-bottom-color: #fff;
+}
+
+.navbar-inverse .navbar-nav > .open > a, .navbar-inverse .navbar-nav > .open > a:hover, .navbar-inverse .navbar-nav > .open > a:focus {
+	background-color: #7b9fe4;
+}
+
+h4 > .glyphicon {
+	padding-right: 14px;
+}
+
+/* Logo styling */
+#fplogo {
+	width:140px;
+	height:90px;
+	margin-bottom: 15px;
+}
+
+#logo {
+	width:50px;
+	height:32px;
+	margin-bottom: 8px;
+}
+
+.appinfo {
+	width: 100%;
+	float: left;
+	padding-right: 20px;
+
+}
+
+.server-instances {
+	width: 40%;
+	float: left ;
+	padding-right: 20px;
+
+}
+
+.appinfo .app-icon {
+	width: 48px;
+	height: 48px;
+	float: left;
+	border: solid 1px #aaa;
+	margin: 5px 15px 10px 10px;
+}
+
+#server_instances {
+	margin-top: 40px;
+	clear: both;
+}
+
+.loading {
+	border: none;
+	width: 16px;
+	height: 16px;
+	display: none;
+}
+
+#server_instances .loading {
+	border: none;
+	width: 16px;
+	height: 16px;
+	display: none;
+}
+
+#server_instances hr {
+	margin-left: 0px;
+}
+
+.appimageinfo {
+	float: right;
+	width: 60%;
+}
+
+#appimg {
+	width: 48px;
+	height: 48px;
+	border: solid 1px #aaa;
+	float: left;
+	margin: -4px 20px 10px 20px;
+}
+
+.appdivider {
+	clear: both;
+	margin-bottom: 2px;
+}
+
+.appreginfo {
+	margin-left: 6px;
+	color: #aaa;
+	font-size: 9pt;
+}
+
+.form-inline .form-group {
+	margin-right: 40px;
+}
+
+.btn-launch {
+	width: 250px;
+	height: 28px;
+	font-size: 12px;
+	padding-top: 4px;
+	margin-top: 10px;
+	float: left;
+}
+.btn-align {
+    float: left;
+}
+.btn-first {
+    float: left;
+    margin-left: 180px;
+}
+
+.btn-other {
+    float: left;
+    margin-left: 170px;
+}
+
+.md-centre {
+    margin-top: 12.5%;
+}
+
+.modal-footer {
+	margin-top: 0px;
+}
+
+.modal-body form {
+	margin-left: 20px;
+	margin-right: 20px;
+}
+
+.imageitem {
+	padding-bottom: 5px;
+}
+
+.imageinstance {
+	background: #f4f4f4;
+	padding: 8px 8px;
+	margin-bottom: 5px;
+}
+
+.cred-info div hr {
+	margin-left: 0;
+	width: 40%;
+}
+
+.modal-body .errorlist {
+	color: #FF0000;
+}
+
+.modal-body .error-control {
+	border: solid 1px #FF0000;
+}
+
+.manage-images {
+	font-size: 9pt;
+	text-align: right;
+	padding-right: 6px;
+	margin-bottom: -6px;
+}
+
+#new_image_form .errorlist li {
+	margin-left: -24px;
+	color: red;
+}
+
+#new_image_form .error-control {
+	border: solid 1px #FF0000;
+}
+
+#provider_image_info .local_images {
+	width: 35%;
+}
+
+#provider_image_info .cloud_images {
+	width: 65%;
+	padding-left: 20px;
+}
+
+#provider_image_info .cloud_images th {
+	font-size: 8pt;
+}
+
+#provider_image_info .cloud_images td {
+	font-size: 8pt;
+}
+
+#server_instances table th {
+	font-size: 8pt;
+}
+
+#server_instances table td {
+	font-size: 8pt;
+}
+
+#app_list .panel-body hr {
+	margin-top: 4px;
+	margin-bottom: 4px;
+}
+
+.run-image:hover {
+	cursor: pointer;
+	text-decoration: none;
+}
+
+.shutdown-server:hover {
+	cursor: pointer;
+	text-decoration: none;
+}
+.modalbground.ui-dialog-titlebar {background-color:#7B9FE4}
+
+.dropdown-submenu{position:relative;}
+.dropdown-submenu>.dropdown-menu{top:0;left:100%;margin-top:-6px;margin-left:-1px;-webkit-border-radius:0 6px 6px 6px;-moz-border-radius:0 6px 6px 6px;border-radius:0 6px 6px 6px;}
+.dropdown-submenu:hover>.dropdown-menu{display:block;}
+.dropdown-submenu>a:after{display:block;content:" ";float:right;width:0;height:0;border-color:transparent;border-style:solid;border-width:5px 0 5px 5px;border-left-color:#cccccc;margin-top:5px;margin-right:-10px;}
+.dropdown-submenu:hover>a:after{border-left-color:#ffffff;}
+.dropdown-submenu.pull-left{float:none;}.dropdown-submenu.pull-left>.dropdown-menu{left:-100%;margin-left:10px;-webkit-border-radius:6px 0 6px 6px;-moz-border-radius:6px 0 6px 6px;border-radius:6px 0 6px 6px;}
+
+/*
+#font-family: 'Exo', sans-serif;
+#font-family: 'Share', cursive;
+#font-family: 'Oxygen', sans-serif;
+#font-family: 'Montserrat Alternates', sans-serif;
+#font-family: 'Libre Baskerville', serif;
+*/
+/** Branch Category table css **/
+ul {
+	list-style-type: none;
+}
+
+li {
+	padding: 1px 0;
+}
+
+input[type="radio"],input[type="checkbox"] {
+	margin: -4px 0 0 0;
+}
+
+i {
+	color: #388ED1;
+	cursor: pointer;
+	margin: 1px 0 0 0;
+	position: relative;
+	top: 1px;
+}
+
+#container {
+	width: 1000px;
+	margin: 0 auto;
+}
+.white{
+	color:white
+}
+
+.bottom-three {
+     margin-bottom: 3cm;
+  }
+.top-three {
+    margin-top: 3cm;
+}
+.top-two {
+    margin-top: 2cm;
+}

@@ -1,0 +1,29 @@
+<div class="form-group">
+	<label for="branch_id" class="col-lg-2 control-label">Branch</label>
+	<div class="col-lg-8">
+		<select class="form-control" name="branch" id="branch">
+	<option value="Z">Select a branch</option>
+	{% for branch in branch_list %}
+	<option value="{{ branch.id}}">{{ branch.name }}</option>
+	{% endfor %}
+	</select>
+	</div>
+</div>
+
+<div class="form-group">
+	<label for="category_id" class="col-lg-2 control-label">Category</label>
+	<div class="col-lg-8">
+	   <select class="form-control" name="category" id="category" disabled="true">
+	       <option>Select a category</option>
+	   </select>
+	</div>			
+</div>
+
+<div class="form-group">
+	<label for="subcategory_id" class="col-lg-2 control-label">SubCategory</label>
+	<div class="col-lg-8">
+	    <select class="form-control" name="subcategory" id="subcategory" disabled="true">
+	        <option>Select a subCategory</option>
+	    </select>
+	</div>			
+</div>

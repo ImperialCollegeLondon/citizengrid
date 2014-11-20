@@ -1,0 +1,102 @@
+{% extends "base.html" %}
+
+{% block head %}
+<script type="text/javascript">
+function welcomeCheckboxClick() {
+	var welcomeBox = $("#welcomeCheckbox")[0];
+	var hiddenWelcome = $("#cancelWelcome")[0];
+	if(welcomeBox.checked == true) {
+    	hiddenWelcome.value = true;
+    }
+    else {
+    	hiddenWelcome.value = false;
+    }
+}
+</script>
+{% endblock %}
+
+{% block container-content %}
+<style>
+.centered
+{
+    text-align:center;
+}
+</style>
+<div class="cg-header" style="padding: 5px 5px;">
+	<div class="container">
+		<h3>
+			<img id="logo" src="/img/logo_trans.png"></img> <span>CitizenGrid</span>
+		</h3>
+	</div>
+</div>
+
+<div class="container" style="padding-top: 25px;">
+<div class="row">
+  <div class="col-md-12">
+    <h3>Welcome to CitizenGrid</h3>
+  </div>
+</div>
+<div class="row">
+  <div class="col-md-12">
+    <h4>Lets start with a quick overview of the CitizenGrid platform...</h4>
+  </div>
+</div>
+
+<div class="row">
+	<div class="col-md-8">
+	  <h4><span class="glyphicon glyphicon-list"></span>Application Directory</h4>
+	  <p>The application directory shows all the applications that are available to you.
+	  To run an application, select it from the directory to see further information and details of how to run the application or contribute your spare computing power to the project.
+	</div>
+	<!-- Select an application to begin using it or contributing your spare computing power to run it. -->
+	<div class="col-md-4" style="background:#eee">
+	  <h4>Want to register an application?</h4>
+	  <p>If you have an application you want to register with CitizenGrid, select the application provider role below.</p>
+	</div>
+</div>
+
+<div class="row">
+	<div class="col-md-8">
+	  <h4><span class="glyphicon glyphicon-user"></span>Account Profile and Settings</h4>
+	  <p>Use your account profile to provide details that identify you or your project to other CitizenGrid users and to configure your cloud credentials to contribute cloud computing time to projects.</p>
+	</div>
+</div>
+
+<div class="row">
+	<div class="col-md-8">
+	  <h4><span class="glyphicon glyphicon-open"></span>Run locally or on a cloud</h4>
+	  <p>The application you select may be run on one of your local machines or it may be run on
+	  cloud resources that you provide. You can configure remote cloud platforms in your account settings.
+	  <p class="text-primary" style="padding-top: 20px;">To get started, select your primary role from the options on the right (you can switch between roles later).</p>
+	</div>
+	<div class="col-md-4" style="background:#eee">
+	  <h4>What is your primary role?</h4>
+	  <p style="padding-top: 20px;">I will primarily be an:</p>
+	  <p>
+	    <form method="post" action="/cg">
+	      <button type="submit" name="app_user" class="btn btn-primary">Application User</button>
+	      <button type="submit" name="app_provider" class="btn btn-info pull-right">Application Provider</button>
+		<br>
+		<br>
+			<div class="text-center">
+				<button type="submit" name="cancel" class="btn btn-default btn-large text-center">Cancel</button>
+			</div>
+	      <input type="hidden" name="cancelWelcome" id="cancelWelcome" value="true" />
+	      {% csrf_token %}
+        </form>
+      </p>
+
+	<p></p>
+	</div>
+</div>
+
+<div class="row">
+    <div class="col-md-12">
+      <label class="checkbox-inline">
+        <input type="checkbox" id="welcomeCheckbox" checked="true" onClick="welcomeCheckboxClick()">
+        <span class="text-muted">Do not show this welcome screen next time I log in.</span></label>
+    </div>
+</div>
+
+{% endblock %}
+
