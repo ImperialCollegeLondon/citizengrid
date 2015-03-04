@@ -8,6 +8,6 @@
 *.pyc
 *.class
 */target/
-
+*.db
 
 

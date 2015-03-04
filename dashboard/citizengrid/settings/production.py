@@ -1,5 +1,4 @@
-# Production settings for CitizenGrid project.
-from citizengrid.settings.base import *
+from base import *
 
 DATABASES = {
     'default': {
