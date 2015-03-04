@@ -21,7 +21,7 @@ from citizengrid.models import UserInfo, ApplicationBasicInfo, ApplicationServer
     UserCloudCredentials
 from citizengrid.models import ApplicationEC2Images, ApplicationOpenstackImages
 from citizengrid.forms import ApplicationBasicInfoForm, ApplicationServerInfoForm, ApplicationClientInfoForm, CloudCredentialsForm, CloudImageForm, \
-    UpdateUserCreationForm
+    UpdateUserCreationForm,LocalImageForm
 from citizengrid.models import ApplicationFile
 from citizengrid import DATA_K
 from citizengrid.forms import ExtendedUserCreationForm
@@ -412,48 +412,69 @@ def manage_images(request, app):
     # Get app from the DB
     application = ApplicationBasicInfo.objects.filter(id=app_id)[0]
 
+    fs = FileSystemStorage()
+
     if request.user != application.owner:
         return HttpResponseForbidden('ACCESS DENIED: You cannot manage the images for this application, you are not the owner.')
 
     if request.method == 'POST':
-        cif = CloudImageForm(request.POST)
-        if cif.is_valid():
-            print "CIF cleaned data is " + str(cif.cleaned_data)
-            cloud = cif.cleaned_data['cloud']
-            endpoint = cif.cleaned_data['endpoint']
-            image_id = cif.cleaned_data['image_id']
-            server_client = cif.cleaned_data['server_client']
+        if 'cif' in request.POST:
+            cif = CloudImageForm(request.POST)
+            if cif.is_valid():
+                print "CIF cleaned data is " + str(cif.cleaned_data)
+                cloud = cif.cleaned_data['cloud']
+                endpoint = cif.cleaned_data['endpoint']
+                image_id = cif.cleaned_data['image_id']
+                server_client = cif.cleaned_data['server_client']
 
-            print 'New image form contents: '
-            print 'Cloud: ' + cloud
-            print 'Endpoint: ' + endpoint
-            print 'Image ID: ' + image_id
-            print 'Server or Client image: ' + server_client
-            #===================================================================
-            # TODO - refactor image create function to use single version rather
-            # than using different versions
-            #===================================================================
+                print 'New image form contents: '
+                print 'Cloud: ' + cloud
+                print 'Endpoint: ' + endpoint
+                print 'Image ID: ' + image_id
+                print 'Server or Client image: ' + server_client
+                #===================================================================
+                # TODO - refactor image create function to use single version rather
+                # than using different versions
+                #===================================================================
 
-            #appserver = ApplicationServerInfo(appref=application,apphost=cloud,server_image_id=image_id,server_image_location=endpoint)
-            #appserver.save() 
-            if cloud == 'Private':
-                new_image = ApplicationOpenstackImages(application=application,
-                                                       image_id=image_id,
-                                                       zone_name='',
-                                                       zone_url=endpoint,
-                                                       image_type=server_client)
+                #appserver = ApplicationServerInfo(appref=application,apphost=cloud,server_image_id=image_id,server_image_location=endpoint)
+                #appserver.save()
+                if cloud == 'Private':
+                    new_image = ApplicationOpenstackImages(application=application,
+                                                           image_id=image_id,
+                                                           zone_name='',
+                                                           zone_url=endpoint,
+                                                           image_type=server_client)
+                    new_image.save()
+                    print 'Registered new Openstack image with ID: ' + str(new_image.id)
+                elif cloud == 'Public':
+                    new_image = ApplicationEC2Images(application=application,
+                                                     image_id=image_id,
+                                                     zone_name='',
+                                                     zone_url=endpoint,
+                                                     image_type=server_client)
+                    new_image.save()
+                    print 'Registered new AWS image with ID: ' + str(new_image.id)
+        else:
+            print "In else block"
+            lif = LocalImageForm(request.POST,request.FILES)
+            if lif.is_valid():
+                lif_cleaned= str(lif.cleaned_data)
+                local_image = request.FILES['local_image']
+                local = lif.cleaned_data["local"]
+
+                handle_uploaded_file(application.name,request,fs,local_image)
+                new_image = ApplicationFile(owner = request.user,
+                                            application = application,file=local_image.name,
+                                            file_format = str(local).upper(),file_type='S'
+                                            )
                 new_image.save()
-                print 'Registered new Openstack image with ID: ' + str(new_image.id)
-            elif cloud == 'Public':
-                new_image = ApplicationEC2Images(application=application,
-                                                 image_id=image_id,
-                                                 zone_name='',
-                                                 zone_url=endpoint,
-                                                 image_type=server_client)
-                new_image.save()
-                print 'Registered new AWS image with ID: ' + str(new_image.id)
+            else:
+                print "LIF not clean" +str(lif.cleaned_data)
+
     else:
         cif = CloudImageForm()
+    cif = CloudImageForm()
 
     # Now get all image files, EC2 and Openstack configs for the app
     local_images = ApplicationFile.objects.filter(application=app_id, owner=request.user)
@@ -529,7 +550,7 @@ class ApplicationNewAppWizard(SessionWizardView):
 
         #=======================================================================
         # Processes file upload of server and client images.
-        # TODO - Processing file at this stage is incorrent, we
+        # TODO - Processing file at this stage is incorrect, we
         # need to do file upload and db update  in the last stage, if there is any error
         # delete the files
         #=======================================================================
@@ -537,6 +558,13 @@ class ApplicationNewAppWizard(SessionWizardView):
             print str("In the step" + self.steps.current)
             if self.steps.current== 'step1':
                 self.extra_context = {'cat_1': 1,'subcat_1':1}
+                print str(form.cleaned_data)
+
+                if 'iconfile' in form.cleaned_data and 'name' in form.cleaned_data:
+                    fs = FileSystemStorage()
+                    file = form.cleaned_data['iconfile']
+                    name = str(form.cleaned_data['name'])
+                    handle_uploaded_file_icon(name, self.request,fs,file)
             return self.get_form_step_data(form)
 
         """
@@ -602,12 +630,22 @@ class ApplicationNewAppWizard(SessionWizardView):
                     app.branch = t.getlist('step1-select_category')
                     app.category = t.getlist('cat')
                     app.subcategory = t.getlist('subcat')
+
                     # Generate the identicon for the application
                     fs = FileSystemStorage()
-                    icon_location = os.path.join(fs.location, '..', 'static', 'img', 'ident', str(app.id)+'.png')
-                    gen_icon.create_icon(icon_location)
-                    app.iconfile = os.path.join('img', 'ident', str(app.id)+'.png')
+
+                    icon_location = os.path.join('media',request.user.get_username())
+                    #icon_location = os.path.join(fs.location, '..', 'static', 'img', 'ident')
+                    #gen_icon.create_icon(icon_location)
+                    #icon_location = os.path.join(fs.location, request.user.username, name)
+                    iconfile_name = self.get_cleaned_data_for_step('step1')['iconfile'].name
+                    print "inconfile is %s" %(self.get_cleaned_data_for_step('step1')['iconfile'].name)
+                   # app.iconfile = os.path.join('img', 'ident', str(app.id)+'.png')
+                    app.iconfile = os.path.join(icon_location, iconfile_name)
                     app.save()
+
+
+
                     appserver = ApplicationServerInfo(appref=app,apphost=apphost,server_image_id=server_image_id,server_image_location=server_image_location)
                     appclient = ApplicationClientInfo(appref=app,clienthost=client_platform,client_image_id=client_image_id,client_image_location=client_image_location)
                    # appserver.save()
@@ -620,9 +658,12 @@ class ApplicationNewAppWizard(SessionWizardView):
                     # Uploading files here
                     file1 = self.get_form_step_files(form_list[1])
                     file2 = self.get_form_step_files(form_list[2])
-                    uploadnew(request,file1['files[]'],"S") if 'files[]' in file1 and file1['files[]'] is not None else ""
+
+
+                    uploadnew(name,request,file1['files[]'],"S") if 'files[]' in file1 and file1['files[]'] is not None else ""
                     #uploading client
-                    uploadnew(request,file2['files[]'],"C") if 'files[]' in file2 and file2['files[]'] is not None else ""
+
+                    uploadnew(name,request,file2['files[]'],"C") if 'files[]' in file2 and file2['files[]'] is not None else ""
                     #Saving Server Cloud details (EC2 and Openstack if given)
                     view_utils.store_cloud_details(app,'S',str(apphost),server_image_id,server_image_location)
 
@@ -675,12 +716,12 @@ def getTableData(request):
 
 #===============================================================================
 #     uploadnew : Upload Server or client images
-#    fiel - Input file to be stored
+#    file - Input file to be stored
 #    steptype - client or server stage file image
 #===============================================================================
 
-@login_required
-def uploadnew(request,file,steptype):
+
+def uploadnew(appname,request,file,steptype):
     print "Debug: Entering uploadnew"
     result_list = []
 
@@ -706,15 +747,19 @@ def uploadnew(request,file,steptype):
 
         file_fmt_extns = {'.ovf':'OVF','.ova':'OVA','.iso':'ISO','.vmdk':'VMDK','.vdi':'VDI','.hd':'RAW','.img':'RAW'}
 
-        file_fmt = file_fmt_extns.get(file_extn,'NONE');
+        file_fmt = file_fmt_extns.get(file_extn,'NONE')
+
+        print "file_extn and file_fmt are %s %s"  %(file_extn,file_fmt)
         try:
 
             with transaction.atomic():
 
-                app_file = ApplicationFile(file=upload_file, owner=request.user, file_format=file_fmt,image_type=steptype)
+                app_file = ApplicationFile(file=upload_file.name, owner=request.user, file_format=file_fmt,image_type=steptype)
                 app_file.save()
-        except Exception:
-            print "File not uploaded successfully"
+
+        except Exception,e:
+            print "Reason is" + e.message
+            print "File not uploaded !!!"
         else:
 
 
@@ -758,7 +803,8 @@ def application_detail(request,appid):
     file_info_dict = {}
 
     file_formats = { 'NONE': 'Local file (Unknown type)',
-                   'RAW' : 'Local image (RAW)',
+                   'HD' : 'Local image (RAW_ID)',
+                   'IMG' : 'Local image (RAW_Image)',
                    'VDI' : 'Local image (Virtualbox)',
                    'VMDK': 'Local image (VMware VMDK)',
                    'ISO' : 'CD/DVD ROM Image',
@@ -809,3 +855,31 @@ def cg_delete(request,id):
     else:
         print  "No type found" +  str(request.POST.get('type'))
     return HttpResponse(data)
+
+
+def handle_uploaded_file(appname,request,fs,file):
+    location = ""
+    if appname is None:
+        location  = os.path.join(fs.location,request.user.get_username())
+    else:
+        location = os.path.join(fs.location,request.user.get_username(), appname)
+    if not os.path.isdir(location):
+        os.makedirs(location,0700)
+        print "Created user directory for  uploads: " + str(os.path.join(location))
+
+    with fs.open(os.path.join(location,file.name), 'wb+') as destination:
+        for chunk in file.chunks():
+            destination.write(chunk)
+        destination.close()
+
+def handle_uploaded_file_icon(appname,request,fs,file):
+        location = ""
+        location = os.path.join(fs.location, request.user.get_username())
+        if not os.path.exists(location):
+            os.makedirs(location,0700)
+            print "Created user directory for  uploads: " + str(os.path.join(location))
+
+        with fs.open(os.path.join(location,file.name), 'wb+') as destination:
+            for chunk in file.chunks():
+                destination.write(chunk)
+            destination.close()

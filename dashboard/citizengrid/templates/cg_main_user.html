@@ -34,7 +34,7 @@ function welcomeCheckboxClick() {
 	<div class="container">
 		<span>
 			<h3 style="float: left;">
-				<img id="logo" src="/static/img/logo_trans.png"></img> <span>CitizenGrid</span>
+				<img id="logo" src="/img/logo_trans.png"></img> <span>CitizenGrid</span>
 			</h3>
 			<div style="float: right; border: 1px #6E91E0 solid; color: #4B6FE4; background-color: rgba(245, 245, 245, 0.2); margin: 16px 0px; margin-right: 30px;" class="well well-sm">Current role: {{role}}</div>
 		</span>
@@ -51,6 +51,26 @@ function welcomeCheckboxClick() {
     <h4>Find applications to run or contribute resources to</h4>
   </div>
 </div>
+
+     <div class="row">
+        <div class="col-md-12">
+             <h3>My CitizenGrid</h3>
+
+            <ul class="nav nav-pills user-menu">{% if active_tab %} {% if active_tab == 'MA' %}
+                <li class="active">{% else %}
+                    <li>{% endif %} {% else %}
+                        <li class="active">{% endif %} <a data-toggle="pill" data-target="ajax_app_detail" href="#"></span>Public Apps</a>
+
+                        </li>
+
+                            </li>{% if active_tab == 'NA' %}
+                            <li class="active">{% else %}
+                                <li>{% endif %} <a data-toggle="pill" data-target="new_adv_app" href="#"></span>My Apps</a>
+
+                                </li>
+            </ul>
+        </div>
+    </div>
 
 <!-- BEGIN: APPLICATION LIST  - RENDER INFORMATION ABOUT ALL AVAILABLE APPS -->
 <div class="row pill-target" id="app_list" style="padding-top: 30px;">

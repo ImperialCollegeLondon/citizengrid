@@ -24,7 +24,7 @@ class Branch(models.Model):
     name = models.CharField(max_length=30)
     description = models.CharField(max_length=256)
     def __unicode__(self):
-        return u'{0}'.format(self.name)
+         return u'{0}'.format(self.name)
 
 class Category(models.Model):
     name = models.CharField(max_length=30)
@@ -62,7 +62,7 @@ class ApplicationBasicInfo(models.Model):
     last_updated = models.DateTimeField(auto_now_add=True) # Not to be displayed in the basic form
     client_downloads = models.IntegerField() # Not to be displayed in the basic form
     public = models.BooleanField()
-    iconfile = models.CharField(max_length=256)
+    iconfile = models.ImageField(upload_to='/media/')
     keywords = models.CharField(max_length=128, default='NONE')
     branch = models.ManyToManyField(Branch,default='NONE')
     category = models.ManyToManyField(Category,default='NONE')
@@ -76,8 +76,8 @@ class ApplicationBasicInfo(models.Model):
 def upload_file_location(instance, filename):
     fs = FileSystemStorage()
     base = fs.location
-    print "About to save uploaded temp file to: " + os.path.join(base, instance.owner.username, filename)
-    return os.path.join(base, instance.owner.username, filename)
+    print "About to save uploaded temp file to: " + os.path.join(base, instance.owner.username, instance.application.name, filename) #there should be app id should be also in this.
+    return os.path.join(base, instance.owner.username, instance.application.name, filename)
 
 class ApplicationFile(models.Model):
     FILE_TYPE = (
@@ -87,17 +87,20 @@ class ApplicationFile(models.Model):
 
     FILE_FORMATS = (
         ('NONE', 'File Type Not Specified or Unknown'),
-        ('RAW', 'RAW Disk Image'),
+        ('HD', 'RAW Hard Disk Image'),
+        ('IMG', 'RAW Hard Disk Image'),
         ('VDI', 'Virtualbox Virtual Disk Image'),
         ('VMDK', 'VMware Virtual Machine Disk'),
         ('ISO', 'CD/DVD ROM Disk Image'),
         ('OVF', 'Open Virtualization Format Descriptor'),
-        ('OVA', 'Open Virtualization Format Archive'),
+        ('OVA', 'Open Virtualization Format Archive')
     )
+
 
     IMAGE_TYPE = (
         ('C', 'Client'),
         ('S', 'Server'),
+        ('I', 'Icon'),
     )
 
     owner = models.ForeignKey(User)

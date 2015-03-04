@@ -55,7 +55,7 @@ td {
 		<tr>
 			<th>Description<br><i>(Optional)</i></th>
 			<td>
-				<textarea class="form-control" rows="4" style="width: 50%;" id="{{ field.id_for_label }}" name="{{ field.html_name }}">{{field.value}}</textarea>
+				<textarea class="form-control" rows="4" style="width: 50%;" id="{{ field.id_for_description }}" name="{{ field.html_name }}">{{field.value}}</textarea>
 			</td>
 		</tr>
 
@@ -70,6 +70,16 @@ td {
         <td>{{ wizard.form.name.errors }}</td>
         {% endif %}
 		</tr>
+
+    {%elif field.label == 'Logo Image' %}
+        <tr>
+			<th>{{field.label}}</th>
+			<td>
+				<div style="padding-top: 7px;"><input type="checkbox" name="public" id="ispublic" value="{{field.value}}"> <span> &nbsp;&nbsp;Select to make this application available to all users</span></div>
+			</td>
+		</tr>
+
+
 	{% elif field.label == 'Public' %}
 		<tr>
 			<th>{{field.label}}</th>

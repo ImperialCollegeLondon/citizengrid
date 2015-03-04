@@ -107,20 +107,14 @@ class ApplicationBasicInfoForm(forms.Form):
 
     name = forms.CharField(max_length=128)
     description = forms.CharField()
+    iconfile = forms.FileField(
+        label='Select a logo file',
+        help_text='jpg or png or gif'
+    )
     public = forms.BooleanField(required=False)
     select_category = forms.BooleanField(required=False)
-    #ModelChoiceField(queryset=Branch.objects.all(),to_field_name="id")
-#forms.ModelChoiceField(queryset=Branch.objects.all(),to_field_name="id")
-    #category = forms.ModelChoiceField(queryset=Category.objects.all(),to_field_name="id")
-    #subCategory = forms.ModelChoiceField(queryset=SubCategory.objects.all(),to_field_name="id")
     additional_Information = forms.CharField(required=False)
     keywords = forms.CharField(max_length=128, required=False)
-      # Store the request object so we can use it in form cleaning
-    # def clean_name(self):
-    #     name = self.cleaned_data.get('name')
-    #     if name == 'romanname':
-    #         raise forms.ValidationError(('Name not correct'))
-    #     return name
 
 class  ApplicationServerInfoForm(forms.Form):
     def __init__(self, *args, **kwargs):
@@ -160,12 +154,6 @@ class  ApplicationClientInfoForm(forms.Form):
                 print 'PROCESSING APP REGISTRATION: No files uploaded and invalid URL specified for image_location'
                 raise ValidationError(u'You must upload an image file OR specify the URL of a remote image.')
 
-# class OpenstackCredentialsForm(forms.Form):
-#     alias = forms.CharField(max_length=64)
-#     access_key = forms.CharField(max_length=64)
-#     secret_key = forms.CharField(max_length=64)
-#     endpoint = forms.URLField(min_length=11, max_length=256, required=True)
-
 class CloudCredentialsForm(forms.Form):
     cloud = forms.ChoiceField(choices=(('Public', 'Amazon EC2'), ('Private','OpenStack'), ('CitizenGrid','CitizenGrid'),('Other','Other')))
     alias = forms.CharField(max_length=64)
@@ -178,3 +166,9 @@ class CloudImageForm(forms.Form):
     endpoint = forms.URLField(min_length=11, max_length=256, required=True)
     image_id = forms.CharField(max_length=64, required=True)
     server_client = forms.ChoiceField(choices=(('C', 'Client Image'),('S','Server Image')))
+
+class LocalImageForm(forms.Form):
+    local = forms.ChoiceField(choices=(('vdi', 'VDI'),('ovf','OVF'),('ova','OVA'),('vmdk','VMDK'),('iso','ISO'),('img','RAW_HD'),('hd','RAW_IMG')))
+    local_image = forms.FileField
+
+

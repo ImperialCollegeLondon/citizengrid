@@ -202,12 +202,13 @@ def application_user_view_data(request):
         file_info_dict = {}
 
         file_formats = { 'NONE': 'Local file (Unknown type)',
-                       'RAW' : 'Local image (RAW)',
-                       'VDI' : 'Local image (Virtualbox)',
-                       'VMDK': 'Local image (VMware VMDK)',
-                       'ISO' : 'CD/DVD ROM Image',
-                       'OVF' : 'OVF Appliance',
-                       'OVA' : 'Local Appliance Archive (OVA)'}
+                   'HD' : 'Local image (RAW_ID)',
+                   'IMG' : 'Local image (RAW_Image)',
+                   'VDI' : 'Local image (Virtualbox)',
+                   'VMDK': 'Local image (VMware VMDK)',
+                   'ISO' : 'CD/DVD ROM Image',
+                   'OVF' : 'OVF Appliance',
+                   'OVA' : 'Local Appliance Archive (OVA)'}
 
         for appfile in files:
             if appfile.application.id not in file_info_dict:
@@ -311,7 +312,8 @@ def application_provider_view_data(request):
     file_info_dict = {}
 
     file_formats = { 'NONE': 'Local file (Unknown type)',
-                   'RAW' : 'Local image (RAW)',
+                   'HD' : 'Local image (RAW_ID)',
+                   'IMG' : 'Local image (RAW_Image)',
                    'VDI' : 'Local image (Virtualbox)',
                    'VMDK': 'Local image (VMware VMDK)',
                    'ISO' : 'CD/DVD ROM Image',
@@ -326,6 +328,7 @@ def application_provider_view_data(request):
         file_info['name'] = appfile.filename()
         # FIXME: Need a more foolproof way to get the file path for the link
         file_info['path'] = os.path.join('media', request.user.username, appfile.filename())
+        print appfile.file_format
         file_info['formatstring'] = file_formats[appfile.file_format]
         file_info['image_type'] = appfile.image_type
         file_info_dict[appfile.application.id].append(file_info)
