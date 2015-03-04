@@ -6,7 +6,7 @@ PROJECT_ROOT = os.path.realpath(os.path.dirname(__file__))
 DEBUG = False
 TEMPLATE_DEBUG = DEBUG
 
-ALLOWED_HOSTS = ['127.0.0.1'] # Change to IP address and domain name in production
+ALLOWED_HOSTS = ['127.0.0.1','localhost'] # Change to IP address and domain name in production
 
 ADMINS = (
     ('admin', 'admin@localhost'),
@@ -158,8 +158,7 @@ INSTALLED_APPS = (
     'password_reset',
     'django.contrib.admindocs',
     'citizengrid',
-    'south',
-    'django.contrib.humanize',
+    #'south',
     'django_nyt',
     'mptt',
     'sekizai',
@@ -198,7 +197,7 @@ LOGGING = {
          },
     },
     'loggers': {
-	'django': {
+    'django': {
             'handlers': ['console'],
             'level': 'DEBUG',
             'propagate': True,

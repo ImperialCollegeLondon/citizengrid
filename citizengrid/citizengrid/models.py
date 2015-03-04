@@ -24,7 +24,7 @@ class Branch(models.Model):
     name = models.CharField(max_length=30)
     description = models.CharField(max_length=256)
     def __unicode__(self):
-         return u'{0}'.format(self.name)
+        return u'{0}'.format(self.name)
 
 class Category(models.Model):
     name = models.CharField(max_length=30)
