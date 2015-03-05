@@ -12,8 +12,21 @@
 
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+		    <keystore.path>${project.basedir}/lib/cgrid.keystore</keystore.path>
+    		<keystore.alias>cgrid-dev</keystore.alias>
+    		<keystore.type>JKS</keystore.type>
+    		<keystore.password>cgrid-dev</keystore.password>
+    		<keystore.store.password>${keystore.password}</keystore.store.password>
+    		<keystore.key.password>${keystore.password}</keystore.key.password>  
 	</properties>
-
+	
+	<repositories>
+		<repository>
+			<id>local-lib</id>
+			<name>In Project Repo</name>
+			<url>file://${project.basedir}/lib</url>			
+		</repository>
+	</repositories>
 	<dependencies>
 		<dependency>
 			<groupId>org.virtualbox</groupId>
@@ -84,10 +97,11 @@
 					</execution>
 				</executions>
 				<configuration>
-					<keystore>/Users/pooyadav/.keystore</keystore>
-					<alias>citizengrid</alias>
-					<storepass>citizengrid</storepass>
-					<keypass>citizengrid</keypass>
+					<storetype>${keystore.type}</storetype>
+					<keystore>${keystore.path}</keystore>
+					<alias>${keystore.alias}</alias>
+					<storepass>${keystore.store.password}</storepass>
+					<keypass>${keystore.key.password}</keypass>
 				</configuration>
 			</plugin>
 		</plugins>
