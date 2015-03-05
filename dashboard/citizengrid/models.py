@@ -24,34 +24,40 @@ class Branch(models.Model):
     name = models.CharField(max_length=30)
     description = models.CharField(max_length=256)
     def __unicode__(self):
-         return u'{0}'.format(self.name)
+        return u'{0}'.format(self.name)
 
 class Category(models.Model):
     name = models.CharField(max_length=30)
     description = models.CharField(max_length=60)
     branch =  models.ForeignKey(Branch,null=False)
     def __unicode__(self):
-         return u'{0}'.format(self.name)
+        return u'{0}'.format(self.name)
 
 class SubCategory(models.Model):
     name = models.CharField(max_length=30)
     description = models.CharField(max_length=60)
     category = models.ForeignKey(Category,null=False)
     def __unicode__(self):
-         return u'{0}'.format(self.name)
+        return u'{0}'.format(self.name)
 
-
+class Group(models.Model):
+    name = models.CharField(max_length=128)
+    description = models.TextField()
+    creation_time = models.DateTimeField(auto_now_add=True)
+    user = models.ManyToManyField(User,default='NONE')
+    def __unicode__(self):
+        return self.name
+    
 # Database View over Branch ->Category ->SubCategory
-
 class CGView(models.Model):
-	name = models.CharField(max_length=30)
-	category_name = models.CharField(max_length=30)
-        category_id = models.IntegerField(null=False)
-        subcategory_name = models.CharField(max_length=30)
-        subcategory_id = models.IntegerField(null=False)
+    name = models.CharField(max_length=30)
+    category_name = models.CharField(max_length=30)
+    category_id = models.IntegerField(null=False)
+    subcategory_name = models.CharField(max_length=30)
+    subcategory_id = models.IntegerField(null=False)
 
-	class Meta:
-		managed = False
+class Meta:
+    managed = False
 
 class ApplicationBasicInfo(models.Model):
     owner = models.ForeignKey(User) # Not displayed in the basic form
@@ -67,11 +73,8 @@ class ApplicationBasicInfo(models.Model):
     branch = models.ManyToManyField(Branch,default='NONE')
     category = models.ManyToManyField(Category,default='NONE')
     subcategory = models.ManyToManyField(SubCategory,default='NONE')
-
     def __unicode__(self):
         return self.name
-
-
 
 def upload_file_location(instance, filename):
     fs = FileSystemStorage()
@@ -95,7 +98,6 @@ class ApplicationFile(models.Model):
         ('OVF', 'Open Virtualization Format Descriptor'),
         ('OVA', 'Open Virtualization Format Archive')
     )
-
 
     IMAGE_TYPE = (
         ('C', 'Client'),
@@ -132,17 +134,16 @@ class ApplicationClientInfo(models.Model):
     client_image_location = models.CharField(max_length=256)
 
 class UserCloudCredentials(models.Model):
-     HOST_CHOICES = (('Public', 'Amazon EC2'), ('Private','OpenStack'), ('CitizenGrid','CitizenGrid'),('Other','Other'))
-     host_cloud = models.CharField(max_length=64, choices=HOST_CHOICES, default ='Other')
-     user = models.ForeignKey(User)
-     key_alias = models.CharField(max_length=64)
-     access_key = models.CharField(max_length=64)
-     secret_key = models.CharField(max_length=64)
-     endpoint = models.CharField(max_length=256)
-     def __unicode__(self):
+    HOST_CHOICES = (('Public', 'Amazon EC2'), ('Private','OpenStack'), ('CitizenGrid','CitizenGrid'),('Other','Other'))
+    host_cloud = models.CharField(max_length=64, choices=HOST_CHOICES, default ='Other')
+    user = models.ForeignKey(User)
+    key_alias = models.CharField(max_length=64)
+    access_key = models.CharField(max_length=64)
+    secret_key = models.CharField(max_length=64)
+    endpoint = models.CharField(max_length=256)
+
+    def __unicode__(self):
         return self.key_alias
-
-
 
 class ApplicationEC2Images(models.Model):
 

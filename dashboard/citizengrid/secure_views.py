@@ -296,6 +296,16 @@ def manage_credentials(request):
 
     return render_to_response('cg_manage_credentials.html', {'next':'/', 'cloud_creds':cloud_creds,'role':role}, context_instance=RequestContext(request))
 
+@login_required
+def manage_groups(request):
+    groups = []
+    print 'in manage groups'
+
+    role = view_utils.return_role(request)
+
+    return render_to_response('cg_manage_groups.html', {'next':'/', 'groups':groups,'role':role}, context_instance=RequestContext(request))
+
+
 # Called via an AJAX call from a modal on the credential management page
 # This view returns only the HTML content for the modal itself. The main
 # view is rendered from the cg_manage_credentials template.
