@@ -1,0 +1,205 @@
+{% extends "base.html" %}
+
+{% load cg_template_filters %}
+
+{% block head %}
+
+{% endblock %}
+
+{% block container-content %}
+
+<div class="cg-header" style="padding: 5px 5px;">
+	<div class="container">
+		<h3>
+			<img id="logo" src="/img/logo_trans.png"> <span>CitizenGrid</span>
+		</h3>
+	</div>
+</div>
+
+<div class="container" style="padding-top: 25px;">
+<div class="row">
+  <div class="col-md-12">
+    <h3>CitizenGrid: Image Management - {{ app.name }}</h3>
+  </div>
+</div>
+<div class="row">
+  <div class="col-md-12">
+    <h4>Manage images for the CitizenGrid application "{{ app.name }}".</h4>
+  </div>
+</div>
+<hr>
+<div class="panel panel-default">
+    <div class="panel-heading">Images</div>
+
+    <div class="panel-body">
+
+<div class="panel panel-default">
+    <div class="panel-heading"><span>Local Images</span></div>
+    <div class="panel-body">
+        <div id= "localimage">
+    	{% if local_images|length == 0 %}
+    	  <div class="alert alert-info">You don't have any local images registered for this application.</div>
+
+    	{% else %}
+    	{% for file in local_images %}
+    	<div  class="row">
+    	<div class="local col-md-4 pull-left">{{ file.file_format|getfileformat }}: <a href="{{ file.file|getfileurl:username }}">{{ file.file|getfilebasename }}</a></div>
+ 		<div class="local col-md-1 pull-right"> <a href="javascript:void(0)" id="{{file.id}}" type="file" class="" title="delete image"><i class="icon-trash icon-white"></i></a> </div>
+    </div>
+    	{% endfor %}
+        {% endif %}
+   </div>
+    	<form class="form-inline" id="new_local_img_form" role="form" action="" enctype="multipart/form-data" method="POST">
+    	<table><tr>
+    		<td>
+    		<label style="margin-right: 20px;">New image: </label>
+    		</td>
+    		<td>
+    		<div class="form-group">
+				<label class="sr-only" for="id_local">Local: </label>
+				<select class="form-control {% if new_local_img_form.local.errors %}error-control{% endif %}" id="id_local" name="local">
+					<option value="vdi">VDI</option>
+					<option value="ovf">OVF</option>
+                    <option value="ova">OVA</option>
+                    <option value="iso">ISO</option>
+                    <option value="vmdk">VMDK</option>
+                    <option value="hd">RAW_HD</option>
+                    <option value="img">RAW_IMG</option>
+				</select>
+			</div>
+			</td>
+			<!--<td>-->
+			<!--<div class="form-group">-->
+				<!--<label class="sr-only" for="id_client_endpoint">Endpoint: </label>-->
+				<!--<input id="id_client_endpoint" class="form-control {% if new_local_img_form.client_endpoint.errors %}error-control{% endif %}" type="text" name="client_endpoint" maxlength="256" style="width: 260px;" placeholder="Local endpoint URL">-->
+			<!--</div>-->
+			<!--</td>-->
+			<!--<td>-->
+			<!--<div class="form-group">-->
+				<!--<label class="sr-only" for="id_client_image_id">Image ID: </label>-->
+				<!--<input id="id_client_image_id" class="form-control {% if new_local_img_form.client_image_id.errors %}error-control{% endif %}" type="text" name="client_image_id" maxlength="64" placeholder="Image ID"/>-->
+			<!--</div>-->
+			<!--</td>-->
+			<td>
+			<div class="form-group">
+				<label class="sr-only" for="id_local_image">Local Image: </label>
+		  <div>
+		    <div id="fileuploadblock">
+	                <!-- The fileinput-button span is used to style the file input field as button -->
+	                <span class="btn btn-success fileinput-button">
+	                    <i class="glyphicon glyphicon-plus white"></i>
+	                    <span>Add files...</span>
+	                    <input type="file" name="local_image" multiple>
+	                </span>
+
+</div>
+	        </div>
+			</div>
+			</td>
+			<td>
+			<button class="btn btn-info" type="submit" value="lif" name="lif">
+	    		<i class="glyphicon glyphicon-plus"></i>
+	    		<span>Add image...</span>
+	    	</button>
+	    	</td>
+	    	</tr>
+	    	<tr>
+	    	<td></td>
+	    	<!--<td>{{ new_local_img_form.client_endpoint.errors }}</td>-->
+	    	<!--<td>{{ new_local_img_form.client_image_id.errors }}</td>-->
+	    	<td>{{ new_local_img_form.local.errors }}</td>
+	    	</tr>
+	    </table>
+	    {% csrf_token %}
+    	</form>
+    </div>
+</div>
+
+<div class="panel panel-default">
+    <div class="panel-heading">
+    	<span>Cloud images</span>
+    </div>
+    <div class="panel-body">
+        <div id="cloudimage">
+    	{% if ec2_images|length == 0 and openstack_images|length == 0 %}
+    	  <div class="alert alert-info">You don't have any cloud images registered for this application.</div>
+    	{% else %}
+    	    <table class="table table-striped" id="cloud_image_table">
+    	    <thead><tr><th>Image type</th><th>Image ID</th><th>Endpoint</th><th>Server/Client Image</th></tr></thead>
+    	    <tbody>
+    		{% if ec2_images|length > 0 %}
+    			{% for ec2_image in ec2_images %}
+    			  <tr><td>Amazon EC2</td><td>{{ ec2_image.image_id }}</td><td style="width: 400px;">{{ ec2_image.zone_url }}</td><td>{% if ec2_image.image_type == 'C' %}Client Image{% else %}Server Image{% endif %}</td>
+    			  <td><div class="cloud"><a id="{{ec2_image.image_id}}" href="javascript:void(0)" type="ec2" class="" title="delete image"><i class="icon-trash icon-white"></i></a></div></td>
+    			  </tr>
+    			{% endfor %}
+    		{% endif %}
+    		{% if openstack_images|length > 0 %}
+    			{% for os_image in openstack_images %}
+    			  <tr><td>Openstack</td><td>{{ os_image.image_id }}</td><td style="width: 400px;">{{ os_image.zone_url }}</td><td>{% if os_image.image_type == 'C' %}Client Image{% else %}Server Image{% endif %}</td>
+    			  <td><div class="cloud"><a id="{{os_image.image_id}}" href="javascript:void(0)" type="os" class="" title="delete image"><i class="icon-trash icon-white"></i></a></div></td>
+    			  </tr>
+    			{% endfor %}
+    	    {% endif %}
+    	    </tbody>
+            </table>
+    	{% endif %}
+    	</div>
+    	<form class="form-inline" id="new_image_form" role="form" action="" method="POST">
+    	<table><tr>
+    		<td>
+    		<label style="margin-right: 20px;">New image: </label>
+    		</td>
+    		<td>
+    		<div class="form-group">
+				<label class="sr-only" for="id_cloud">Cloud: </label>
+				<select class="form-control {% if cloud_image_form.cloud.errors %}error-control{% endif %}" id="id_cloud" name="cloud">
+					<option value="Private">OpenStack</option>
+					<option value="Public">Amazon EC2</option>
+				</select>
+			</div>
+			</td>
+			<td>
+			<div class="form-group">
+				<label class="sr-only" for="id_endpoint">Endpoint: </label>
+				<input id="id_endpoint" class="form-control {% if cloud_image_form.endpoint.errors %}error-control{% endif %}" type="text" name="endpoint" maxlength="256" style="width: 260px;" placeholder="Cloud endpoint URL">
+			</div>
+			</td>
+			<td>
+			<div class="form-group">
+				<label class="sr-only" for="id_image_id">Image ID: </label>
+				<input id="id_image_id" class="form-control {% if cloud_image_form.image_id.errors %}error-control{% endif %}" type="text" name="image_id" maxlength="64" placeholder="Image ID"/>
+			</div>
+			</td>
+			<td>
+			<div class="form-group">
+				<label class="sr-only" for="id_server_client">Cloud: </label>
+				<select class="form-control {% if cloud_image_form.server_client.errors %}error-control{% endif %}" id="id_server_client" name="server_client">
+					<option value="C">Client Image</option>
+					<option value="S">Server Image</option>
+				</select>
+			</div>
+			</td>
+			<td>
+			<button class="btn btn-info" type="submit" name="cif" value="cif">
+	    		<i class="glyphicon glyphicon-plus"></i>
+	    		<span>Add image...</span>
+	    	</button>
+	    	</td>
+	    	</tr>
+	    	<tr>
+	    	<td></td>
+	    	<td>{{ cloud_image_form.cloud.errors }}</td>
+	    	<td>{{ cloud_image_form.endpoint.errors }}</td>
+	    	<td>{{ cloud_image_form.image_id.errors }}</td>
+	    	<td>{{ cloud_image_form.server_client.errors }}</td>
+	    	</tr>
+	    </table>
+	    {% csrf_token %}
+    	</form>
+    </div>
+</div>
+       </div>
+<a href="/cg"><< Back to application list</a>
+<script type="text/javascript" src="/static/js/cg_delete.js"></script>
+{% endblock %}

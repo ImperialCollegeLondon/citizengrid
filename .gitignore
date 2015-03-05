@@ -1,0 +1,14 @@
+*.classpath
+secret_key.py
+*.DS_Store
+*.project
+*.pydevproject
+*.settings/
+*.idea/
+*/bin/
+*.pyc
+*.class
+*/target/
+*.db
+
+

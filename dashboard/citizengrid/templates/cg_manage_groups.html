@@ -1,0 +1,231 @@
+{% extends "base.html" %}
+
+{% block head %}
+
+{% endblock %}
+
+{% block container-content %}
+
+<div class="cg-header" style="padding: 5px 5px;">
+	<div class="container">
+		<h3>
+			<img id="logo" src="/img/logo_trans.png"/> <span>CitizenGrid</span>
+		</h3>
+	</div>
+</div>
+
+<div class="container" style="padding-top: 25px;">
+<div class="row">
+  <div class="col-md-12">
+    <h3>CitizenGrid: Group Management</h3>
+  </div>
+</div>
+<div class="row">
+  <div class="col-md-12">
+    <h4>Manage your groups for atom smashing!</h4>
+  </div>
+</div>
+<hr>
+
+<div id="oscred-info" class="row cred-info">
+  <div class="col-md-12">
+    <h3>Group Memberships</h3>
+    <hr style="width: 30%; align: left;"/>
+    {% if groups|length == 0 %}
+      <div class="alert alert-info" id="cloud-nocreds"><b>You do not have any group memberships at present.</b></div>
+      <table class="table table-striped" id="cloud-table" style="display: none;">
+        <thead><tr><th>Name</th><th>Description</th></tr></thead>
+        <tbody>
+        </tbody>
+      </table>
+    {% else %}
+      <table class="table table-striped" id="cloud-table">
+        <thead><tr><th>Name</th><th>Description</th></tr></thead>
+        <tbody>
+        {% for group in groups %}
+          <tr>
+          	<td style="width: 220px;">{{ group.name }}</td> 
+          	<td style="width: 220px;">{{ group.description }}</td>
+			<td style="width: 100px;">
+		  	<div class="container"> 
+		    	<div class="row">
+		    		<div class="delcreds col-md-1"><a href="javascript:void(0)" id="{{ cred.id }}" type="oscred" class="" title="edit image"><i class="glyphicon glyphicon-wrench"></i></a></div>
+		  			<div class="delcreds col-md-1"><a href="javascript:void(0)" id="{{ cred.id }}" type="oscred" class="" title="delete image"><i class="icon-trash icon-white"></i></a></div>
+		    	</div>
+		  	</div>
+			</td>
+          </tr>
+        {% endfor %}
+        </tbody>
+      </table>
+    {% endif %}
+    <a href="#cloudModal" data-toggle="modal">Add new group</a>
+  </div>
+</div>
+
+
+<!-- Cloud Credential (Input Form) Modal -->
+<div class="modal fade md-centre" id="cloudModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+        <h4 class="modal-title" id="myModalLabel">Add Cloud Credentials</h4>
+      </div>
+      <div class="modal-body">
+        <form class="form-horizontal" data-async id="cloudForm" data-target="#cloudModal" action="/cg/manage/cred/cloud" method="POST">
+          <fieldset>
+            <div class="form-group">
+              <label for="osCloud">Platform</label>
+              <select id="osCloud" class="form-control"  placeholder="Cloud Platform" name="cloud">
+                    <option value ="Private">OpenStack</option>
+					<option value="Public">Amazon EC2</option>
+                    <option value="CitizenGrid">CitizenGrid</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="osAlias">Alias</label>
+              <input type="text" id="osAlias" class="form-control" value="{% if form.alias.value %}{{ form.alias.value }}{% endif %}" placeholder="Alias for these credentials" name="alias">
+            </div>
+            <div class="form-group">
+              <label for="osAccessKey">Access Key</label>
+              <input type="text" id="osAccessKey" class="form-control" value="{% if form.access_key.value %}{{ form.access_key.value }}{% endif %}" placeholder="Your account access key" name="access_key">
+            </div>
+            <div class="form-group">
+              <label for="osSecretKey">Secret Key</label>
+              <input type="text" id="osSecretKey" class="form-control" value="{% if form.secret_key.value %}{{ form.secret_key.value }}{% endif %}" placeholder="Your account secret key" name="secret_key">
+            </div>
+            <div class="form-group">
+              <label for="osEndpointUrl">Endpoint</label>
+              <input type="text" id="osEndpointUrl" class="form-control" value="{% if form.endpoint.value %}{{ form.endpoint.value }}{% endif %}" placeholder="URL for the OpenStack service" name="endpoint">
+            </div>
+            {% csrf_token %}
+          </fieldset>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" id="cloudCredClose" data-dismiss="modal">Close</button>
+        <button type="button" class="btn btn-primary" id="cloudFormSubmit">Submit</button>
+        <button type="button" class="btn btn-primary" id="cloudCredOk" style="display: none;">OK</button>
+      </div>
+    </div><!-- /.modal-content -->
+  </div><!-- /.modal-dialog -->
+</div><!-- /.modal -->
+<script type="text/javascript" src="/js/cg_delete.js"></script>
+<script type="text/javascript">
+var cloudCredForm = null;
+var new_cloud = null;
+var new_alias = null;
+var new_access_key = null;
+var new_endpoint = null;
+var id=null;
+
+$('#cloudFormSubmit').on('click', function() {
+	$('#cloudForm').submit();
+});
+
+
+$('#cloudCredOk').on('click', function() {
+	if($('#cloudCredOk').is(":visible")) {
+		// If OK button is visible, we accept the click event
+		// Close the modal, replace the HTML content and re-activate
+		// the buttons.
+
+		var rowCount = $('#cloud-table tbody').children().length;
+		if(rowCount > 0) {
+
+			$('#cloud-table tr:last').after('<tr><td style="width: 220px;">' + new_cloud + '</td><td style="width: 220px;">' + new_alias + '</td><td style="width: 300px;">' + new_access_key + '</td><td>' + new_endpoint + '</td>' +
+			'<td style="width: 100px;"><div class="container"> <div class="row"><div class="editcreds col-md-1"><a href="javascript:void(0)" id="'+ id+
+			' " type="oscred" class="" title="edit image"><i class="glyphicon glyphicon-wrench"></i></a></div><div class="delcreds col-md-1"><a href="javascript:void(0)" id="'+ id +
+			' " type="oscred" class="" title="delete image"><i class="icon-trash icon-white"></i></a></div></div></div>' +
+			' </td>'+  '</tr>');	
+		}
+		else {
+			$('#cloud-table tbody').html('<tr><td style="width: 220px;">' + new_cloud + '</td><td style="width: 220px;">' + new_alias + '</td><td style="width: 300px;">' + new_access_key + '</td><td>' + new_endpoint + '</td>' +
+					'<td style="width: 100px;"><div class="container"> <div class="row"><div class="editcreds col-md-1"><a href="javascript:void(0)" id="'+ id+
+					' " type="oscred" class="" title="edit image"><i class="glyphicon glyphicon-wrench"></i></a></div><div class="delcreds col-md-1"><a href="javascript:void(0)" id="'+ id +
+					' " type="oscred" class="" title="delete image"><i class="icon-trash icon-white"></i></a></div></div></div>' +
+					' </td>'+  '</tr>');	
+			$('#cloud-nocreds').hide();
+			$('#cloud-table').show();
+		}
+		
+		$('#cloudModal').modal("hide");
+		if(cloudCredForm != null) {
+			$('#cloudModal .modal-body').html(cloudCredForm);
+		}
+		$('#cloudCredOk').hide();
+		$('#cloudCredClose').show();
+		$('#cloudFormSubmit').show();
+		
+		
+		
+	}
+});
+
+$(document).on("submit", 'form[data-async]', function(e) {
+	var form = $(this);
+    var target = form.attr('action');
+    
+    if(console.log) {
+    	console.log('Received form submission for target <' + target + '>');
+    }
+    
+    $.ajax({
+        id:form.attr('id'),
+        type: form.attr('method'),
+        url: form.attr('action'),
+        data: form.serialize()
+      }).done(function(response) {
+    	  if(console.log) {
+    		  console.log('Data returned from form processing <' + response + '>');
+    	  }
+    	  
+    	  //Before updating the HTML in the modal, store the values
+    	  // to update the table...
+          new_cloud = $('#osCloud').val();
+		  new_alias = $('#osAlias').val();
+		  new_access_key = $('#osAccessKey').val();
+		  new_endpoint = $('#osEndpointUrl').val();
+		  console.log($(response).find("#hide").attr("value"))
+		  id = $(response).find("#hide").attr("value")
+
+          if(new_cloud == "Public"){
+           new_cloud = "Amazon EC2" ;
+            }
+          else  if(new_cloud == "Private"){
+             new_cloud = "OpenStack" ;
+            }
+          else if(new_cloud == "CitizenGrid"){
+            new_cloud = "CitizenGrid";
+            }
+          else {
+             new_cloud = null
+            };
+
+    	  
+    	  // Update the HTML in the modal box
+    	  // Replace the HTML in the form with the response data
+    	  if(cloudCredForm == null) {
+    		  cloudCredForm = $('#cloudModal .modal-body').html();
+    	  }
+    	  $('#cloudModal .modal-body').html(response);
+    	  
+    	  // If the form is still present in the modal box, leave the buttons. 
+    	  // If it isn't, we have a message response, switch buttons to single OK.
+    	  if($('#cloudForm').length == 0) {
+    		  $('#cloudCredClose').hide();
+    		  $('#cloudFormSubmit').hide();
+    		  $('#cloudCredOk').show();
+    	  }
+      }).fail(function() {
+        alert("Error on the input")
+        // Optionally alert the user of an error here...
+      });
+    
+    e.preventDefault();
+
+});
+</script>
+
+{% endblock %}

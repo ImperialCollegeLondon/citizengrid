@@ -1,0 +1,158 @@
+
+
+{% load i18n %}
+
+{% block head %}
+<!-- CSS to style the file input field as button and adjust the Bootstrap progress bars -->
+<link rel="stylesheet" href="/css/jquery.fileupload-ui.css">
+<link rel="stylesheet" href="/css/bootstrap.min.css">
+<link rel="stylesheet" href="/css/bootstrapValidator.min.css">
+<link rel="stylesheet" href="/css/citizengrid.css">
+<link rel="stylesheet" href="/css/font-awesome.min.css">
+
+<style>
+table {
+    border-collapse: collapse;
+}
+
+td {
+    padding-top: .5em;
+    padding-bottom: .5em;
+}
+
+</style>
+
+<!-- CSS adjustments for browsers with JavaScript disabled -->
+<noscript><link rel="stylesheet" href="/css/jquery.fileupload-ui-noscript.css"></noscript>
+
+{#<script src="/js/jquery-1.11.1.min.js"></script>#}
+{#<script src="/js/bootstrap.min.js"></script>#}
+{#<script src="/js/bootstrapValidator.min.js"></script>#}
+<script src="/js/app-provider.js"></script>
+
+{{ wizard.form.media }}
+{% endblock %}
+
+{% block content %}
+<p>Step {{ wizard.steps.step1 }} of {{ wizard.steps.count }}</p>
+
+{{ wizard.form.non_field_errors }}
+
+<form id="step1" action="#" method="post">{% csrf_token %}
+<table>
+{{ wizard.management_form }}
+{% if wizard.form.forms %}
+    {{ wizard.form.management_form }}
+    {% for form in wizard.form.forms %}
+        {{ form }}
+    {% endfor %}
+{% else %}
+    <!-- {{ wizard.form }} -->
+     <tbody>
+    {% for field in form %}
+
+	{% if field.label == 'Description' %}
+		<tr>
+			<th>Description<br><i>(Optional)</i></th>
+			<td>
+				<textarea class="form-control" rows="4" style="width: 50%;" id="{{ field.id_for_description }}" name="{{ field.html_name }}">{{field.value}}</textarea>
+			</td>
+		</tr>
+
+
+	{% elif field.label == 'Name' %}
+		<tr>
+			<th>Name</th>
+			<td>
+				<input type="text" class="form-control input-medium col-md-4" style="width: 50%;" id="{{ field.id_for_label }}" name="{{ field.html_name }}" value="{{field.value}}"/>
+			</td>
+           {% if wizard.form.name.errors %}
+        <td>{{ wizard.form.name.errors }}</td>
+        {% endif %}
+		</tr>
+
+    {%elif field.label == 'Logo Image' %}
+        <tr>
+			<th>{{field.label}}</th>
+			<td>
+				<div style="padding-top: 7px;"><input type="checkbox" name="public" id="ispublic" value="{{field.value}}"> <span> &nbsp;&nbsp;Select to make this application available to all users</span></div>
+			</td>
+		</tr>
+
+
+	{% elif field.label == 'Public' %}
+		<tr>
+			<th>{{field.label}}</th>
+			<td>
+				<div style="padding-top: 7px;"><input type="checkbox" name="public" id="ispublic" value="{{field.value}}"> <span> &nbsp;&nbsp;Select to make this application available to all users</span></div>
+			</td>
+		</tr>
+	{% elif field.label == 'Select category' %}
+		<tr>
+			<th>{{field.label}}</th>
+			<td>
+			<div style="padding-top: 7px;" id="container">
+				<div class="cgbranch row">
+					<ul class="span4">
+						{% for b in branches %}
+						<li class="parent-list"><input type="checkbox" name="{{ field.html_name }}" id= "branch_{{ field.id_for_label }}" value="{{ b.id}}" class="cgbranch parent" /> {{b.name}}<i class="icon-caret-up"></i>
+							<ul>
+								{% for c in category %}
+								{% if c.branch.id == b.id %}
+								<li class="parent-list"><input type="checkbox" name="cat" class="cgbranch parent" id="cat" value="{{c.id}}"  /> {{c.name}} <i class="icon-caret-up"></i>
+									<ul>
+										{% for s in subcategory %}
+										{%if s.category.id == c.id %}
+										<li><input type="checkbox" name="subcat" class="cgbranch" id="subcat" value="{{s.id}}" /> {{s.name}} </li>
+										{% endif %}
+										{% endfor %}
+									</ul>
+								</li>
+								{% endif %}
+								{% endfor %}
+							</ul>
+						</li>
+						{% endfor %}
+					</ul>
+				</div>
+			</div>
+			</td>
+		</tr>
+	 {% elif field.label == 'Additional information' %}
+	 <tr>
+	 	<th>Additional<br>information<br><i>(Optional)</i></th>
+	 	<td>
+			 <textarea class="form-control" rows="4" style="width: 50%;" id="{{ field.id_for_label }}" name="{{ field.html_name }}"></textarea>
+	 	</td>
+	 </tr>
+	 {% elif field.label == 'Keywords' %}
+	 <tr>
+	 	<th>Keywords<br><i>(Optional)</i></th>
+	 	<td>
+			 <textarea class="form-control" rows="4" style="width: 50%;" id="{{ field.id_for_label }}" name="{{ field.html_name }}"></textarea>
+	 	</td>
+	 </tr>
+	          {% else %}
+		<tr>
+			<th>{{field.label}}</th>
+			<td>
+				{{field}}
+			</td>
+		</tr>
+          {% endif %}
+
+
+
+    {% endfor%}
+
+    </tbody>
+{% endif %}
+</table>
+{% if wizard.steps.prev %}
+<button name="wizard_goto_step" class="navButton" type="submit" value="{{ wizard.steps.first }}">{% trans "first step" %}</button>
+<button name="wizard_goto_step" class="navButton"  type="submit" value="{{ wizard.steps.prev }}">{% trans "prev step" %}</button>
+{% endif %}
+<input type="submit" class="btn btn-primary start" id="1" value="{% trans "Next" %}"/>
+</form>
+
+{% endblock %}
