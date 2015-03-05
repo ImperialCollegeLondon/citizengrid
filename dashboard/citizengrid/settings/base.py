@@ -1,6 +1,21 @@
 # Django settings for citizengrid project.
 
 import os
+
+# Simple function to generate a secret key file based on the info at
+# http://stackoverflow.com/questions/4664724/distributing-django-projects-with-unique-secret-keys
+# According to info at the above URL this should use the same process
+# that is used in Django's startproject command to generate a key so it should
+# be in the same format.
+def generate_secret_key(key_file):
+    from django.utils.crypto import get_random_string
+    chars = 'abcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*(-_=+)'
+    secret_key = get_random_string(50, chars)
+    with open(key_file, 'w') as f:
+        f.write('SECRET_KEY = \'' + secret_key + '\'\n')
+
+
+
 PROJECT_ROOT = os.path.join(os.path.realpath(os.path.dirname(__file__)), '..')
 
 DEBUG = False
@@ -18,7 +33,6 @@ DEFAULT_TABLESPACE = ''
 EMAIL_PORT = 1025
 
 MANAGERS = ADMINS
-
 
 # Local time zone for this installation. Choices can be found here:
 # http://en.wikipedia.org/wiki/List_of_tz_zones_by_name
@@ -77,9 +91,17 @@ STATICFILES_FINDERS = (
 #    'django.contrib.staticfiles.finders.DefaultStorageFinder',
 )
 
-# Make this unique, and don't share it with anybody.
-SECRET_KEY = '5=f$gh(s(cm^w%23y=juv*p(!)j_xgj-^@i3pl**amp;mp6fr)u3ri'
-
+# SECURITY WARNING: keep the secret key used in production secret!
+# The secret key is no longer required here. Using approach based on
+# info at http://stackoverflow.com/questions/4664724/distributing-django-projects-with-unique-secret-keys
+# to generate a unique secret key the first time the app is started.
+# SECRET_KEY = '<ENTER SECRET KEY HERE>''
+try:
+    from secret_key import *
+except ImportError:
+    generate_secret_key(os.path.join(PROJECT_ROOT, 'settings', 'secret_key.py'))
+    from secret_key import *
+   
 # List of callables that know how to import templates from various sources.
 TEMPLATE_LOADERS = (
     'django.template.loaders.filesystem.Loader',
@@ -195,3 +217,4 @@ LOGGING = {
 
     }
 }
+
