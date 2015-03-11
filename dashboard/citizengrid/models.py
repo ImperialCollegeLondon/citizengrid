@@ -40,13 +40,8 @@ class SubCategory(models.Model):
     def __unicode__(self):
         return u'{0}'.format(self.name)
 
-class Group(models.Model):
-    name = models.CharField(max_length=128)
-    description = models.TextField()
-    creation_time = models.DateTimeField(auto_now_add=True)
-    user = models.ManyToManyField(User,default='NONE')
-    def __unicode__(self):
-        return self.name
+
+
     
 # Database View over Branch ->Category ->SubCategory
 class CGView(models.Model):
@@ -73,6 +68,23 @@ class ApplicationBasicInfo(models.Model):
     branch = models.ManyToManyField(Branch,default='NONE')
     category = models.ManyToManyField(Category,default='NONE')
     subcategory = models.ManyToManyField(SubCategory,default='NONE')
+    def __unicode__(self):
+        return self.name
+
+class Role(models.Model):
+    name = models.CharField(max_length=30)
+    description = models.CharField(max_length=60)
+    def __unicode__(self):
+        return u'{0}'.format(self.name)
+
+class MyGroup(models.Model):
+    name = models.CharField(max_length=128)
+    description = models.TextField()
+    creation_time = models.DateTimeField(auto_now_add=True)
+    user = models.ManyToManyField(User,default='NONE')
+    is_admin = models.BooleanField(default=False)
+    is_participant = models.BooleanField(default=False)
+    application = models.ManyToManyField(ApplicationBasicInfo,null=True)
     def __unicode__(self):
         return self.name
 
