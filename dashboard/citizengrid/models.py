@@ -39,9 +39,6 @@ class SubCategory(models.Model):
     category = models.ForeignKey(Category,null=False)
     def __unicode__(self):
         return u'{0}'.format(self.name)
-
-
-
     
 # Database View over Branch ->Category ->SubCategory
 class CGView(models.Model):
@@ -202,3 +199,8 @@ class CloudInstancesOpenstack(models.Model):
     instance_id = models.CharField(max_length=16)
     status = models.CharField(max_length=32)
     #image_type = models.CharField(max_length=3)
+    
+class UsersApplications(models.Model):
+
+    user =  models.ForeignKey(User)
+    application = models.ForeignKey(ApplicationBasicInfo)
