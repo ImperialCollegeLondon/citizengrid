@@ -11,5 +11,6 @@ secret_key.py
 */target/
 *.db
 media/
+migrations/
 
 
