@@ -1,0 +1,39 @@
+
+    {% if groups|length == 0 %}
+      <div class="alert alert-info" id="group-nogroup"><b>You do not have any group memberships at present.</b></div>
+      <table class="table table-striped" id="group-table" style="display: none;">
+        <thead><tr><th>Name</th><th>Description</th><th> Group Role</th><th> Members</th></tr></thead>
+        <tbody>
+        </tbody>
+      </table>
+    {% else %}
+      <table class="table table-striped " id="group-table">
+        <thead><tr><th>Group Name</th><th>Description</th><th> Group Role</th><th> Members</th></tr></thead>
+        <tbody>
+        {% for group in groups %}
+          <tr>
+          	<td style="width: 220px;"><div id="groupname" class="col-md-1 col-md-offset-1">{{ group.name }}</div></td>
+          	<td style="width: 220px;"><div id="groupdesc" class="col-md-8">{{ group.description }}</td>
+            <td style="width: 220px;"><div id="grouprole" class="col-md-1">{{ group.get_group_role_display }}</td>
+            <td style="width: 220px;"><div id="groupmembers" class="col-md-1">{{ group.user.all|length }}</td>
+
+			<td style="width: 100px;">
+		  	<div class="container" id="groupfunction" class="col-md-1">
+		    	<div class="row">
+                    {% if group.group_role == 'M'  %}
+		    		<div class="editgrp col-md-1"><a href="#groupModal" data-toggle="modal" id="{{ group.id }}" type="editgrp" class="" title="edit group"><i class="glyphicon glyphicon-wrench"></i></a></div>
+		  			<div class="leavegrp col-md-1"><a href="javascript:void(0)" id="{{ group.id }}" type="leavegrp" class="" title="leave group"><i class=" glyphicon glyphicon-plane"></i></a></div>
+                    <div class="attachapp col-md-1"><a href="#attachAppToGrpModal" id="{{ group.id }}" type="attachapp" class="" title="attach app to group"><i class="icon-link icon-white"></i></a></div>
+		    	{% else %}
+                    <div class="editgrp col-md-1"><a href="#groupModal" data-toggle="modal" id="{{ group.id }}" type="editgrp" class="" title="edit group"><i class="glyphicon glyphicon-wrench"></i></a></div>
+		  			<div class="delgrp col-md-1"><a href="javascript:void(0)" id="{{ group.id }}" type="delgrp" class="" title="delete group"><i class="icon-trash icon-white"></i></a></div>
+                    <div class="attachapp col-md-1"><a href="#attachAppToGrpModal" id="{{ group.id }}" type="attachapp" class="" title="attach app to group"><i class="icon-link icon-white"></i></a></div>
+		    	{% endif %}
+                </div>
+		  	</div>
+			</td>
+          </tr>
+        {% endfor %}
+        </tbody>
+      </table>
+    {% endif %}

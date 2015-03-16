@@ -39,7 +39,7 @@ class SubCategory(models.Model):
     category = models.ForeignKey(Category,null=False)
     def __unicode__(self):
         return u'{0}'.format(self.name)
-    
+
 # Database View over Branch ->Category ->SubCategory
 class CGView(models.Model):
     name = models.CharField(max_length=30)
@@ -75,15 +75,30 @@ class Role(models.Model):
         return u'{0}'.format(self.name)
 
 class MyGroup(models.Model):
+
+    GROUP_ROLE = (
+        ('O','Owner'),
+        ('M','Member'),
+    )
+
     name = models.CharField(max_length=128)
     description = models.TextField()
     creation_time = models.DateTimeField(auto_now_add=True)
     user = models.ManyToManyField(User,default='NONE')
-    is_admin = models.BooleanField(default=False)
-    is_participant = models.BooleanField(default=False)
-    application = models.ManyToManyField(ApplicationBasicInfo,null=True)
+
+    group_role = models.CharField(max_length=1, choices=GROUP_ROLE, default='M')
     def __unicode__(self):
         return self.name
+
+class AppTeam(models.Model):
+    name = models.CharField(max_length=128)
+    description = models.TextField()
+    creation_time = models.DateTimeField(auto_now_add=True)
+    group = models.ForeignKey(MyGroup,null=True)
+    application = models.ForeignKey(ApplicationBasicInfo,null=True)
+    tag = models.CharField(max_length=128)
+
+
 
 def upload_file_location(instance, filename):
     fs = FileSystemStorage()
@@ -187,20 +202,14 @@ class ApplicationOpenstackImages(models.Model):
 
 class CloudInstancesOpenstack(models.Model):
 
-    #CLOUD_TYPE = (
-    #    ('OS', 'Openstack'),
-    #    ('EC2', 'Amazon EC2'),
-    #)
-
+    IMAGE_TYPE = (
+        ('C', 'Client'),
+        ('S', 'Server'),
+    )
     owner =  models.ForeignKey(User)
     application = models.ForeignKey(ApplicationBasicInfo)
     application_image = models.ForeignKey(ApplicationOpenstackImages)
     credentials = models.ForeignKey(UserCloudCredentials)
     instance_id = models.CharField(max_length=16)
     status = models.CharField(max_length=32)
-    #image_type = models.CharField(max_length=3)
-    
-class UsersApplications(models.Model):
-
-    user =  models.ForeignKey(User)
-    application = models.ForeignKey(ApplicationBasicInfo)
+    image_type = models.CharField(max_length=1, choices=IMAGE_TYPE, default='C')
