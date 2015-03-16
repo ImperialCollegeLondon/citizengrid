@@ -218,4 +218,5 @@ class UsersApplications(models.Model):
 
     user =  models.ForeignKey(User)
     application = models.ForeignKey(ApplicationBasicInfo)
+    creation_time = models.DateTimeField(auto_now_add=True)
 

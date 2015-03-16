@@ -19,7 +19,7 @@ from django.http.response import HttpResponseNotAllowed, HttpResponseNotFound,\
 from django.forms.util import ErrorList
 from django.template.loader import render_to_string
 from citizengrid.models import UserInfo, ApplicationBasicInfo, ApplicationServerInfo, ApplicationClientInfo, Branch, Category, SubCategory, \
-    UserCloudCredentials,UserApplications
+    UserCloudCredentials,UsersApplications
 from citizengrid.models import ApplicationEC2Images, ApplicationOpenstackImages
 from citizengrid.forms import ApplicationBasicInfoForm, ApplicationServerInfoForm, ApplicationClientInfoForm, CloudCredentialsForm, CloudImageForm, \
     UpdateUserCreationForm,LocalImageForm
@@ -633,7 +633,9 @@ def get_cloud_credentials(request):
     """
 
     url = request.body
-    print 'Received a request to get credentials for URL: ' + url
+    #url = url.lstrip()
+    
+    print 'Received a request to get credentials:' + url
 
     creds = UserCloudCredentials.objects.filter(user_id=request.user, endpoint=url)
 
