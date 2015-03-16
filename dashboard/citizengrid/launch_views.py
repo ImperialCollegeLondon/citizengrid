@@ -20,6 +20,7 @@ from citizengrid.models import UserCloudCredentials
 from citizengrid.models import ApplicationOpenstackImages
 from citizengrid.models import ApplicationEC2Images
 from citizengrid.models import CloudInstancesOpenstack
+from citizengrid.models import UsersApplications
 from django.http.response import HttpResponseNotFound
 
 
@@ -69,7 +70,11 @@ jnlp_base = """
 @login_required
 def launchapp(request, appid, launchtype):
     print "Request to launch app with ID <" + appid + "> and launch type <" + launchtype + ">"
-
+    print "requesting user is " + str(request.user.id)
+    appObject = ApplicationBasicInfo.objects.get(id=appid)
+    rec = UsersApplications(user=request.user,application=appObject)
+    rec.save()
+    print "Saved record to UsersApplications"    
     # removed owner_id=request.user as any user can launch the application
     #app_files = ApplicationFile.objects.filter(owner_id=request.user, file_type='S', application_id=appid)
     app_files = ApplicationFile.objects.filter( file_type='S', application_id=appid,image_type='C')

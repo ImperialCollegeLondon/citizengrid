@@ -52,27 +52,26 @@ function welcomeCheckboxClick() {
   </div>
 </div>
 
-     <div class="row">
-        <div class="col-md-12">
-             <h3>My CitizenGrid</h3>
+	<div class="row">
+		<div class="col-md-12">
+			<h3>My CitizenGrid</h3>
+			<ul class="nav nav-pills user-menu">
+				{% if active_tab %} {% if active_tab == 'MA' %}
+				<li class="active">{% else %}
+				<li>{% endif %} {% else %}
+				<li class="active">{% endif %} <a data-toggle="pill" id="pubapps"
+					data-target="ajax_app_detail" href="#">Public Apps</a>
+				</li>
+				</li>{% if active_tab == 'NA' %}
+				<li class="active">{% else %}
+				<li>{% endif %} <a data-toggle="pill" id="myapps"
+					data-target="new_adv_app" href="#">My Apps</a>
+				</li>
+			</ul>
+		</div>
+	</div>
 
-            <ul class="nav nav-pills user-menu">{% if active_tab %} {% if active_tab == 'MA' %}
-                <li class="active">{% else %}
-                    <li>{% endif %} {% else %}
-                        <li class="active">{% endif %} <a data-toggle="pill" data-target="ajax_app_detail" href="#"></span>Public Apps</a>
-
-                        </li>
-
-                            </li>{% if active_tab == 'NA' %}
-                            <li class="active">{% else %}
-                                <li>{% endif %} <a data-toggle="pill" data-target="new_adv_app" href="#"></span>My Apps</a>
-
-                                </li>
-            </ul>
-        </div>
-    </div>
-
-<!-- BEGIN: APPLICATION LIST  - RENDER INFORMATION ABOUT ALL AVAILABLE APPS -->
+	<!-- BEGIN: APPLICATION LIST  - RENDER INFORMATION ABOUT ALL AVAILABLE APPS -->
 <div class="row pill-target" id="app_list" style="padding-top: 30px;">
   <div class="col-md-12">
   	{% if apps|length == 0 %}
@@ -81,8 +80,7 @@ function welcomeCheckboxClick() {
       <div class="alert alert-info">
           <h4>Application info</h4>
           <b>There are {{ apps|length }} applications available</b>
-          <p>To begin running the client for an application, select the application and click on application name and then click the 'Launch' buttons in the image details section of the
-              application info.</p>
+          <p>To begin running an application, select it in the list below and then click the 'Launch' button in the image details section of the application info.</p>
       </div>
     {% endif %}
   </div>
@@ -116,21 +114,18 @@ function welcomeCheckboxClick() {
 </div>
 <div>
 <!-- end jquery datatable -->
-
-
-
-
 <!-- Launch App Modal Pop-up -->
 <div class="modal fade" id="launchAppModal" tabindex="-1" role="dialog" aria-labelledby="launchAppLabel" aria-hidden="true">
   <div class="modal-dialog md-centre">
     <div class="modal-content">
       <div class="modal-header">
         <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-        <h4 class="modal-title">Launch application</h4>
+        <h4 class="modal-title">Launch Application</h4>
       </div>
       <div class="modal-body">
         <img id="appimg">
         <div id="appname"></div>
+
         <div id="launchtype" data-launchtype="vbox">Launch type: <b>Local (VirtualBox)</b></div>
       </div>
       <div class="modal-footer">
@@ -144,33 +139,57 @@ function welcomeCheckboxClick() {
 
 <!-- DataTables javascript. Add configurations here-->
 		<script type="text/javascript" src="//cdn.datatables.net/1.10.0/js/jquery.dataTables.min.js"></script>
+		<script type="text/javascript" src="//cdn.datatables.net/plug-ins/f2c75b7247b/api/fnReloadAjax.js"></script>
 		<script type="text/javascript" src="//cdn.datatables.net/plug-ins/be7019ee387/integration/bootstrap/3/dataTables.bootstrap.js"></script>
 <script type="text/javascript">
-	$(document).ready(function() {
-		$("#table").delegate(".demo", "click", function() {
-			if(console.log){
-				console.log("Making ajax request with param"+ $(this).attr("value"))
-			}
-			$("#ajax_app_detail").load("cg/appdetail/"+$(this).attr("value"), function() {});
-			});
-		
-		
-	   $('#table').dataTable({
-		"processing": false,
-		"serverSide": false,
-		"ajax": "/gettabledata",
-		"columns": [
-		{data : "name"},
-		{data :"description"},
-		{data :"keywords"},
-		{data:"branch"},
-		{data: "category"},
-		{data : "subcategory"},
-        {data : "owner"}
 
-		]
-	});
-	} );
+	$(document).ready(
+			function() {
+				$('#myapps').click(function() {
+					var table = $('#table').dataTable();
+					table.fnReloadAjax("/getuserapps");
+				})
+				$('#pubapps').click(function() {
+					var table = $('#table').dataTable();
+					table.fnReloadAjax("/gettabledata");
+				})
+				$("#table").delegate(
+						".demo",
+						"click",
+						function() {
+							if (console.log) {
+								console.log("Making ajax request with param"
+										+ $(this).attr("value"))
+							}
+							$("#ajax_app_detail").load(
+									"cg/appdetail/" + $(this).attr("value"),
+									function() {
+									});
+						});
+
+				$('#table').dataTable({
+					"processing" : false,
+					"serverSide" : false,
+					"ajax" : "/gettabledata",
+					"columns" : [ {
+						data : "name"
+					}, {
+						data : "description"
+					}, {
+						data : "keywords"
+					}, {
+						data : "branch"
+					}, {
+						data : "category"
+					}, {
+						data : "subcategory"
+					}, {
+						data : "owner"
+					}
+
+					]
+				});
+			});
 </script>
 {% endblock %}
 
