@@ -1,0 +1,31 @@
+
+    {% if gats|length == 0 %}
+      <div class="alert alert-info" id="group-nogroup"><b>No applications attached to this group.</b></div>
+      <table class="table table-striped" id="gats-table" style="display: none;">
+        <thead><tr><th>Tag Name</th><th>Tag ID</th><th> Tag Description </th><th> Application Name </th></tr></thead>
+        <tbody>
+        </tbody>
+      </table>
+    {% else %}
+      <table class="table table-striped " id="gats-table">
+        <thead><tr><th>Tag Name</th><th>Tag ID</th><th> Tag Description </th><th> Application Name </th></tr></thead>
+        <tbody>
+        {% for gat in gats %}
+          <tr>
+          	<td style="width: 220px;"><div id="tagname" class="col-md-1 col-md-offset-1">{{ gat.tagname }}</div></td>
+          	<td style="width: 220px;"><div id="tagid" class="col-md-8">{{ gat.gatdesc }}</div></td>
+            <td style="width: 220px;"><div id="tagdesc" class="col-md-1">{{ gat.id }}</div></td>
+            <td style="width: 220px;"><div id="app_name" class="col-md-1">{{ gat.application.name }}</div></td>
+
+			<td style="width: 100px;">
+		  	<div class="container" id="gaticons" class="col-md-1">
+		    	<div class="row">
+                    <div class="detach_gat col-md-1"><a href="javascript:void(0)" id="{{ gat.id }}" type="detach_gat" class="" title="detach application/tag from group"><i class="icon-link icon-white"></i></i></a></div>
+                 </div>
+		  	</div>
+			</td>
+          </tr>
+        {% endfor %}
+        </tbody>
+      </table>
+    {% endif %}

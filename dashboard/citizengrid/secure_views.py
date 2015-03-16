@@ -23,7 +23,7 @@ from citizengrid.models import UserInfo, ApplicationBasicInfo, ApplicationServer
 from citizengrid.models import ApplicationEC2Images, ApplicationOpenstackImages
 from citizengrid.forms import ApplicationBasicInfoForm, ApplicationServerInfoForm, ApplicationClientInfoForm, CloudCredentialsForm, CloudImageForm, \
     UpdateUserCreationForm,LocalImageForm
-from citizengrid.models import ApplicationFile,MyGroup
+from citizengrid.models import ApplicationFile,MyGroup,GroupApplicationTag
 from citizengrid import DATA_K
 from citizengrid.forms import ExtendedUserCreationForm
 from django.contrib.auth.models import User
@@ -309,9 +309,22 @@ def manage_groups(request):
     return render_to_response('cg_manage_groups.html', {'next':'/', 'groups':groups,'role':role}, context_instance=RequestContext(request))
 
 @login_required
-def groups(request):
+def application_list(request):
     print " All groups "
-    groups = MyGroup.objects.select_related().exclude(user=request.user)
+    apps = ApplicationBasicInfo.objects.all()
+    select_data = """ <select name=attach_app_list id="attach_app_list" class="form-control"  placeholder="Applications">
+    <option value="0">Nothing Selected</option>
+    """
+    for mg in apps :
+        select_data = select_data + "<option value=\"" + str(mg.id) + "\">" + mg.name + "</option>"
+    select_data = select_data + """</select> """
+    print select_data
+    return HttpResponse(select_data,content_type="application/html")
+
+@login_required
+def groups(request):
+    print " Entering all applications method "
+    apps = MyGroup.objects.select_related().exclude(user=request.user)
     select_data = """ <select name =groups[] id="joingroup" class="form-control"  placeholder="Groups" name="group" multiple> """
     for mg in groups :
         select_data = select_data + "<option value=\"" + str(mg.id) + "\">" + mg.name + "</option>"
@@ -338,13 +351,30 @@ def detail_group(request,id):
 
 @login_required
 def edit_group(request,id):
-    with transaction.atomic:
-        group = MyGroup(name=request.name,description=request.description,isAdmin=True,isParticipant=False)
-        group.save()
-        apps = ApplicationBasicInfo.objects.filter(id__in = request.getlist('appid'))
-        group.application = apps
-        group.save()
-    return detail_group(id)
+    print "Inside backend Edit group routine"
+    print  'grpname' in request.POST
+    if 'grpname' in request.POST:
+        try:
+
+            #with transaction.atomic:
+            mg = MyGroup.objects.get(id=id)
+            print str(request.POST['grpname'])
+            print str(request.POST['grpdesc'])
+            mg.name = str(request.POST['grpname'])
+            mg.description = str(request.POST['grpdesc'])
+            mg.save()
+        except IntegrityError as e:
+            print e.message
+
+        success_data = """
+        <span>Your group creation request is successful. Here is what you submitted:</span><br><br>
+        <strong>Name:</strong>""" + str(request.POST['grpname']) + "<br>"
+        #return HttpResponse( success_data,content_type="application/html")
+        return HttpResponseRedirect('/cg/manage/group')
+    else:
+        print "Sufficient information not present in the request to create a group"
+        return HttpResponse( "<p> Invalida Data </p>",content_type="application/html")
+        #return "<p> Invalida Data </p>"
 
 
 @login_required
@@ -404,19 +434,47 @@ def add_group(request):
         return HttpResponseRedirect('/cg/manage/group')
     else:
         print "Sufficient information not present in the request to create a group"
-        return HttpResponse( "<p> Invalida Data </p>",content_type="application/html")
+        return HttpResponse( "<p> Invalid Data </p>",content_type="application/html")
         #return "<p> Invalida Data </p>"
 
 @login_required
 def attach_app_to_group(request,id):
-    application =  ApplicationBasicInfo.objects.get(request.appid)
-    mg = MyGroup.objects.get(id=id)
-    mg.application.add(application)
-    mg.save()
-    group = MyGroup.objects.get(id=id)
-    return HttpResponse(
-            json.dumps({'id': group.id, 'name': group.name, 'desc': group.description,'apps':group.application}),
-            content_type="application/json")
+    if 'tagname' in request.POST:
+        tagname = str(request.POST['tagname'])
+        tagdesc = request.POST['tagdesc']
+        tagid = request.POST['tagid']
+        appid = request.POST['appid']
+        print appid
+        application =  ApplicationBasicInfo.objects.get(id=appid)
+        mg = MyGroup.objects.get(id=id)
+        print "Application %s to be attached to the group %s with tagid %s and tagname %s " %(application.name,mg.name,tagid,tagname)
+        try:
+            gat = GroupApplicationTag(tagname=tagname,description=tagdesc,tagid=tagid,application=application,group=mg)
+            gat.save()
+        except IntegrityError as e:
+            print e.message
+            return HttpResponse( "<p> Invalid Data </p>",content_type="application/html")
+        success_data = """
+        <span>Your group application tag creation request is successful. Here is what you submitted:</span><br><br>
+        <strong>Name:</strong>""" + tagname + "<br>"
+        return HttpResponse(success_data,content_type="application/html")
+    else:
+        return HttpResponse( "<p> Invalid Data </p>",content_type="application/html")
+
+
+
+@login_required
+def application_grp_tag_detail(request):
+    print "Inside Group Application Tag details method"
+    if 'id' in request.GET:
+        grpid = request.GET['id']
+        gats = GroupApplicationTag.objects.filter(group=grpid)
+        print gats
+        html = render_to_string('ajaxgrouptemplate/group_application_tag_grid.html', { 'gats':gats}, context_instance=RequestContext(request))
+        return HttpResponse(html)
+    else:
+        return HttpResponse( "<p> Invalid Data </p>",content_type="application/html")
+
 
 @login_required
 def detach_app_from_group(request,id):

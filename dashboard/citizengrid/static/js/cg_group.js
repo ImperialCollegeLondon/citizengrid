@@ -4,8 +4,8 @@ $(function()
         cache: false,
         headers: { "X-CSRFToken": getCookie("csrftoken") }
     });
-              $("#groupModal").modal({ show: false})
-		$(document.body).on('click',".leavegrp >a, .editgrp >a, .delgrp >a .attachapp > a",function(e) {
+        $("#groupModal").modal({ show: false})
+		$(document.body).on('click',".leavegrp >a, .editgrp >a, .delgrp >a, .attachapp > a, .groupname > a",function(e) {
             console.log($(this).attr('type'))
             var type =$(this).attr("type")
             var id = $(this).attr("id")
@@ -25,6 +25,7 @@ $(function()
                     $(".modal-body #grpname").val(rowData['grpname'])
 
                     $(".modal-body #grpdesc").val(rowData['grpdesc'])
+                    $(".modal-body #grpid").val(id)
 
                     $("#applist").val(rowData.apps)
                     var html ="\<select name = \"apps[]\" id=\"appsgroup\" class=\"form-control\"  placeholder=\"Application\" multiple>"
@@ -62,22 +63,41 @@ $(function()
                 }
             }
             else if (type == 'attachapp') {
-
-                    e.preventDefault();
+                console.log("Inside attach app")
+                console.log($(this).attr("id") + "and type is" + $(this).attr("type"));
+                e.preventDefault();
 
                     var type = $(this).attr("type")
                     var id = $(this).attr("id")
-
+                    $(".modal-body #attach_grpid").val(id)
                     $.ajax({
-                        url: '/cg/manage/group/attach/',
+                        url: '/cg/manage/group/applist',
                         data: {
                             id: id
                         },
-                        type: "POST",
+                        type: "GET",
                         success: function (data) {
-                            $("#groups").html(data)
+                            $("#attach_app").html(data)
+                            $("#attach_app_list").multiselect()
                         }
                     });
+                $("#attachAppToGrpModal").modal('show')
+            }
+            else if (type == 'grouptagdetail'){
+                var grpid = $(this).attr("id")
+                console.log("Inside groupdetail ")
+                console.log("Calling application Detail tag function with group id" +grpid );
+                    $.ajax({
+                        url: '/cg/manage/group/applicationgrouptag',
+                        data: {
+                            id: grpid
+                        },
+                        type: "GET",
+                        success: function (data) {
+                            $("#attach_tag").html(data)
+                        }
+                    });
+
             }
             else if (type == 'delgrp')
             {
