@@ -1,7 +1,15 @@
 {% extends "base.html" %}
 
 {% block head %}
-
+<link rel="stylesheet" type="text/css" href="/css/bootstrap-multiselect.css" />
+<style>
+        i.green:before {
+            color: green;
+        }
+        i.red:before {
+            color: red;
+        }
+    </style>
 {% endblock %}
 
 {% block container-content %}
@@ -19,39 +27,46 @@
   <div class="col-md-12">
     <h3>CitizenGrid: Group Management</h3>
   </div>
+<div class="modal-footer">
+        <button type="button" class="btn btn-primary" id="group_join" data-toggle="modal" data-target="#groupjoinModal"> Join a Group</button>
+        <button type="button" class="btn btn-primary" id="group_create" data-toggle="modal" data-target="#groupcreateModal">Start a new Group</button>
 </div>
-<div class="row">
-  <div class="col-md-12">
-    <h4>Manage your groups for atom smashing!</h4>
-  </div>
-</div>
-<hr>
 
-<div id="oscred-info" class="row cred-info">
-  <div class="col-md-12">
-    <h3>Group Memberships</h3>
-    <hr style="width: 30%; align: left;"/>
+
+<hr>
+<div id="group-info" class="row group-info">
+    <div id="groups">
     {% if groups|length == 0 %}
-      <div class="alert alert-info" id="cloud-nocreds"><b>You do not have any group memberships at present.</b></div>
-      <table class="table table-striped" id="cloud-table" style="display: none;">
-        <thead><tr><th>Name</th><th>Description</th></tr></thead>
+      <div class="alert alert-info" id="group-nogroup"><b>You do not have any group memberships at present.</b></div>
+      <table class="table table-striped" id="group-table" style="display: none;">
+        <thead><tr><th>Name</th><th>Description</th><th> Group Role</th><th> Members</th></tr></thead>
         <tbody>
         </tbody>
       </table>
     {% else %}
-      <table class="table table-striped" id="cloud-table">
-        <thead><tr><th>Name</th><th>Description</th></tr></thead>
+      <table class="table table-striped " id="group-table">
+        <thead><tr><th>Group Name</th><th>Description</th><th> Group Role</th><th> Members</th></tr></thead>
         <tbody>
         {% for group in groups %}
           <tr>
-          	<td style="width: 220px;">{{ group.name }}</td> 
-          	<td style="width: 220px;">{{ group.description }}</td>
+          	<td style="width: 220px;"><div id="groupname" class="col-md-1 col-md-offset-1">{{ group.name }}</div></td>
+          	<td style="width: 220px;"><div id="groupdesc" class="col-md-8">{{ group.description }}</td>
+            <td style="width: 220px;"><div id="grouprole" class="col-md-1">{{ group.get_group_role_display }}</td>
+            <td style="width: 220px;"><div id="groupmembers" class="col-md-1">{{ group.user.all|length }}</td>
+
 			<td style="width: 100px;">
-		  	<div class="container"> 
+		  	<div class="container" id="groupfunction" class="col-md-1">
 		    	<div class="row">
-		    		<div class="delcreds col-md-1"><a href="javascript:void(0)" id="{{ cred.id }}" type="oscred" class="" title="edit image"><i class="glyphicon glyphicon-wrench"></i></a></div>
-		  			<div class="delcreds col-md-1"><a href="javascript:void(0)" id="{{ cred.id }}" type="oscred" class="" title="delete image"><i class="icon-trash icon-white"></i></a></div>
-		    	</div>
+                    {% if group.group_role == 'M'  %}
+		    		<div class="editgrp col-md-1"><a href="#groupModal" data-toggle="modal" id="{{ group.id }}" type="editgrp" class="" title="edit group"><i class="glyphicon glyphicon-wrench"></i></a></div>
+		  			<div class="leavegrp col-md-1"><a href="javascript:void(0)" id="{{ group.id }}" type="leavegrp" class="" title="leave group"><i class=" glyphicon glyphicon-plane"></i></a></div>
+                    <div class="attachapp col-md-1"><a href="#attachAppToGrpModal" data-toggle="modal" id="{{ group.id }}" type="attachapp" class="" title="attach app to group"><i class="icon-link icon-white"></i></a></div>
+		    	{% else %}
+                    <div class="editgrp col-md-1"><a href="#groupModal" data-toggle="modal" id="{{ group.id }}" type="editgrp" class="" title="edit group"><i class="glyphicon glyphicon-wrench"></i></a></div>
+		  			<div class="delgrp col-md-1"><a href="javascript:void(0)" id="{{ group.id }}" type="delgrp" class="" title="delete group"><i class="icon-trash icon-white"></i></a></div>
+                    <div class="attachapp col-md-1"><a href="#attachAppToGrpModal" data-toggle="modal" id="{{ group.id }}" type="attachapp" class="" title="attach app to group"><i class="icon-link icon-white"></i></a></div>
+		    	{% endif %}
+                </div>
 		  	</div>
 			</td>
           </tr>
@@ -59,173 +74,240 @@
         </tbody>
       </table>
     {% endif %}
-    <a href="#cloudModal" data-toggle="modal">Add new group</a>
-  </div>
-</div>
-
-
-<!-- Cloud Credential (Input Form) Modal -->
-<div class="modal fade md-centre" id="cloudModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+    </div>
+    <!-- Create Group modal window -->
+<div class="modal fade md-centre" id="groupcreateModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
   <div class="modal-dialog">
     <div class="modal-content">
       <div class="modal-header">
         <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-        <h4 class="modal-title" id="myModalLabel">Add Cloud Credentials</h4>
+        <h4 class="modal-title" id="myModalLabel">Create a Group</h4>
       </div>
       <div class="modal-body">
-        <form class="form-horizontal" data-async id="cloudForm" data-target="#cloudModal" action="/cg/manage/cred/cloud" method="POST">
+        <form class="form-horizontal" id ="groupCreateForm" data-target="#groupcreateModal" action="/cg/manage/group/create/" method="POST">
           <fieldset>
             <div class="form-group">
-              <label for="osCloud">Platform</label>
-              <select id="osCloud" class="form-control"  placeholder="Cloud Platform" name="cloud">
-                    <option value ="Private">OpenStack</option>
-					<option value="Public">Amazon EC2</option>
-                    <option value="CitizenGrid">CitizenGrid</option>
-              </select>
+              <label for="grpname">Name</label>
+              <input type="text" id="grpname" class="form-control" value="{% if form.grpname.value %}{{ form.grpname.value }}{% endif %}" placeholder="Name of Group" name="grpname">
             </div>
             <div class="form-group">
-              <label for="osAlias">Alias</label>
-              <input type="text" id="osAlias" class="form-control" value="{% if form.alias.value %}{{ form.alias.value }}{% endif %}" placeholder="Alias for these credentials" name="alias">
-            </div>
-            <div class="form-group">
-              <label for="osAccessKey">Access Key</label>
-              <input type="text" id="osAccessKey" class="form-control" value="{% if form.access_key.value %}{{ form.access_key.value }}{% endif %}" placeholder="Your account access key" name="access_key">
-            </div>
-            <div class="form-group">
-              <label for="osSecretKey">Secret Key</label>
-              <input type="text" id="osSecretKey" class="form-control" value="{% if form.secret_key.value %}{{ form.secret_key.value }}{% endif %}" placeholder="Your account secret key" name="secret_key">
-            </div>
-            <div class="form-group">
-              <label for="osEndpointUrl">Endpoint</label>
-              <input type="text" id="osEndpointUrl" class="form-control" value="{% if form.endpoint.value %}{{ form.endpoint.value }}{% endif %}" placeholder="URL for the OpenStack service" name="endpoint">
+              <label for="grpdesc">Description</label>
+              <input type="text" id="grpdesc" class="form-control" value="{% if form.grpdesc.value %}{{ form.grpdesc.value }}{% endif %}" placeholder="Group Description" name="grpdesc">
             </div>
             {% csrf_token %}
           </fieldset>
         </form>
       </div>
       <div class="modal-footer">
-        <button type="button" class="btn btn-default" id="cloudCredClose" data-dismiss="modal">Close</button>
-        <button type="button" class="btn btn-primary" id="cloudFormSubmit">Submit</button>
-        <button type="button" class="btn btn-primary" id="cloudCredOk" style="display: none;">OK</button>
+        <button type="button" class="btn btn-default" id="grpCreateFormClose" data-dismiss="modal">Close</button>
+        <button type="button" class="btn btn-primary" id="grpCreateFormSubmit">Submit</button>
+        <button type="button" class="btn btn-primary" id="grpFormOk" style="display: none;">OK</button>
       </div>
+
     </div><!-- /.modal-content -->
+    <div id="thanks"><p><a data-toggle="modal" href="#groupcreateModal" class="btn btn-primary btn-large"></a></p></div>
   </div><!-- /.modal-dialog -->
 </div><!-- /.modal -->
-<script type="text/javascript" src="/js/cg_delete.js"></script>
+
+
+  </div>
+</div>
+
+    <!-- Group modal window -->
+<div class="modal fade md-centre" id="groupjoinModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+        <h4 class="modal-title" id="myModalLabel">Available Groups</h4>
+      </div>
+      <div class="modal-body">
+        <form class="form-horizontal" data-async id="groupjoinForm" data-target="#groupjoinModal" action="/cg/manage/group/join/" method="POST">
+          <fieldset>
+            <div class="form-group">
+              <label class="col-xs-3 control-label" for="joingroup">Group</label>
+                <div id="select_group_data"></div>
+              </div>
+            {% csrf_token %}
+          </fieldset>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" id="grpFormClose" data-dismiss="modal">Close</button>
+        <button type="button" class="btn btn-primary" id="grpJoinFormSubmit">Join</button>
+        <button type="button" class="btn btn-primary" id="grpFormOk" style="display: none;">OK</button>
+      </div>
+    </div><!-- /.modal-content -->
+
+  </div><!-- /.modal-dialog -->
+</div><!-- /.modal -->
+
+    <!-- Edit Group modal window -->
+<div class="modal fade md-centre" id="groupEditModal" tabindex="-1" role="dialog" aria-labelledby="editModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+        <h4 class="modal-title" id="editModalLabel">Edit Group</h4>
+      </div>
+      <div class="modal-body">
+        <form class="form-horizontal" data-async id="groupEditForm" data-target="#groupEditModal" action="/cg/manage/group/edit/" method="POST">
+          <fieldset>
+            <div class="form-group">
+              <label for="grpname">Name</label>
+              <input type="text" id="grpname" class="form-control" value="{% if form.grpname.value %}{{ form.grpname.value }}{% endif %}" placeholder="Name of Group" name="grpname">
+            </div>
+            <div class="form-group">
+              <label for="grpdesc">Description</label>
+              <input type="text" id="grpdesc" class="form-control" value="{% if form.grpdesc.value %}{{ form.grpdesc.value }}{% endif %}" placeholder="Group Description" name="grpdesc">
+            </div>
+            <div class="form-group" id="attached_apps">
+            <label for="applist">Edit Group</label>
+            <div id="applist"><!-- Ajax content to go here  --></div>
+            </div>
+            {% csrf_token %}
+          </fieldset>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" id="grpFormClose" data-dismiss="modal">Close</button>
+        <button type="button" class="btn btn-primary" id="grpJoinFormSubmit">Submit</button>
+        <button type="button" class="btn btn-primary" id="grpFormOk" style="display: none;">OK</button>
+      </div>
+    </div><!-- /.modal-content -->
+
+  </div><!-- /.modal-dialog -->
+</div><!-- /.modal -->
+    <!-- Attach applications to the  Group modal window -->
+<div class="modal fade md-centre" id="attachAppToGrpModal" tabindex="-1" role="dialog" aria-labelledby="attach_appModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+        <h4 class="modal-title" id="attach_appModalLabel">Attach Applications to  Group</h4>
+      </div>
+      <div class="modal-body">
+        <form class="form-horizontal" data-async id="attachAppGrpForm" data-target="#attachAppToGrpModal" action="/cg/manage/group/attachapp/" method="POST">
+          <fieldset>
+            <div class="form-group" id="attach_app_to_grp">
+            <label for="attach_app_to_grp">Attach applications to the group</label>
+             <div class="container">
+                 <div class="row">
+                     <div id="from_app" class="col-md-4">
+                        <select class="form-control" name="from_app" id="" multiple>
+
+                            <option name="a">Test</option>
+                            <option name="a">Rest</option>
+                        </select>
+                     </div>
+                     <div id="transfer_icon" class="col-md-2">
+                         <div class="container">
+                             <div class="row">
+                             <button type="button" class="btn btn-lg btn-default">
+                                <span class="glyphicon glyphicon-forward" style="color:blue"><i class="green"></i></span>
+                            </button>
+                             </div>
+                             <br>
+                             <div class="row">
+                             <button type="button" class="btn btn-lg btn-default">
+                                <span class="glyphicon glyphicon-backward" style="color:blue"><i class="green"></i></span>
+                            </button>
+                             </div>
+                         </div>
+                     </div>
+                     <div id="to_app" class="col-md-4">
+
+                            <select class="form-control" name="to_app" id="" multiple>
+
+                            <option name="a">Test</option>
+                            <option name="a">Rest</option>
+                        </select>
+                     </div>
+                 </div>
+             </div>
+            </div>
+            {% csrf_token %}
+          </fieldset>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" id="grpFormClose" data-dismiss="modal">Close</button>
+        <button type="button" class="btn btn-primary" id="grpJoinFormSubmit">Submit</button>
+        <button type="button" class="btn btn-primary" id="grpFormOk" style="display: none;">OK</button>
+      </div>
+    </div><!-- /.modal-content -->
+
+  </div><!-- /.modal-dialog -->
+</div><!-- /.modal -->
+  </div>
+<script type="text/javascript" src="/js/bootstrap-multiselect.js"></script>
+<script type="text/javascript" src="/js/cg_group.js"></script>
 <script type="text/javascript">
-var cloudCredForm = null;
-var new_cloud = null;
-var new_alias = null;
-var new_access_key = null;
-var new_endpoint = null;
-var id=null;
+$(document).ready(function(e){
+   $(document.body).on('click',"#group_join",function(e) {
+    console.log("Get all group data");
+       var groupdata = ""
+       $.ajax({
+           url : '/cg/manage/groups',
+           type: 'GET',
+           success: function(data){
+               groupdata = data
+               console.log(groupdata);
+               $("#select_group_data").html(groupdata)
+                $('#joingroup').multiselect();
 
-$('#cloudFormSubmit').on('click', function() {
-	$('#cloudForm').submit();
-});
+           },
+           processData: false,
+           contentType: false
 
+       });
+	$("#groupjoinModal").modal('show')
 
-$('#cloudCredOk').on('click', function() {
-	if($('#cloudCredOk').is(":visible")) {
-		// If OK button is visible, we accept the click event
-		// Close the modal, replace the HTML content and re-activate
-		// the buttons.
+	});
+    $('#grpCreateFormSubmit').click(function(e){
+        //e.preventDefault();
+        console.log("Create Group")
+        console.log($('#grpdesc').val())
+        console.log($('#groupCreateForm').serialize())
+        var name = $('#grpname').val()
+        var desc = $('#grpdesc').val()
+        console.log(name)
+        $.ajax({
+           url : '/cg/manage/group/create/',
+           type: 'POST',
+           data: {
+                grpname: name,
+                grpdesc: desc
+            },
+           success: function(msg){
+               $("#thanks").html(msg)
+               $("#groupcreateModal").modal('hide')
 
-		var rowCount = $('#cloud-table tbody').children().length;
-		if(rowCount > 0) {
-
-			$('#cloud-table tr:last').after('<tr><td style="width: 220px;">' + new_cloud + '</td><td style="width: 220px;">' + new_alias + '</td><td style="width: 300px;">' + new_access_key + '</td><td>' + new_endpoint + '</td>' +
-			'<td style="width: 100px;"><div class="container"> <div class="row"><div class="editcreds col-md-1"><a href="javascript:void(0)" id="'+ id+
-			' " type="oscred" class="" title="edit image"><i class="glyphicon glyphicon-wrench"></i></a></div><div class="delcreds col-md-1"><a href="javascript:void(0)" id="'+ id +
-			' " type="oscred" class="" title="delete image"><i class="icon-trash icon-white"></i></a></div></div></div>' +
-			' </td>'+  '</tr>');	
-		}
-		else {
-			$('#cloud-table tbody').html('<tr><td style="width: 220px;">' + new_cloud + '</td><td style="width: 220px;">' + new_alias + '</td><td style="width: 300px;">' + new_access_key + '</td><td>' + new_endpoint + '</td>' +
-					'<td style="width: 100px;"><div class="container"> <div class="row"><div class="editcreds col-md-1"><a href="javascript:void(0)" id="'+ id+
-					' " type="oscred" class="" title="edit image"><i class="glyphicon glyphicon-wrench"></i></a></div><div class="delcreds col-md-1"><a href="javascript:void(0)" id="'+ id +
-					' " type="oscred" class="" title="delete image"><i class="icon-trash icon-white"></i></a></div></div></div>' +
-					' </td>'+  '</tr>');	
-			$('#cloud-nocreds').hide();
-			$('#cloud-table').show();
-		}
-		
-		$('#cloudModal').modal("hide");
-		if(cloudCredForm != null) {
-			$('#cloudModal .modal-body').html(cloudCredForm);
-		}
-		$('#cloudCredOk').hide();
-		$('#cloudCredClose').show();
-		$('#cloudFormSubmit').show();
-		
-		
-		
-	}
-});
-
-$(document).on("submit", 'form[data-async]', function(e) {
-	var form = $(this);
-    var target = form.attr('action');
-    
-    if(console.log) {
-    	console.log('Received form submission for target <' + target + '>');
-    }
-    
-    $.ajax({
-        id:form.attr('id'),
-        type: form.attr('method'),
-        url: form.attr('action'),
-        data: form.serialize()
-      }).done(function(response) {
-    	  if(console.log) {
-    		  console.log('Data returned from form processing <' + response + '>');
-    	  }
-    	  
-    	  //Before updating the HTML in the modal, store the values
-    	  // to update the table...
-          new_cloud = $('#osCloud').val();
-		  new_alias = $('#osAlias').val();
-		  new_access_key = $('#osAccessKey').val();
-		  new_endpoint = $('#osEndpointUrl').val();
-		  console.log($(response).find("#hide").attr("value"))
-		  id = $(response).find("#hide").attr("value")
-
-          if(new_cloud == "Public"){
-           new_cloud = "Amazon EC2" ;
+           },
+           error: function(){
+                alert("failure");
             }
-          else  if(new_cloud == "Private"){
-             new_cloud = "OpenStack" ;
-            }
-          else if(new_cloud == "CitizenGrid"){
-            new_cloud = "CitizenGrid";
-            }
-          else {
-             new_cloud = null
-            };
 
-    	  
-    	  // Update the HTML in the modal box
-    	  // Replace the HTML in the form with the response data
-    	  if(cloudCredForm == null) {
-    		  cloudCredForm = $('#cloudModal .modal-body').html();
-    	  }
-    	  $('#cloudModal .modal-body').html(response);
-    	  
-    	  // If the form is still present in the modal box, leave the buttons. 
-    	  // If it isn't, we have a message response, switch buttons to single OK.
-    	  if($('#cloudForm').length == 0) {
-    		  $('#cloudCredClose').hide();
-    		  $('#cloudFormSubmit').hide();
-    		  $('#cloudCredOk').show();
-    	  }
-      }).fail(function() {
-        alert("Error on the input")
-        // Optionally alert the user of an error here...
-      });
-    
-    e.preventDefault();
+       });
+       $("#groupcreateModal").modal('hide'); //hide popup
+    });
+    $('#grpJoinFormSubmit').click(function(e){
+        console.log("Entering Join Group function")
+        var ids = $('#joingroup').val()
+        console.log("ids send at " + ids)
+        $.ajax({
+           url : '/cg/manage/group/join/',
+           type: 'POST',
+           data: {
+                ids: ids
+            },
+           error: function(){
+                alert("failure");
+            }
 
+       });
+       $("#groupjoinModal").modal('hide'); //hide popup
+    });
 });
 </script>
-
 {% endblock %}

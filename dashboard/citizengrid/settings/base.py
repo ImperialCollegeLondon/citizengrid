@@ -170,7 +170,7 @@ INSTALLED_APPS = (
     'password_reset',
     'django.contrib.admindocs',
     'citizengrid',
-    #'south',
+    'south',
     'django_nyt',
     'mptt',
     'sekizai',
