@@ -11,27 +11,29 @@ from django.core.files.storage import FileSystemStorage
 from django.contrib.formtools.wizard.views import SessionWizardView
 from django.http import HttpResponse
 from Crypto.Cipher import AES
+from django.shortcuts import redirect
 import simplejson
 from rest_framework import status
 from django.http.response import HttpResponseNotAllowed, HttpResponseNotFound,\
     HttpResponseForbidden, HttpResponseRedirect
 from django.forms.util import ErrorList
-
+from django.template.loader import render_to_string
 from citizengrid.models import UserInfo, ApplicationBasicInfo, ApplicationServerInfo, ApplicationClientInfo, Branch, Category, SubCategory, \
-    UserCloudCredentials, UsersApplications
+    UserCloudCredentials
 from citizengrid.models import ApplicationEC2Images, ApplicationOpenstackImages
 from citizengrid.forms import ApplicationBasicInfoForm, ApplicationServerInfoForm, ApplicationClientInfoForm, CloudCredentialsForm, CloudImageForm, \
     UpdateUserCreationForm,LocalImageForm
-from citizengrid.models import ApplicationFile
+from citizengrid.models import ApplicationFile,MyGroup
 from citizengrid import DATA_K
 from citizengrid.forms import ExtendedUserCreationForm
 from django.contrib.auth.models import User
 import citizengrid.view_utils as view_utils
 from citizengrid.view_utils import application_provider_view_data
+from django.template import loader, Context
 import utils
 import view_utils
 import views
-from django.db import transaction
+from django.db import IntegrityError, transaction
 from visicon import gen_icon
 
 
@@ -298,13 +300,134 @@ def manage_credentials(request):
 
 @login_required
 def manage_groups(request):
-    groups = []
-    print 'in manage groups'
+    print " Inside manage groups."
+    groups = MyGroup.objects.select_related().all().filter(user=request.user)
+
+    print 'in manage groups with groups retrieved ' + str(len(groups))
 
     role = view_utils.return_role(request)
-
     return render_to_response('cg_manage_groups.html', {'next':'/', 'groups':groups,'role':role}, context_instance=RequestContext(request))
 
+@login_required
+def groups(request):
+    print " All groups "
+    groups = MyGroup.objects.select_related().exclude(user=request.user)
+    select_data = """ <select name =groups[] id="joingroup" class="form-control"  placeholder="Groups" name="group" multiple> """
+    for mg in groups :
+        select_data = select_data + "<option value=\"" + str(mg.id) + "\">" + mg.name + "</option>"
+    select_data = select_data + """</select> """
+    print select_data
+    return HttpResponse(select_data,content_type="application/html")
+
+
+
+@login_required
+def detail_group(request,id):
+    group = MyGroup.objects.select_related().get(id=id)
+    all_apps = []
+    all_applications = ApplicationBasicInfo.objects.all()
+    for a in all_applications:
+        app = {}
+        app['id'] = a.id
+        app['desc'] = a.description
+        app['name'] = a.name
+        all_apps.append(app)
+    return HttpResponse(
+            json.dumps({'id': group.id, 'grpname': group.name, 'grpdesc': group.description,'apps':all_apps}),
+            content_type="application/json")
+
+@login_required
+def edit_group(request,id):
+    with transaction.atomic:
+        group = MyGroup(name=request.name,description=request.description,isAdmin=True,isParticipant=False)
+        group.save()
+        apps = ApplicationBasicInfo.objects.filter(id__in = request.getlist('appid'))
+        group.application = apps
+        group.save()
+    return detail_group(id)
+
+
+@login_required
+def leave_group(request,id):
+    print "Inside leave group routine"
+    groups = MyGroup.objects.select_related().filter(user=request.user).get(id=id)
+    groups.user.remove(request.user)
+    groups.save()
+    groups = MyGroup.objects.select_related().all().filter(user=request.user)
+    role = view_utils.return_role(request)
+    html =  render_to_string('ajaxgrouptemplate/group_delete_template.html', { 'groups':groups,'role':role}, context_instance=RequestContext(request))
+    return HttpResponse(html)
+
+@login_required
+def delete_group(request,id):
+    print "Inside delete group"
+    MyGroup.objects.filter(id=id).delete()
+    groups = MyGroup.objects.select_related().all().filter(user=request.user)
+    role = view_utils.return_role(request)
+    html =  render_to_string('ajaxgrouptemplate/group_delete_template.html', { 'groups':groups,'role':role}, context_instance=RequestContext(request))
+    return HttpResponse(html)
+
+@login_required
+def join_group(request):
+    print "Inside Join group"
+    print 'ids[]' in request.POST
+    ids = request.POST.getlist('ids[]')
+    int_ids = [int(str(i)) for i in ids]
+    try:
+        with transaction.atomic():
+            for i in int_ids:
+                group = MyGroup.objects.select_related().get(id=i)
+                group.user.add(request.user)
+                group.save()
+    except IntegrityError as e:
+        print e.message
+    return manage_groups(request)
+
+@login_required
+def add_group(request):
+    print  'grpname' in request.POST
+    print request.POST
+    if 'grpname' in request.POST:
+        try:
+
+            #with transaction.atomic:
+                mg = MyGroup(name=str(request.POST['grpname']),description=str(request.POST['grpdesc']),group_role='O')
+                mg.save()
+                mg.user.add(request.user)
+        except IntegrityError as e:
+            print e.message
+
+        success_data = """
+        <span>Your group creation request is successful. Here is what you submitted:</span><br><br>
+        <strong>Name:</strong>""" + str(request.POST['grpname']) + "<br>"
+        #return HttpResponse( success_data,content_type="application/html")
+        return HttpResponseRedirect('/cg/manage/group')
+    else:
+        print "Sufficient information not present in the request to create a group"
+        return HttpResponse( "<p> Invalida Data </p>",content_type="application/html")
+        #return "<p> Invalida Data </p>"
+
+@login_required
+def attach_app_to_group(request,id):
+    application =  ApplicationBasicInfo.objects.get(request.appid)
+    mg = MyGroup.objects.get(id=id)
+    mg.application.add(application)
+    mg.save()
+    group = MyGroup.objects.get(id=id)
+    return HttpResponse(
+            json.dumps({'id': group.id, 'name': group.name, 'desc': group.description,'apps':group.application}),
+            content_type="application/json")
+
+@login_required
+def detach_app_from_group(request,id):
+    application =  ApplicationBasicInfo.objects.get(request.appid)
+    mg = MyGroup.objects.get(id=id)
+    mg.application.remove(application)
+    mg.save()
+    group = MyGroup.objects.get(id=id)
+    return HttpResponse(
+            json.dumps({'id': group.id, 'name': group.name, 'desc': group.description,'apps':group.application}),
+            content_type="application/json")
 
 # Called via an AJAX call from a modal on the credential management page
 # This view returns only the HTML content for the modal itself. The main
@@ -707,7 +830,6 @@ def wrapped_wizard_view(request):
 #===============================================================================
 @login_required
 def getTableData(request):
-    print "In getTableData"
     data = ApplicationBasicInfo.objects.all().prefetch_related("branch","category","subcategory").filter(public=1).order_by('id')
     app_list =[]
     for d in data:
@@ -724,30 +846,6 @@ def getTableData(request):
 
     jsonData ='{"aaData":'+ json.dumps(app_list) + ', "iTotalRecords": 10, "sEcho": 3, "iTotalDisplayRecords": 10}'
     return HttpResponse(jsonData, content_type="application/javascript")
-
-
-@login_required
-def getUserApps(request):
-    print "In getUserApps"
-    # Get all users applications to be displayed in the application list
-    #data = UsersApplications.objects.filter(user=request.user)
-    data = ApplicationBasicInfo.objects.filter(usersapplications__user=request.user).prefetch_related("branch","category","subcategory")
-    app_list =[]
-    for d in data:
-        ls={}
-        ls['name']="<span class='demo hover' value='" + str(d.id) + "'>"+ d.name +"</span>"
-        ls['description']= d.description
-        ls['branch'] = [b.name for b in d.branch.all().order_by('id')]
-        ls['category'] = [c.name for c in d.category.all().order_by('id')]
-        ls['subcategory'] = [s.name for s in d.subcategory.all().order_by('id')]
-        #ls['apphost'] = dict(ApplicationServerInfo.SERVER_APP_HOST_CHOICES).get(str(serverinfo[0]['apphost']))
-        ls['keywords'] = d.keywords
-        ls['owner'] = d.owner.username
-        app_list.append(ls)
-
-    jsonData ='{"aaData":'+ json.dumps(app_list) + ', "iTotalRecords": 10, "sEcho": 3, "iTotalDisplayRecords": 10}'
-    return HttpResponse(jsonData, content_type="application/javascript")
-
 
 #===============================================================================
 #     uploadnew : Upload Server or client images
