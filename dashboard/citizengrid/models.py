@@ -215,7 +215,6 @@ class CloudInstancesOpenstack(models.Model):
     image_type = models.CharField(max_length=1, choices=IMAGE_TYPE, default='C')
 
 class UsersApplications(models.Model):
-
     user =  models.ForeignKey(User)
     application = models.ForeignKey(ApplicationBasicInfo)
 
