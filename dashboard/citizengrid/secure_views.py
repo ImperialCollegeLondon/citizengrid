@@ -19,7 +19,7 @@ from django.http.response import HttpResponseNotAllowed, HttpResponseNotFound,\
 from django.forms.util import ErrorList
 from django.template.loader import render_to_string
 from citizengrid.models import UserInfo, ApplicationBasicInfo, ApplicationServerInfo, ApplicationClientInfo, Branch, Category, SubCategory, \
-    UserCloudCredentials
+    UserCloudCredentials,UserApplications
 from citizengrid.models import ApplicationEC2Images, ApplicationOpenstackImages
 from citizengrid.forms import ApplicationBasicInfoForm, ApplicationServerInfoForm, ApplicationClientInfoForm, CloudCredentialsForm, CloudImageForm, \
     UpdateUserCreationForm,LocalImageForm
@@ -846,6 +846,32 @@ def getTableData(request):
 
     jsonData ='{"aaData":'+ json.dumps(app_list) + ', "iTotalRecords": 10, "sEcho": 3, "iTotalDisplayRecords": 10}'
     return HttpResponse(jsonData, content_type="application/javascript")
+
+
+@login_required
+def getUserApps(request):
+    print "In getUserApps"
+    # Get all users applications to be displayed in the application list
+    #data = UsersApplications.objects.filter(user=request.user)
+    data = ApplicationBasicInfo.objects.filter(usersapplications__user=request.user).prefetch_related("branch","category","subcategory")
+    app_list =[]
+    for d in data:
+        ls={}
+        ls['name']="<span class='demo hover' value='" + str(d.id) + "'>"+ d.name +"</span>"
+        ls['description']= d.description
+        ls['branch'] = [b.name for b in d.branch.all().order_by('id')]
+        ls['category'] = [c.name for c in d.category.all().order_by('id')]
+        ls['subcategory'] = [s.name for s in d.subcategory.all().order_by('id')]
+        #ls['apphost'] = dict(ApplicationServerInfo.SERVER_APP_HOST_CHOICES).get(str(serverinfo[0]['apphost']))
+        ls['keywords'] = d.keywords
+        ls['owner'] = d.owner.username
+        app_list.append(ls)
+
+    jsonData ='{"aaData":'+ json.dumps(app_list) + ', "iTotalRecords": 10, "sEcho": 3, "iTotalDisplayRecords": 10}'
+    return HttpResponse(jsonData, content_type="application/javascript")
+
+
+
 
 #===============================================================================
 #     uploadnew : Upload Server or client images
