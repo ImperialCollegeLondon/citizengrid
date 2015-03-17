@@ -72,7 +72,11 @@ def launchapp(request, appid, launchtype):
     print "Request to launch app with ID <" + appid + "> and launch type <" + launchtype + ">"
     print "requesting user is " + str(request.user.id)
     appObject = ApplicationBasicInfo.objects.get(id=appid)
- 
+
+    #if appid == <the id of vams>:
+    #   Generate context iso
+    #    from subprocess import call
+    #    call([], executable=settings.ISO_GENERATOR_EXE)
     
     try:
         rec = UsersApplications.objects.get(user=request.user,application=appObject)   
