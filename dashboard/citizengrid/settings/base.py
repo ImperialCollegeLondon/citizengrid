@@ -18,7 +18,7 @@ def generate_secret_key(key_file):
 
 PROJECT_ROOT = os.path.join(os.path.realpath(os.path.dirname(__file__)), '..')
 
-DEBUG = False
+DEBUG = True
 TEMPLATE_DEBUG = DEBUG
 
 ALLOWED_HOSTS = ['127.0.0.1','localhost','cyberlab.doc.ic.ac.uk'] # Change to IP address and domain name in production

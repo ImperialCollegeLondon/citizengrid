@@ -72,9 +72,16 @@ def launchapp(request, appid, launchtype):
     print "Request to launch app with ID <" + appid + "> and launch type <" + launchtype + ">"
     print "requesting user is " + str(request.user.id)
     appObject = ApplicationBasicInfo.objects.get(id=appid)
-    rec = UsersApplications(user=request.user,application=appObject)
+ 
+    
+    try:
+        rec = UsersApplications.objects.get(user=request.user,application=appObject)   
+        rec.run_count = rec.run_count + 1   
+        print "Updated record to UsersApplications"   
+    except UsersApplications.DoesNotExist:
+        rec = UsersApplications(user=request.user,application=appObject)          
+        print "Inserted new record to UsersApplications"   
     rec.save()
-    print "Saved record to UsersApplications"    
     # removed owner_id=request.user as any user can launch the application
     #app_files = ApplicationFile.objects.filter(owner_id=request.user, file_type='S', application_id=appid)
     app_files = ApplicationFile.objects.filter( file_type='S', application_id=appid,image_type='C')
