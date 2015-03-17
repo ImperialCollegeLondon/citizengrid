@@ -217,4 +217,7 @@ class CloudInstancesOpenstack(models.Model):
 class UsersApplications(models.Model):
     user =  models.ForeignKey(User)
     application = models.ForeignKey(ApplicationBasicInfo)
-
+    creation_time = models.DateTimeField(auto_now_add=True)
+    run_count = models.IntegerField(default=1) 
+    def __unicode__(self):
+        return self.application

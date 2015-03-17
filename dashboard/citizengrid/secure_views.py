@@ -691,7 +691,9 @@ def get_cloud_credentials(request):
     """
 
     url = request.body
-    print 'Received a request to get credentials for URL: ' + url
+    #url = url.lstrip()
+    
+    print 'Received a request to get credentials:' + url
 
     creds = UserCloudCredentials.objects.filter(user_id=request.user, endpoint=url)
 
