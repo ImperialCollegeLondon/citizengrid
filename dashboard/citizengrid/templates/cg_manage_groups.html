@@ -49,10 +49,10 @@
         <tbody>
         {% for group in groups %}
           <tr>
-          	<td style="width: 220px;"><div id="groupname" class="col-md-1 col-md-offset-1">{{ group.name }}</div></td>
-          	<td style="width: 220px;"><div id="groupdesc" class="col-md-8">{{ group.description }}</td>
-            <td style="width: 220px;"><div id="grouprole" class="col-md-1">{{ group.get_group_role_display }}</td>
-            <td style="width: 220px;"><div id="groupmembers" class="col-md-1">{{ group.user.all|length }}</td>
+          	<td style="width: 220px;"><div id="groupname" class="col-md-1 col-md-offset-1 groupname"><a id="{{ group.id }}" type ="grouptagdetail" class="" href="javascript:void(0)" title="Application Group detail">{{ group.name }}</a><br><div id="attach_tag"></div></div></td>
+          	<td style="width: 220px;"><div id="groupdesc" class="col-md-8">{{ group.description }}</div></td>
+            <td style="width: 220px;"><div id="grouprole" class="col-md-1">{{ group.get_group_role_display }}</div></td>
+            <td style="width: 220px;"><div id="groupmembers" class="col-md-1">{{ group.user.all|length }}</div></td>
 
 			<td style="width: 100px;">
 		  	<div class="container" id="groupfunction" class="col-md-1">
@@ -155,23 +155,26 @@
           <fieldset>
             <div class="form-group">
               <label for="grpname">Name</label>
-              <input type="text" id="grpname" class="form-control" value="{% if form.grpname.value %}{{ form.grpname.value }}{% endif %}" placeholder="Name of Group" name="grpname">
+              <input type="text" id="editgrpname" class="form-control" value="{% if form.editgrpname.value %}{{ form.editgrpname.value }}{% endif %}" placeholder="Name of Group" name="editgrpname">
             </div>
             <div class="form-group">
               <label for="grpdesc">Description</label>
-              <input type="text" id="grpdesc" class="form-control" value="{% if form.grpdesc.value %}{{ form.grpdesc.value }}{% endif %}" placeholder="Group Description" name="grpdesc">
+              <input type="text" id="editgrpdesc" class="form-control" value="{% if form.editgrpdesc.value %}{{ form.editgrpdesc.value }}{% endif %}" placeholder="Group Description" name="editgrpdesc">
             </div>
-            <div class="form-group" id="attached_apps">
-            <label for="applist">Edit Group</label>
-            <div id="applist"><!-- Ajax content to go here  --></div>
-            </div>
+              <div>
+                  <input type="hidden" id="grpid" name="grpid" value="{% if form.grpid.value %}{{ form.grpid.value }}{% endif %}">
+              </div>
+            <!--<div class="form-group" id="attached_apps">-->
+            <!--<label for="applist">Edit Group</label>-->
+            <!--<div id="applist">&lt;!&ndash; Ajax content to go here  &ndash;&gt;</div>-->
+            <!--</div>-->
             {% csrf_token %}
           </fieldset>
         </form>
       </div>
       <div class="modal-footer">
         <button type="button" class="btn btn-default" id="grpFormClose" data-dismiss="modal">Close</button>
-        <button type="button" class="btn btn-primary" id="grpJoinFormSubmit">Submit</button>
+        <button type="button" class="btn btn-primary" id="grpEditFormSubmit">Submit</button>
         <button type="button" class="btn btn-primary" id="grpFormOk" style="display: none;">OK</button>
       </div>
     </div><!-- /.modal-content -->
@@ -190,41 +193,26 @@
         <form class="form-horizontal" data-async id="attachAppGrpForm" data-target="#attachAppToGrpModal" action="/cg/manage/group/attachapp/" method="POST">
           <fieldset>
             <div class="form-group" id="attach_app_to_grp">
-            <label for="attach_app_to_grp">Attach applications to the group</label>
-             <div class="container">
-                 <div class="row">
-                     <div id="from_app" class="col-md-4">
-                        <select class="form-control" name="from_app" id="" multiple>
-
-                            <option name="a">Test</option>
-                            <option name="a">Rest</option>
-                        </select>
-                     </div>
-                     <div id="transfer_icon" class="col-md-2">
-                         <div class="container">
-                             <div class="row">
-                             <button type="button" class="btn btn-lg btn-default">
-                                <span class="glyphicon glyphicon-forward" style="color:blue"><i class="green"></i></span>
-                            </button>
-                             </div>
-                             <br>
-                             <div class="row">
-                             <button type="button" class="btn btn-lg btn-default">
-                                <span class="glyphicon glyphicon-backward" style="color:blue"><i class="green"></i></span>
-                            </button>
-                             </div>
-                         </div>
-                     </div>
-                     <div id="to_app" class="col-md-4">
-
-                            <select class="form-control" name="to_app" id="" multiple>
-
-                            <option name="a">Test</option>
-                            <option name="a">Rest</option>
-                        </select>
-                     </div>
-                 </div>
-             </div>
+            <label for="attach_app_to_grp"></label>
+                <div class="form-group">
+                    <label for="tagname">Application Tag Name</label>
+                    <input type="text" id="tagname" class="form-control" value="{% if form.tagname.value %}{{ form.tagname.value }}{% endif %}" placeholder="Name of Group" name="tagname">
+                </div>
+                <div class="form-group">
+                    <label for="tagid">Application Tag ID</label>
+                    <input type="text" id="tagid" class="form-control" value="{% if form.tagid.value %}{{ form.tagid.value }}{% endif %}" placeholder="Name of Group" name="tagid">
+                </div>
+               <div class="form-group">
+                    <label for="tagdesc">Application Tag Description</label>
+                    <input type="text" id="tagdesc" class="form-control" value="{% if form.tagdesc.value %}{{ form.tagdesc.value }}{% endif %}" placeholder="Name of Group" name="tagdesc">
+               </div>
+                <div class="form-group" id="attached_apps">
+                    <label for="attach_app">Attach Applications</label>
+                    <div id="attach_app"><!-- Ajax content to go here  --></div>
+                </div>
+                <div>
+                  <input type="hidden" id="attach_grpid" name="attach_grpid" value="{% if form.attach_grpid.value %}{{ form.attach_grpid.value }}{% endif %}">
+                </div>
             </div>
             {% csrf_token %}
           </fieldset>
@@ -232,7 +220,7 @@
       </div>
       <div class="modal-footer">
         <button type="button" class="btn btn-default" id="grpFormClose" data-dismiss="modal">Close</button>
-        <button type="button" class="btn btn-primary" id="grpJoinFormSubmit">Submit</button>
+        <button type="button" class="btn btn-primary" id="grpAttachFormSubmit">Submit</button>
         <button type="button" class="btn btn-primary" id="grpFormOk" style="display: none;">OK</button>
       </div>
     </div><!-- /.modal-content -->
@@ -290,6 +278,74 @@ $(document).ready(function(e){
 
        });
        $("#groupcreateModal").modal('hide'); //hide popup
+    });
+   $('#grpEditFormSubmit').click(function(e){
+        e.preventDefault();
+        console.log("Editing Group")
+        var name = $(".modal-body #editgrpname").val()
+        var desc = $('#editgrpdesc').val()
+       console.log(desc)
+       console.log(name)
+       var grp_id = $('#grpid').val()
+        console.log(grp_id)
+        $.ajax({
+           url : '/cg/manage/group/edit/'+grp_id,
+           type: 'POST',
+           data: {
+                grpname: name,
+                grpdesc: desc
+            },
+            success: function(msg){
+              // $("#thanks").html(msg)
+               $("#groupEditModal").modal('hide')
+
+           },
+           error: function(){
+                alert("failure");
+            }
+
+       });
+       $("#groupEditModal").modal('hide'); //hide popup
+    });
+    $('#grpAttachFormSubmit').click(function(e){
+        //e.preventDefault();
+        console.log("posting attach form ")
+        console.log($('#attachAppGrpForm').serialize())
+        var tagname = $('#tagname').val()
+        var tagdesc = $('#tagdesc').val()
+        var tagid = $('#tagid').val()
+        var appid = $('#attach_app_list').val()
+        var grpid = $("#attach_grpid").val()
+        console.log("The groupid is" + grpid)
+        if(appid != '0'){
+        $.ajax({
+           url : '/cg/manage/group/attachapptogrp/' +grpid,
+           type: 'POST',
+           data: {
+                tagname: tagname,
+                tagdesc: tagdesc,
+                tagid: tagid,
+                appid : appid
+            },
+           success: function(msg){
+               //$("#thanks").html(msg)
+               alert(msg)
+               $("#attachAppToGrpModal").modal('hide')
+
+           },
+           error: function(){
+                alert("failure");
+            }
+
+       });
+       $("#attachAppToGrpModal").modal('hide'); //hide popup
+        }else{
+            alert("You have to associate a valid application before submitting!!");
+            $("#attachAppToGrpModal").modal('show');
+            return false;
+
+        }
+
     });
     $('#grpJoinFormSubmit').click(function(e){
         console.log("Entering Join Group function")

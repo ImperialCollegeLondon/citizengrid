@@ -90,13 +90,13 @@ class MyGroup(models.Model):
     def __unicode__(self):
         return self.name
 
-class AppTeam(models.Model):
-    name = models.CharField(max_length=128)
+class GroupApplicationTag(models.Model):
+    tagname = models.CharField(max_length=128)
     description = models.TextField()
     creation_time = models.DateTimeField(auto_now_add=True)
     group = models.ForeignKey(MyGroup,null=True)
     application = models.ForeignKey(ApplicationBasicInfo,null=True)
-    tag = models.CharField(max_length=128)
+    tagid = models.CharField(max_length=128)
 
 
 
