@@ -136,7 +136,7 @@
                             <img id="cloud-credentials-loading" class="loading" src="/img/loading.gif">
                             <select type="text" id="selectTags" class="form-control" value="" placeholder="" name="tags">
                                 <option value="global">Global</option>
-                                <option value="none">none</option>
+                                <option value="none">None</option>
                            </select>
                         </div>
 
@@ -172,6 +172,13 @@
 
         <div id="launchtype" data-launchtype="vbox">Launch type: <b>Local (VirtualBox)</b></div>
       </div>
+      <div class="form-group">
+          <label for="selectTags">Application tags</label>
+          <select type="text" id="selectTags" class="form-control" value="" placeholder="" name="tags">
+          <option value="global">Global</option>
+          <option value="none">None</option>
+          </select>
+      </div>
       <div class="modal-footer">
         <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
         <a class="btn btn-primary launchapp-btn" data-id="" href="">Launch</a>
@@ -199,7 +206,7 @@ $(".launchapp-btn").on("click", function(event) {
 	var appId = $(event.target).data("id");
 	var launchType = $('#launchtype').data("launchtype");
 	$(event.target).attr("href", "/cg/launchapp/" + appId + "/" + launchType);
-	if(console.log) {
+	if(console && console.log) {
 		console.log('About to launch application with ID: ' + appId);
 	}
 	$('#launchAppModal').modal("hide");
