@@ -11,6 +11,5 @@ secret_key.py
 */target/
 *.db
 media/
-*/citizengrid/migrations/
 
 

@@ -917,7 +917,7 @@ def getUserApps(request):
     app_list =[]
     for d in data:
         ls={}
-        ls['name']="<span class='demo hover' value='" + str(d.id) + "'>"+ d.name +"</span>"
+        ls['name']="<span class='hover' id='myapplink' value='" + str(d.id) + "'>"+ d.name +"</span>"
         ls['description']= d.description
         ls['branch'] = [b.name for b in d.branch.all().order_by('id')]
         ls['category'] = [c.name for c in d.category.all().order_by('id')]
@@ -1007,8 +1007,8 @@ def application_detail(request,appid):
     # Get all public applications to be displayed in the application list
     app = ApplicationBasicInfo.objects.filter(public=True,id=appid)
     # Get the list of app ids that we're going to look up application files for.
-    #app_ids = [app.id]
-    #print 'Looking up file for apps: ' + str(app_ids)
+    app_ids = [appid]
+    print 'Looking up file for apps: ' + str(app_ids)
 
     files = ApplicationFile.objects.filter(file_type='S', image_type= 'C', application=int(appid))
     os_client_images = ApplicationOpenstackImages.objects.filter(application=int(appid), image_type= 'C')
@@ -1040,6 +1040,49 @@ def application_detail(request,appid):
         file_info['formatstring'] = file_formats[appfile.file_format]
         file_info_dict[appfile.application.id].append(file_info)
     return render_to_response('cg_application_detail.html', {'apps':app, 'file_info': file_info_dict,'os_images':os_client_images, 'ec2_images':ec2_client_images, })
+
+    #===============================================================================
+    #  Shows MY application detail
+    #===============================================================================
+
+@login_required
+def my_application(request,appid):
+    # Get all public applications to be displayed in the application list
+    app = ApplicationBasicInfo.objects.filter(public=True,id=appid)
+    # Get the list of app ids that we're going to look up application files for.
+    app_ids = [appid]
+    print 'Looking up file for apps: ' + str(app_ids)
+
+    files = ApplicationFile.objects.filter(file_type='S', image_type= 'C', application=int(appid))
+    os_client_images = ApplicationOpenstackImages.objects.filter(application=int(appid), image_type= 'C')
+    ec2_client_images = ApplicationEC2Images.objects.filter(application=int(appid), image_type= 'C')
+
+    # We now have a list of files for all the applications.
+    # For each application, prepare a new list. Each item in the list
+    # will be a dict containing the details about a file for an application.
+    # This list will then be added to the file_info_dict with the key
+    # as the app id.
+    file_info_dict = {}
+
+    file_formats = { 'NONE': 'Local file (Unknown type)',
+                   'HD' : 'Local image (RAW_ID)',
+                   'IMG' : 'Local image (RAW_Image)',
+                   'VDI' : 'Local image (Virtualbox)',
+                   'VMDK': 'Local image (VMware VMDK)',
+                   'ISO' : 'CD/DVD ROM Image',
+                   'OVF' : 'OVF Appliance',
+                   'OVA' : 'Local Appliance Archive (OVA)'}
+
+    for appfile in files:
+        if appfile.application.id not in file_info_dict:
+            file_info_dict[appfile.application.id] = []
+        file_info = {}
+        file_info['appfile'] = appfile
+        file_info['name'] = appfile.filename()
+        file_info['path'] = os.path.join('media', request.user.username, appfile.filename())
+        file_info['formatstring'] = file_formats[appfile.file_format]
+        file_info_dict[appfile.application.id].append(file_info)
+    return render_to_response('cg_myapp_template.html', {'apps':app, 'file_info': file_info_dict,'os_images':os_client_images, 'ec2_images':ec2_client_images, })
 
 
     #===================================================================================================================================

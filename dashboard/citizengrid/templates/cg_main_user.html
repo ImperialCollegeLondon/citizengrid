@@ -146,25 +146,31 @@ function welcomeCheckboxClick() {
 	$(document).ready(
 			function() {
 				$('#myapps').click(function() {
+					$("#ajax_app_detail").hide();
 					var table = $('#table').dataTable();
 					table.fnReloadAjax("/getuserapps");
-				})
+				});
 				$('#pubapps').click(function() {
+					$("#ajax_app_detail").hide();
 					var table = $('#table').dataTable();
 					table.fnReloadAjax("/gettabledata");
-				})
-				$("#table").delegate(
-						".demo",
-						"click",
+				});
+				$( "#old" ).delegate( "#myapplink", "click", function() {
+					$( this ).after( "<p>Another paragraph!</p>" );
+					});
+				$("#table").delegate("#myapplink","click", function() {
+							$("#ajax_app_detail").load("cg/myappdetail/" + $(this).attr("value"),
+									function() {}
+							);
+							$("#ajax_app_detail").show();
+						});
+				
+				$("#table").delegate(".demo","click",
 						function() {
-							if (console.log) {
-								console.log("Making ajax request with param"
-										+ $(this).attr("value"))
-							}
-							$("#ajax_app_detail").load(
-									"cg/appdetail/" + $(this).attr("value"),
-									function() {
-									});
+							$("#ajax_app_detail").load("cg/appdetail/" + $(this).attr("value"),
+									function() {}
+							);
+							$("#ajax_app_detail").show();
 						});
 
 				$('#table').dataTable({
