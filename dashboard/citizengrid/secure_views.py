@@ -3,6 +3,9 @@ import bz2
 import base64
 import json
 
+import boto.ec2
+from urlparse import urlparse
+
 from django.shortcuts import render_to_response
 from django.template import RequestContext
 from django.contrib.auth.decorators import login_required
@@ -19,7 +22,7 @@ from django.http.response import HttpResponseNotAllowed, HttpResponseNotFound,\
 from django.forms.util import ErrorList
 from django.template.loader import render_to_string
 from citizengrid.models import UserInfo, ApplicationBasicInfo, ApplicationServerInfo, ApplicationClientInfo, Branch, Category, SubCategory, \
-    UserCloudCredentials,UsersApplications
+    UserCloudCredentials,UsersApplications, CloudInstancesOpenstack
 from citizengrid.models import ApplicationEC2Images, ApplicationOpenstackImages
 from citizengrid.forms import ApplicationBasicInfoForm, ApplicationServerInfoForm, ApplicationClientInfoForm, CloudCredentialsForm, CloudImageForm, \
     UpdateUserCreationForm,LocalImageForm
@@ -163,9 +166,9 @@ def cg(request):
 def cg_user(request):
     # Get all public applications to be displayed in the application list
 
-    (apps,file_info_dict,role) = view_utils.application_user_view_data(request)
+    (apps,file_info_dict,role,myapps) = view_utils.application_user_view_data(request)
 
-    return render_to_response('cg_main_user.html', {'apps':apps, 'file_info': file_info_dict,'role':role}, context_instance=RequestContext(request))
+    return render_to_response('cg_main_user.html', {'apps':apps, 'myapps':myapps, 'file_info': file_info_dict,'role':role}, context_instance=RequestContext(request))
 
 
 @login_required
@@ -932,7 +935,8 @@ def getUserApps(request):
     app_list =[]
     for d in data:
         ls={}
-        ls['name']="<span class='hover' id='myapplink' value='" + str(d.id) + "'>"+ d.name +"</span>"
+        
+        ls['name']="<span  data-target='#myModal' data-toggle='modal' class='hover' id='myapplink' value='" + str(d.id) + "'>"+ d.name +"</span>"
         ls['description']= d.description
         ls['branch'] = [b.name for b in d.branch.all().order_by('id')]
         ls['category'] = [c.name for c in d.category.all().order_by('id')]
@@ -1062,42 +1066,66 @@ def application_detail(request,appid):
 
 @login_required
 def my_application(request,appid):
-    # Get all public applications to be displayed in the application list
-    app = ApplicationBasicInfo.objects.filter(public=True,id=appid)
-    # Get the list of app ids that we're going to look up application files for.
-    app_ids = [appid]
-    print 'Looking up file for apps: ' + str(app_ids)
+    # Get some stuff to show
+    app = ApplicationBasicInfo.objects.get(pk=appid);
 
-    files = ApplicationFile.objects.filter(file_type='S', image_type= 'C', application=int(appid))
-    os_client_images = ApplicationOpenstackImages.objects.filter(application=int(appid), image_type= 'C')
-    ec2_client_images = ApplicationEC2Images.objects.filter(application=int(appid), image_type= 'C')
+    instances = CloudInstancesOpenstack.objects.filter(owner=request.user, application=app)
 
-    # We now have a list of files for all the applications.
-    # For each application, prepare a new list. Each item in the list
-    # will be a dict containing the details about a file for an application.
-    # This list will then be added to the file_info_dict with the key
-    # as the app id.
+    files = ApplicationFile.objects.filter(application=appid)
+    
+    os_client_images = ApplicationOpenstackImages.objects.filter(application=appid)
+    
+    ec2_client_images = ApplicationEC2Images.objects.filter(application=appid)
+
     file_info_dict = {}
-
-    file_formats = { 'NONE': 'Local file (Unknown type)',
-                   'HD' : 'Local image (RAW_ID)',
-                   'IMG' : 'Local image (RAW_Image)',
-                   'VDI' : 'Local image (Virtualbox)',
-                   'VMDK': 'Local image (VMware VMDK)',
-                   'ISO' : 'CD/DVD ROM Image',
-                   'OVF' : 'OVF Appliance',
-                   'OVA' : 'Local Appliance Archive (OVA)'}
-
+    instance_list = []
+    
     for appfile in files:
         if appfile.application.id not in file_info_dict:
             file_info_dict[appfile.application.id] = []
         file_info = {}
+        print "Got file " + str(appfile)
         file_info['appfile'] = appfile
         file_info['name'] = appfile.filename()
         file_info['path'] = os.path.join('media', request.user.username, appfile.filename())
-        file_info['formatstring'] = file_formats[appfile.file_format]
+        file_info['formatstring'] = appfile.file_format
         file_info_dict[appfile.application.id].append(file_info)
-    return render_to_response('cg_myapp_template.html', {'apps':app, 'file_info': file_info_dict,'os_images':os_client_images, 'ec2_images':ec2_client_images, })
+        
+   
+    if len(instances) > 0:
+        print "Found " + str(len(instances)) + " openstack cloud instances"
+        credentials = instances[0].credentials
+        (access_key, secret_key) = utils.decrypt_cred_pair(credentials.access_key, credentials.secret_key)
+        parsed_url = urlparse(credentials.endpoint)
+        ip = parsed_url.netloc.split(':')[0]
+        local_region = boto.ec2.regioninfo.RegionInfo(name="openstack", endpoint=ip)
+        conn = boto.connect_ec2(aws_access_key_id=access_key,aws_secret_access_key=secret_key,is_secure=False,region=local_region,port=parsed_url.port,path=parsed_url.path)
+
+        print 'Set up connection with IP ' + ip + ', port ' + str(parsed_url.port) + ', path ' + parsed_url.path
+
+        for instance in instances:
+            print 'For each instance: ' + instance.instance_id
+            if instance.credentials.id != credentials.id:
+                print "Instance " + instance.instance_id + " uses different credentials, updated openstack connection..."
+                credentials = instance.credentials
+                (access_key, secret_key) = utils.decrypt_cred_pair(credentials.access_key, credentials.secret_key)
+                parsed_url = urlparse(credentials.endpoint)
+                ip = parsed_url.netloc.split(':')[0]
+                local_region = boto.ec2.regioninfo.RegionInfo(name="openstack", endpoint=ip)
+                conn = boto.connect_ec2(aws_access_key_id=access_key,aws_secret_access_key=secret_key,is_secure=False,region=local_region,port=parsed_url.port,path=parsed_url.path)
+
+            instance_data = conn.get_all_instances(instance_ids=[instance.instance_id])
+            if len(instance_data) > 0:
+                count = 1
+                print 'Instance ID ' + instance_data[0].instances[0].id + ' in state ' + instance_data[0].instances[0].state + ' with IP ' + instance_data[0].instances[0].public_dns_name
+                instance_info = {}
+                instance_info['id'] = instance_data[0].instances[0].id
+                instance_info['state'] = instance_data[0].instances[0].state
+                instance_info['ip'] = instance_data[0].instances[0].public_dns_name
+                instance_list.append( instance_info )
+
+
+    return render_to_response('cg_myapp_template.html', {'app':app,'instance_list':instance_list, 'file_info': file_info_dict,'os_images':os_client_images, 'ec2_images':ec2_client_images })
 
 
     #===================================================================================================================================

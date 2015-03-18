@@ -75,12 +75,11 @@ function welcomeCheckboxClick() {
 <div class="row pill-target" id="app_list" style="padding-top: 30px;">
   <div class="col-md-12">
   	{% if apps|length == 0 %}
-      <div class="alert alert-info"><b>There are no publicly available applications registered with CitizenGrid.</b></div>
+      <div class="alert alert-info"><b>There are no public applications registered with CitizenGrid.</b></div>
     {% else %}
-      <div class="alert alert-info">
-          <h4>Application info</h4>
-          <b>There are {{ apps|length }} applications available</b>
-          <p>To begin running an application, select it in the list below and then click the 'Launch' button in the image details section of the application info.</p>
+      <div id="app_info" class="alert alert-info">
+          <h4>There are {{ apps|length }} public applications registered</h4>
+          <p>To begin running an application, select it in the list below and then click the 'Launch' button.</p>
       </div>
     {% endif %}
   </div>
@@ -94,6 +93,8 @@ function welcomeCheckboxClick() {
 
   </div>
   </div>
+  
+
 <!-- END Ajax'ed Application Container -->
 <br>
 <!-- jquery datatable -->
@@ -117,6 +118,12 @@ function welcomeCheckboxClick() {
 
 
 
+<!-- Modal -->
+<div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+
+</div>
+
+
 <!-- DataTables javascript. Add configurations here-->
 		<script type="text/javascript" src="//cdn.datatables.net/1.10.0/js/jquery.dataTables.min.js"></script>
 		<script type="text/javascript" src="//cdn.datatables.net/plug-ins/f2c75b7247b/api/fnReloadAjax.js"></script>
@@ -127,29 +134,30 @@ function welcomeCheckboxClick() {
 			function() {
 				$('#myapps').click(function() {
 					$("#ajax_app_detail").hide();
+					//$("#app_list").hide();
+					var info = "<h4>There are {{ myapps|length }} applications in your list</h4><p>Click on the application name in the list to see details.";
+
+					$("#app_info").html(info);
 					var table = $('#table').dataTable();
 					table.fnReloadAjax("/getuserapps");
 				});
 				$('#pubapps').click(function() {
 					$("#ajax_app_detail").hide();
+					//$("#app_list").show();
+					var info = "<h4>There are {{ apps|length }} public applications registered</h4><p>To begin running an application, select it in the list below and then click the 'Launch' button.";
+					$("#app_info").html(info);
 					var table = $('#table').dataTable();
 					table.fnReloadAjax("/gettabledata");
 				});
-				$( "#old" ).delegate( "#myapplink", "click", function() {
-					$( this ).after( "<p>Another paragraph!</p>" );
-					});
+				     
 				$("#table").delegate("#myapplink","click", function() {
-							$("#ajax_app_detail").load("cg/myappdetail/" + $(this).attr("value"),
-									function() {}
-							);
-							$("#ajax_app_detail").show();
+							$("#myModal").load("cg/myappdetail/" + $(this).attr("value"));
+							//$("#ajax_app_detail").show();
 						});
 				
 				$("#table").delegate(".demo","click",
 						function() {
-							$("#ajax_app_detail").load("cg/appdetail/" + $(this).attr("value"),
-									function() {}
-							);
+							$("#ajax_app_detail").load("cg/appdetail/" + $(this).attr("value"));
 							$("#ajax_app_detail").show();
 						});
 
