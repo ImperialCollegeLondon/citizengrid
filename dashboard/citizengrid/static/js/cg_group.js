@@ -5,7 +5,7 @@ $(function()
         headers: { "X-CSRFToken": getCookie("csrftoken") }
     });
         $("#groupModal").modal({ show: false})
-		$(document.body).on('click',".leavegrp >a, .editgrp >a, .delgrp >a, .attachapp > a, .groupname > a",function(e) {
+		$(document.body).on('click',".leavegrp >a, .editgrp >a, .delgrp >a, .attachapp > a, .groupname > a,.detach_gat >a",function(e) {
             console.log($(this).attr('type'))
             var type =$(this).attr("type")
             var id = $(this).attr("id")
@@ -83,6 +83,27 @@ $(function()
                     });
                 $("#attachAppToGrpModal").modal('show')
             }
+            else if (type == 'detach_gat') {
+                console.log("Inside detach tag/application form group")
+                console.log($(this).attr("id") + "and type is" + $(this).attr("type"));
+                e.preventDefault();
+
+                    var type = $(this).attr("type")
+                    var id = $(this).attr("id")
+                    console.log("id send" +id)
+                    $.ajax({
+                        url: '/cg/manage/group/detachfromgroup/'+id,
+                        data: {
+                            id: id
+                        },
+                        type: "POST",
+                        success: function (data) {
+                            $("#apptaglist").html(data)
+                        }
+                    });
+                $("#apptagModal").modal('show')
+
+            }
             else if (type == 'grouptagdetail'){
                 var grpid = $(this).attr("id")
                 console.log("Inside groupdetail ")
@@ -94,7 +115,8 @@ $(function()
                         },
                         type: "GET",
                         success: function (data) {
-                            $("#attach_tag").html(data)
+                            $("#apptaglist").html(data)
+                            $("#apptagModal").modal('show')
                         }
                     });
 

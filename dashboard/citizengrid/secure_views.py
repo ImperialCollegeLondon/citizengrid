@@ -455,8 +455,7 @@ def attach_app_to_group(request,id):
             print e.message
             return HttpResponse( "<p> Invalid Data </p>",content_type="application/html")
         success_data = """
-        <span>Your group application tag creation request is successful. Here is what you submitted:</span><br><br>
-        <strong>Name:</strong>""" + tagname + "<br>"
+        Your group application tag creation request is successful."""
         return HttpResponse(success_data,content_type="application/html")
     else:
         return HttpResponse( "<p> Invalid Data </p>",content_type="application/html")
@@ -478,14 +477,16 @@ def application_grp_tag_detail(request):
 
 @login_required
 def detach_app_from_group(request,id):
-    application =  ApplicationBasicInfo.objects.get(request.appid)
-    mg = MyGroup.objects.get(id=id)
-    mg.application.remove(application)
-    mg.save()
-    group = MyGroup.objects.get(id=id)
-    return HttpResponse(
-            json.dumps({'id': group.id, 'name': group.name, 'desc': group.description,'apps':group.application}),
-            content_type="application/json")
+    gat = GroupApplicationTag.objects.get(id=request.POST['id'])
+    grpid = gat.group.id
+    # deleting relevant tag
+    GroupApplicationTag.objects.get(id=id).delete()
+    #preparing the view
+    gats = GroupApplicationTag.objects.filter(group=grpid)
+    html = render_to_string('ajaxgrouptemplate/group_application_tag_grid.html', { 'gats':gats}, context_instance=RequestContext(request))
+    return HttpResponse(html)
+
+
 
 # Called via an AJAX call from a modal on the credential management page
 # This view returns only the HTML content for the modal itself. The main
