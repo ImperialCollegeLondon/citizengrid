@@ -477,6 +477,20 @@ def application_grp_tag_detail(request):
     else:
         return HttpResponse( "<p> Invalid Data </p>",content_type="application/html")
 
+@login_required()
+def application_grp_tag(request,id):
+    print "Entering Group application tag to retrieve all tags"
+    gats = gats = GroupApplicationTag.objects.select_related().filter(application=id)
+    select_data = """ <select name=tag id="tagid" class="form-control"  placeholder="Tags">
+    <option value="NONE">Nothing Selected</option>
+    """
+    for mg in gats :
+        select_data = select_data + "<option value=\"" + str(mg.tagid)+"-"+ mg.tagname+ "\">" + mg.tagname + "</option>"
+    select_data = select_data + """</select> """
+    print select_data
+    return HttpResponse(select_data,content_type="application/html")
+
+
 
 @login_required
 def detach_app_from_group(request,id):
