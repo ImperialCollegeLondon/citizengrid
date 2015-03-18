@@ -7,7 +7,6 @@ from . import settings
 from django.contrib import admin
 admin.autodiscover()
 
-
 # Routers provide an easy way of automatically determining the URL conf.
 router = cg_api_views.HybridRouter()
 # Only admin can see this view

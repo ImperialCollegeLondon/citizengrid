@@ -71,10 +71,14 @@ jnlp_base = """
 def launchapp(request, appid, launchtype, apptag):
     print "Request to launch app with ID <" + appid + "> and launch type <" + launchtype + ">" + "> with tag name <" + apptag +">"
     print "requesting user is " + str(request.user.id)
+    if apptag != "NONE":
+        print "Create an ISO with Group <" + apptag + ">"
+
     appObject = ApplicationBasicInfo.objects.get(id=appid)
 
     #if appid == <the id of vams>:
     #   Generate context iso
+
     #    from subprocess import call
     #    call([], executable=settings.ISO_GENERATOR_EXE)
     
@@ -95,16 +99,10 @@ def launchapp(request, appid, launchtype, apptag):
     for app in app_files:
         print "File: " + app.file.name + " for app <" + app.application.name + ">"
 
-    # Prepare launcher arguments
-    # FIXME: For now, just use first to words of the application name for the VM name
     if len(app_files) == 0:
         return HttpResponse("<h1> No image available to launch</h1>")
     else:
-
-       # vm_name = "test"
-
         vm_name = str(app.application.name)
-        #vm_name = split_name[0] + ' ' + split_name[1]
         app_owner = str(ApplicationBasicInfo.objects.filter(id=appid)[0].owner.username)
         #request.user.get_username()
 
@@ -132,6 +130,7 @@ def launchapp(request, appid, launchtype, apptag):
                            'app_name': app.application.name,
                            'launcher_args': launcher_args,
                            }
+
         formatted_jnlp = jnlp_base.format(**jnlp_properties)
 
         print "Formatted JNLP: "+ formatted_jnlp

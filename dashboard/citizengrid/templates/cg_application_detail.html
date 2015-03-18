@@ -270,9 +270,10 @@ $(".launchapp-btn").on("click", function(event) {
  var startServerModalData = null;
 
     $(document).on("click", "#cloudServerLaunch", function() {
+        // variables
         var url = $('#selectCloud').text();
         var credAlias = $('#selectCredentials').text().split(" - ")[0];
-        var appTag = $("#selectTags" ).val();
+        var appTag = $("#selectTags").val();
         var appId = $('#startCloudServerForm input[name=appid]').val();
         var recordId = $('#startCloudServerForm input[name=recordid]').val();
         var resource_type = $("#resourceType" ).val()

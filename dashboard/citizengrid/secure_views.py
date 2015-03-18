@@ -460,8 +460,6 @@ def attach_app_to_group(request,id):
     else:
         return HttpResponse( "<p> Invalid Data </p>",content_type="application/html")
 
-
-
 @login_required
 def application_grp_tag_detail(request):
     print "Inside Group Application Tag details method"
