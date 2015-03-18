@@ -1,5 +1,15 @@
 {% load cg_template_filters %}
-
+{% block head %}
+<link rel="stylesheet" type="text/css" href="/css/bootstrap-multiselect.css" />
+<style>
+        i.green:before {
+            color: green;
+        }
+        i.red:before {
+            color: red;
+        }
+    </style>
+{% endblock %}
 
 {% block panel-content %}
 {% for app in apps %}
@@ -133,10 +143,10 @@
                         </div>
                         <div class="form-group">
                             <label for="selectTags">Application tags</label>
-                            <select type="text" id="selectTags" class="form-control" value="" placeholder="" name="tags">
-                                <option value="global">Global</option>
-                                <option value="none">None</option>
-                           </select>
+                            <div class="" id="selectTagsCloudServer">
+
+                            </div>
+
                         </div>
 
                         <input type="hidden" name="appid" value="">
@@ -170,14 +180,15 @@
         <div id="appname"></div>
 
         <div id="launchtype" data-launchtype="vbox">Launch type: <b>Local (VirtualBox)</b></div>
+            <div class="form-group">
+                <label for="selectTagslaunch">Application tags</label>
+                <div class="" id="selectTagslaunch">
+
+                </div>
+
+            </div>
       </div>
-      <div class="form-group">
-          <label for="selectTags">Application tags</label>
-          <select type="text" id="selectTags" class="form-control" value="" placeholder="" name="tags">
-          <option value="global">Global</option>
-          <option value="none">None</option>
-          </select>
-      </div>
+
       <div class="modal-footer">
         <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
         <a class="btn btn-primary launchapp-btn" data-id="" href="">Launch</a>
@@ -193,7 +204,16 @@ $(".btn-launch").on("click", function(event) {
 	var appId = $(event.target).data("appid");
     var appTag = $("#selectTags" ).val();
     var appIcon = $(event.target).data("appicon");
-    $('#launchAppModal').modal("show");
+          $.ajax({
+            url: 'cg/manage/applicationgrouptag/' + appId,
+            type: "GET",
+            success: function (data) {
+                $("#selectTagslaunch").html(data)
+               $("#launchAppModal").modal('show')
+            }
+        });
+
+   // $('#launchAppModal').modal("show");
 	$(".modal-body #appimg").attr("src", appIcon);
 	$(".modal-body #appname").html("Application: <b>" + appName + "</b>");
 	$(".modal-footer #launchappbtn").data("id", appId);
@@ -499,7 +519,21 @@ $(".launchapp-btn").on("click", function(event) {
             }, 0);
         }
     });
+$(document.body).on('click'," a.run-image",function(e) {
+   // get all the tags
+    var appid = $(this).attr("data-appid")
+    console.log(appid)
+          $.ajax({
+            url: 'cg/manage/applicationgrouptag/' + appid,
+            type: "GET",
+            success: function (data) {
+                $("#selectTagsCloudServer").html(data)
+                $("#startCloudServerModal").modal('show')
+            }
+        });
+ });
 </script>
+<script type="text/javascript" src="/js/bootstrap-multiselect.js"></script>
 <script type="text/javascript" src="/js/cg_delete.js"></script>
 
 

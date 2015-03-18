@@ -186,6 +186,9 @@ def return_role(request):
 def application_user_view_data(request):
         print "Inside application provider view data"
         apps = ApplicationBasicInfo.objects.filter(public=True)
+        
+        myapps = ApplicationBasicInfo.objects.filter(usersapplications__user=request.user)
+ 
         # Get the list of app ids that we're going to look up application files for.
         app_ids = []
         for app in apps:
@@ -223,7 +226,7 @@ def application_user_view_data(request):
         user_info_list = UserInfo.objects.filter(user=request.user)
         role = user_info_list[0].user_primary_role_desc
         request.session['role'] = role
-        return (apps,file_info_dict,role)
+        return (apps,file_info_dict,role,myapps)
 
 
 def application_provider_view_data(request):

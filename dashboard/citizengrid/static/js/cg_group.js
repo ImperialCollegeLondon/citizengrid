@@ -109,7 +109,7 @@ $(function()
                 console.log("Inside groupdetail ")
                 console.log("Calling application Detail tag function with group id" +grpid );
                     $.ajax({
-                        url: '/cg/manage/group/applicationgrouptag',
+                        url: '/cg/manage/group/applicationgrouptagdetail',
                         data: {
                             id: grpid
                         },
