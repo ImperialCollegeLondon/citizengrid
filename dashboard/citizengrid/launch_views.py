@@ -68,8 +68,8 @@ jnlp_base = """
 
 @require_GET
 @login_required
-def launchapp(request, appid, launchtype):
-    print "Request to launch app with ID <" + appid + "> and launch type <" + launchtype + ">"
+def launchapp(request, appid, launchtype, apptag):
+    print "Request to launch app with ID <" + appid + "> and launch type <" + launchtype + ">" + "> with tag name <" + apptag +">"
     print "requesting user is " + str(request.user.id)
     appObject = ApplicationBasicInfo.objects.get(id=appid)
 
