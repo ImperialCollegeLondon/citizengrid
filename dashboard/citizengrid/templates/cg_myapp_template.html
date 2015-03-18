@@ -4,12 +4,12 @@
 
    <div class="modal-dialog">
       <div class="modal-content">
-         <div class="modal-header">
+         <div class=" alert-info modal-header">
             <button type="button" class="close" data-dismiss="modal" aria-hidden="true">
                   &times;
             </button>
             <h4 class="modal-title" id="myModalLabel">
-               <h3>{{ app.name }}</h3>
+               {{ app.name }}
             </h4>
          </div>
          <div id="myModalBody" class="modal-body">
@@ -23,7 +23,17 @@
 				<img class="app-icon" src={{app.iconfile }}>{{ app.description }}
 			</div>
 		</div>
+
+		
+		
 		<div class="appinfo">
+		
+			<h4>Usage</h4>	
+		<div class="content">
+          You first ran this application on {{ my_stats.creation_time }}
+          <p>You have run this application {{ my_stats.run_count }} times</p>
+      	</div>
+      <hr>
 			<h4>Available Cloud Instances</h4>
 			<table class="appinfo">
 				<tr>

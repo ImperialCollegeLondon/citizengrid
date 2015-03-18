@@ -116,8 +116,6 @@ function welcomeCheckboxClick() {
 <div>
 <!-- end jquery datatable -->
 
-
-
 <!-- Modal -->
 <div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
 
@@ -135,7 +133,7 @@ function welcomeCheckboxClick() {
 				$('#myapps').click(function() {
 					$("#ajax_app_detail").hide();
 					//$("#app_list").hide();
-					var info = "<h4>There are {{ myapps|length }} applications in your list</h4><p>Click on the application name in the list to see details.";
+					var info = "<h4>You have participated in the following applications!</h4><p>Click on the application name in the list to see details.";
 
 					$("#app_info").html(info);
 					var table = $('#table').dataTable();

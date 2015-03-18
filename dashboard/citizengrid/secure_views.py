@@ -916,7 +916,7 @@ def getTableData(request):
 def getUserApps(request):
     print "In getUserApps"
     # Get all users applications to be displayed in the application list
-    #data = UsersApplications.objects.filter(user=request.user)
+    
     data = ApplicationBasicInfo.objects.filter(usersapplications__user=request.user).prefetch_related("branch","category","subcategory")
     app_list =[]
     for d in data:
@@ -1051,10 +1051,12 @@ def application_detail(request,appid):
     #===============================================================================
 
 @login_required
-def my_application(request,appid):
+def my_application(request, appid):
     # Get some stuff to show
     app = ApplicationBasicInfo.objects.get(pk=appid);
-
+    
+    my_stats = UsersApplications.objects.get(user=request.user,application=appid)
+    
     instances = CloudInstancesOpenstack.objects.filter(owner=request.user, application=app)
 
     files = ApplicationFile.objects.filter(application=appid)
@@ -1111,7 +1113,7 @@ def my_application(request,appid):
                 instance_list.append( instance_info )
 
 
-    return render_to_response('cg_myapp_template.html', {'app':app,'instance_list':instance_list, 'file_info': file_info_dict,'os_images':os_client_images, 'ec2_images':ec2_client_images })
+    return render_to_response('cg_myapp_template.html', {'my_stats':my_stats, 'app':app,'instance_list':instance_list, 'file_info': file_info_dict,'os_images':os_client_images, 'ec2_images':ec2_client_images })
 
 
     #===================================================================================================================================
