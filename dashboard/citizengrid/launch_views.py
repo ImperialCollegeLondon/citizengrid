@@ -4,6 +4,7 @@ import tempfile
 import os
 import utils
 import simplejson
+from subprocess import call
 
 import boto.ec2
 
@@ -73,6 +74,14 @@ def launchapp(request, appid, launchtype, apptag):
     print "requesting user is " + str(request.user.id)
     if apptag != "NONE":
         print "Create an ISO with Group <" + apptag + ">"
+        (tagname,tagid) = str(apptag).split("-")
+        if tagname.lower() == 'vas':
+            print "create  VAS contextualized ISO"
+        elif tagname.lower() == 'boinc':
+            print "create BOINC contextualized ISO"
+        else:
+          pass
+
 
     appObject = ApplicationBasicInfo.objects.get(id=appid)
 

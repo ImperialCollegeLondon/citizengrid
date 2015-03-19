@@ -483,7 +483,7 @@ def application_grp_tag(request,id):
     <option value="NONE">Nothing Selected</option>
     """
     for mg in gats :
-        select_data = select_data + "<option value=\"" + str(mg.tagid)+"-"+ mg.tagname+ "\">" + mg.tagname + "</option>"
+        select_data = select_data + "<option value=\"" + str(mg.tagname)+"-"+ mg.tagid+ "\">" + mg.tagname + "</option>"
     select_data = select_data + """</select> """
     print select_data
     return HttpResponse(select_data,content_type="application/html")
