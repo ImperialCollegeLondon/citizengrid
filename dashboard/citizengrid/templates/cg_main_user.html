@@ -90,11 +90,9 @@ function welcomeCheckboxClick() {
 <!-- New Ajax'ed Application Container -->
 <div class="row pill-target" style="padding-top: 30px;">
   <div id="ajax_app_detail" class="col-md-12">
-
   </div>
-  </div>
+</div>
   
-
 <!-- END Ajax'ed Application Container -->
 <br>
 <!-- jquery datatable -->
@@ -116,11 +114,9 @@ function welcomeCheckboxClick() {
 <div>
 <!-- end jquery datatable -->
 
-<!-- Modal -->
+<!-- Modal dialog for showing my app stats -->
 <div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
-
 </div>
-
 
 <!-- DataTables javascript. Add configurations here-->
 		<script type="text/javascript" src="//cdn.datatables.net/1.10.0/js/jquery.dataTables.min.js"></script>
@@ -133,7 +129,7 @@ function welcomeCheckboxClick() {
 				$('#myapps').click(function() {
 					$("#ajax_app_detail").hide();
 					//$("#app_list").hide();
-					var info = "<h4>You have participated in the following applications!</h4><p>Click on the application name in the list to see details.";
+					var info = "<h4>You have participated in the following applications.</h4><p>Click on the application name in the list to see details.";
 
 					$("#app_info").html(info);
 					var table = $('#table').dataTable();
