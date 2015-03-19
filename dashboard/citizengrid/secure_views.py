@@ -1125,7 +1125,7 @@ def my_application(request, appid):
                 instance_list.append( instance_info )
 
 
-    return render_to_response('cg_myapp_template.html', {'my_stats':my_stats, 'app':app,'instance_list':instance_list, 'file_info': file_info_dict,'os_images':os_client_images, 'ec2_images':ec2_client_images })
+    return render_to_response('cg_myapp_detail_template.html', {'my_stats':my_stats, 'app':app,'instance_list':instance_list, 'file_info': file_info_dict,'os_images':os_client_images, 'ec2_images':ec2_client_images })
 
 
     #===================================================================================================================================
