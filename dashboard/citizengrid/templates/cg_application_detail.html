@@ -213,6 +213,7 @@ $(".btn-launch").on("click", function(event) {
             }
         });
 
+
    // $('#launchAppModal').modal("show");
 	$(".modal-body #appimg").attr("src", appIcon);
 	$(".modal-body #appname").html("Application: <b>" + appName + "</b>");
@@ -223,8 +224,9 @@ $(".btn-launch").on("click", function(event) {
 });
 
 $(".launchapp-btn").on("click", function(event) {
+
 	var appId = $(event.target).data("id");
-    var appTag = $(event.target).data("tag");
+    var appTag = $(".modal-body #tagid" ).val()
 	var launchType = $('#launchtype').data("launchtype");
 	$(event.target).attr("href", "/cg/launchapp/" + appId + "/" + launchType + "/" + appTag);
 	if(console && console.log) {
