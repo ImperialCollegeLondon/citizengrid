@@ -1,148 +1,116 @@
-{% load cg_template_filters %} 
-{% block panel-content %}
+{% load jquery_upload_display_tags %} 
+{% load cg_template_filters %}
 
+    <div class="row pill-target" id="app_list" style="padding-top: 30px;">
+        <div class="col-md-12">{% if apps|length == 0 %}
+            <div class="alert alert-info"><b>You don't have any applications registered yet. Create one using the controls above.</b>
+            </div>{% else %}
+            <div class="alert alert-success"><b>You have registered a total of {{ apps|length }} applications.</b>
+            </div>{% for app in apps %}
+            <div class="panel panel-primary app-panel" data-appid="{{ app.id }}">
+			<div class="container panel-heading">
+			<div class="row">
+			  <div class="col-md-4 pull-left">Application: <b>{{ app.name }}</b></div>
+			  <div class="appli_delete col-md-1 pull-right"><a type="app"  id="{{app.id}}" title="delete application" href="#"><i class="icon-trash icon-white white"></i></a><div>
+			  </div>
+			</div></div></div>
+                <div class="panel-body">
+                    <div>
+                        <div class="appinfo">
+                            <img class="app-icon" src={{ app.iconfile }}></img>{{ app.description }}
+                        </div>
+                        <div class="server-instances" id="server_instances">
+                            <hr/>	<span>Running server instances: <img class="loading" src="/static/img/loading.gif"></img></span>
 
-   <div class="modal-dialog">
-      <div class="modal-content">
-         <div class=" alert-info modal-header">
-            <button type="button" class="close" data-dismiss="modal" aria-hidden="true">
-                  &times;
-            </button>
-            <h4 class="modal-title" id="myModalLabel">
-               {{ app.name }}
-            </h4>
-         </div>
-         <div id="myModalBody" class="modal-body">
-         
-         
-         
-         <div class="panel">
-	<div class="panel-body">
-		<div>
-			<div class="appinfo">
-				<img class="app-icon" src={{app.iconfile }}>{{ app.description }}
-			</div>
-		</div>
-
-		
-		
-		<div class="appinfo">
-		
-			<h4>Usage</h4>	
-		<div class="content">
-          You first ran this application on {{ my_stats.creation_time }}
-          <p>You have run this application {{ my_stats.run_count }} times</p>
-      	</div>
-      <hr>
-			<h4>Available Cloud Instances</h4>
-			<table class="appinfo">
-				<tr>
-					<td class="cloud_images" style="vertical-align: top;">
-						<div class="table-responsive">
-							<table class="table table-condensed">
-								<thead>
-									<th>Type</th>
-									<th>Cloud</th>
-									<th>Image ID</th>
-									<th>Cloud URL</th>
-								</thead>
-								<tbody>
-									{% for image in ec2_images %} 
-										<tr>
-											<td>{{ image.image_type }}</td>
-											<td>EC2</td>
-											<td>{{ image.image_id }}</td>
-											<td>{{ image.zone_url }}</td>
-										</tr>
-									{% endfor %} 
-										
-									{% for image in os_images %} 
-										<tr>
-											<td>{{ image.image_type }}</td>
-											<td>Openstack</td>
-											<td>{{ image.image_id }}</td>
-											<td>{{ image.zone_url }}</td>
-										</tr>
-										{% endfor %}
-									</tbody>
-								</table>
-							</div>
-						</td>
-					</tr>
-				</table>
-			</div>	
-		
-	<div class="appinfo">
-			<h4>Files</h4>
-			<table class="appinfo">
-				<tr>
-					<td class="cloud_images" style="vertical-align: top;">
-						<div class="table-responsive">
-							<table class="table table-condensed">
-								<thead>
-									<th>Type</th>
-									<th>Name</th>
-								</thead>
-								<tbody>
-					{% for key, files_list_dict in file_info.items %} 
-						{% for app_file_dict in files_list_dict %}
-						<tr>
-							<td>{{ app_file_dict.formatstring }}</td>
-							<td>{{ app_file_dict.name }}</td>
-						</tr>
-						{% endfor %} 
-					{% endfor %}
-									</tbody>
-								</table>
-							</div>
-						</td>
-					</tr>
-				</table>
-			</div>	
-				
-		<div class="appinfo">
-			<h4>Current Status</h4>
-				<table class="table table-condensed">
-					<thead>
-							<th>Instance ID</th>
-							<th>Address</th>
-							<th>Status</th>
-					</thead>
-					<tbody>
-					{% for instance in instance_list %} 
-					<tr>
-						<td>{{ instance.id }}</td>
-						<td>{{ instance.ip }}</td>
-						<td>{{ instance.state }}</td>
-					</tr>
-					{% endfor %}
-						
-					</tbody>
-				</table>
-			</div>
-
-		<hr class="appdivider">
-		<div class="appreginfo">Application registered by {{ app.owner.username }} at 
-						{{ app.creation_time|date:'H:i' }} on 
-						{{ app.creation_time|date:'d/m/Y' }}.</div>
-	</div>
-</div>
-         
-         
-         
-         
-         
-         </div>
-         <div class="modal-footer">
-            <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-         </div>
-      </div><!-- /.modal-content -->
-	</div><!-- /.modal -->
-	
-	
-
-{% endblock %}
-
-
-
-
+                            <div class="table-responsive">
+                                <table class="table table-condensed" id="server_instance_info_{{ app.id }}">
+                                    <thead>
+                                        <tr>
+                                            <th>Instance ID</th>
+                                            <th>Status</th>
+                                            <th>Address</th>
+                                            <th></th>
+                                            <th></th>
+                                    </thead>
+                                    <tbody></tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="panel panel-default appimageinfo">
+                        <div class="panel-heading">Image details</div>
+                        <div class="panel-body">
+                            <table id="provider_image_info">
+                                <tr>
+                                    <td class="local_images">Local images:</td>
+                                    <td class="cloud_images">Cloud images:</td>
+                                </tr>
+                                <tr>
+                                    <td class="cloud_images" style="vertical-align: top;">
+                                        <div class="table-responsive">
+                                            <table class="table table-condensed">
+                                                <thead>
+                                                    <tr>
+                                                    	<th>Type</th>
+                                                        <th>Format</th>
+                                                        <th>Image </th>
+                                                        <th></th>
+                                                </thead>
+                                                <tbody>{% for key, file_list in file_info.items %} {% if key == app.id %} {% for app_file_dict in file_list %}
+                                                    <tr>
+                                                        <td>{%if app_file_dict|getdictitem:'image_type' == 'S' %}Server {%else%} Client{% endif %}</td>
+                                                        <td>{{ app_file_dict|getdictitem:'formatstring' }}</td>
+                                                        <td><a href="{{ app_file_dict|getdictitem:'path' }}">{{ app_file_dict|getdictitem:'name' }}</td>
+                                                        <td></td>
+                                                    </tr>{% endfor %} {% endif %} {% endfor %}
+                                                    </tbody>
+                                            </table>
+                                        </div>
+                                    </td>
+                                    <td class="cloud_images" style="vertical-align: top;">
+                                        <div class="table-responsive">
+                                            <table class="table table-condensed">
+                                                <thead>
+                                                    <tr>
+                                                    	<th>Type</th>
+                                                        <th>Cloud</th>
+                                                        <th>Image ID</th>
+                                                        <th>Cloud URL</th>
+                                                        <th></th>
+                                                </thead>
+                                                <tbody>{% for image in ec2_images %} {% if image.application.id == app.id %}
+                                                    <tr>
+                                                        <td>{% if image.image_type == 'S' %}Server  &nbsp;
+                                                        <a href="#startCloudServerModal" class="run-image glyphicon glyphicon-play-circle open-StartCloudServerModal"
+                                                        data-original-title="Run server on cloud" data-toggle="modal" data-cloudurl="{{ image.zone_url }}" data-appid="{{ app.id }}"
+                                                        data-record-id="ec2:{{ image.id }}"></a>{% else %}Client{% endif %}</td>
+                                                        <td>EC2</td>
+                                                        <td>{{ image.image_id }}</td>
+                                                        <td>{{ image.zone_url }}</td>
+                                                        <td></td>
+                                                    </tr>{% endif %} {% endfor %} {% for image in os_images %} {% if image.application.id == app.id %}
+                                                    <tr>
+                                                        <td>{% if image.image_type == 'S' %}Server &nbsp;
+                                                        <a href="#startCloudServerModal" class="run-image glyphicon glyphicon-play-circle open-StartCloudServerModal"
+                                                        data-original-title="Run server on cloud" data-toggle="modal" data-cloudurl="{{ image.zone_url }}" data-appid="{{ app.id }}"
+                                                        data-record-id="os:{{ image.id }}"></a>{% else %}Client{% endif %}</td>
+                                                        <td>Openstack</td>
+                                                        <td>{{ image.image_id }}</td>
+                                                        <td>{{ image.zone_url }}</td>
+                                                        <td></td>
+                                                    </tr>{% endif %} {% endfor %}</tbody>
+                                            </table>
+                                        </div>
+                                    </td>
+                                    </tr>
+                            </table>
+                            <hr>
+                            <div class="manage-images"><a href="/cg/manage/images/{{ app.id }}">Manage images</a>
+                            </div>
+                        </div>
+                    </div>
+                    <hr class="appdivider">
+                    <div class="appreginfo">Application registered by {{ app.owner.username }} at {{ app.creation_time|date:'H:i' }} on {{ app.creation_time|date:'d/m/Y' }}. {% if app.public %} This application is <b>public</b> and is visible to all CitizenGrid users. {% else %} This application is <b>private</b> and is only visible to you. {% endif %}</div>
+                </div>
+            </div>{% endfor %} {% endif %}</div>
+    </div>
