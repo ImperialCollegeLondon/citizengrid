@@ -5,7 +5,7 @@ $(function()
         headers: { "X-CSRFToken": getCookie("csrftoken") }
     });
 		$(document.body).on('click',".local >a ,.cloud >a,.appli_delete >a, .delcreds >a",function(e) {
-			var a = confirm("Are you sure you want  to delete");
+			var a = confirm("Click to confirm deletion");
             console.log("Hi")
 			if(a){
 		    e.preventDefault();

@@ -102,7 +102,7 @@ function welcomeCheckboxClick() {
 			<tr>
 				<th>Application <br>Name</th>
 				<th>Description</th>
-				<!-- <th>Keywords</th>-->
+				<th>Keywords</th>
 				<th>Branch</th>
 				<th>Category</th>
 				<th>Subcategory</th>
@@ -145,12 +145,14 @@ function welcomeCheckboxClick() {
 				});
 				     
 				$("#table").delegate("#myapplink","click", function() {
+
 							$("#myModal").load("cg/myappdetail/" + $(this).attr("value"));
 							//$("#ajax_app_detail").show();
 						});
 				
 				$("#table").delegate(".demo","click",
 						function() {
+
 							$("#ajax_app_detail").load("cg/appdetail/" + $(this).attr("value"));
 							$("#ajax_app_detail").show();
 						});
@@ -164,7 +166,7 @@ function welcomeCheckboxClick() {
 					}, {
 						data : "description"
 					}, 
-					//{	data : "keywords" }, 
+					{	data : "keywords" }, 
 					{	data : "branch"
 					}, {
 						data : "category"

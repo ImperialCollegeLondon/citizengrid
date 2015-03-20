@@ -916,7 +916,10 @@ def getTableData(request):
         ls['category'] = [c.name for c in d.category.all().order_by('id')]
         ls['subcategory'] = [s.name for s in d.subcategory.all().order_by('id')]
         #ls['apphost'] = dict(ApplicationServerInfo.SERVER_APP_HOST_CHOICES).get(str(serverinfo[0]['apphost']))
-        ls['keywords'] = d.keywords
+        if 'http' in d.keywords:
+            ls['keywords'] = "<a class='hover' target='new' href='" + d.keywords + "'>"+ d.keywords +"</a>"
+        else:
+            ls['keywords'] = d.keywords
         ls['owner'] = d.owner.username
         app_list.append(ls)
 
@@ -940,7 +943,10 @@ def getUserApps(request):
         ls['category'] = [c.name for c in d.category.all().order_by('id')]
         ls['subcategory'] = [s.name for s in d.subcategory.all().order_by('id')]
         #ls['apphost'] = dict(ApplicationServerInfo.SERVER_APP_HOST_CHOICES).get(str(serverinfo[0]['apphost']))
-        ls['keywords'] = d.keywords
+        if 'http' in d.keywords:
+            ls['keywords'] = "<a class='hover' target='new' href='" + d.keywords + "'>"+ d.keywords +"</a>"
+        else:
+            ls['keywords'] = d.keywords
         ls['owner'] = d.owner.username
         app_list.append(ls)
 
