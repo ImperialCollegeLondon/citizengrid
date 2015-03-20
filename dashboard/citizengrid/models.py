@@ -229,7 +229,7 @@ class RawApplications(models.Model):
     start_date = models.DateTimeField(null=True)
     institution = models.CharField(max_length=128,null=True)
     subject = models.CharField(max_length=128,null=True)
-    research_focus = models.CharField(max_length=128,null=True)
+    research_focus = models.TextField(null=True)
     boinc_based = models.BooleanField()
     performance = models.CharField(max_length=128,null=True)
     url = models.CharField(max_length=128,null=True)
