@@ -10,6 +10,7 @@ secret_key.py
 *.class
 */target/
 *.db
+*.swp
 media/
 migrations/
 */citizengrid/migrations/

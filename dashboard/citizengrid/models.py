@@ -224,11 +224,14 @@ class UsersApplications(models.Model):
 
 
 class RawApplications(models.Model):
+    
     id = models.CharField(max_length=10, primary_key=True)
     name = models.CharField(max_length=128)
     start_date = models.DateTimeField(null=True)
     institution = models.CharField(max_length=128,null=True)
-    subject = models.CharField(max_length=128,null=True)
+    branch = models.CharField(max_length=128,null=True)
+    category = models.CharField(max_length=128,null=True)
+    subcategory = models.CharField(max_length=128,null=True)
     research_focus = models.TextField(null=True)
     boinc_based = models.BooleanField()
     performance = models.CharField(max_length=128,null=True)
