@@ -1,5 +1,10 @@
-1	Mathematics	Mathematics related descipline	1
-2	Logic	Logic related descipline	1
-3	Physics	Science to study nature	3
-4	Chemistry	Chemical	3
-5	Sociology	Social issues	2
+1|Mathematics|Mathematics related discipline|1
+2|Logic|Logic related discipline|1
+3|Physics|Science to study nature|3
+4|Chemistry|Chemical|3
+5|Sociology|Social issues|2
+6|Computing||1
+7|Climate||4
+8|Biology||5
+9|Geology||4
+10|Many||6

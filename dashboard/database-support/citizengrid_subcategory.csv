@@ -1,10 +1,46 @@
-1	Computer Science	Computer science related	1
-2	Statistics	Maths and statistics	1
-3	Philosphy	Philosphy related	2
-4	Reasoning	Reasoning related	2
-5	Particle Physics	Higher Physics	3
-6	Classical Mechanics	Object in motion	3
-7	Quantum Mechanics	Atom in motion	3
-8	Material Science	Material world	4
-9	Organic	Organic Chemistry	4
-10	Inorganic	Deals with Synthetic Chemicals	4
+1|Computer Science|Computer science related|1
+2|Statistics|Maths and statistics|1
+3|Philosphy|Philosphy related|2
+4|Reasoning|Reasoning related|2
+5|Particle Physics|Higher Physics|3
+6|Classical Mechanics|Object in motion|3
+7|Quantum Mechanics|Atom in motion|3
+8|Material Science|Material world|4
+9|Organic|Organic Chemistry|4
+10|Inorganic|Deals with Synthetic Chemicals|4
+11|Mathematics||1
+12|Astrophysics||3
+13|Number Theory||1
+14|Rendering||6
+15|Physics, biochemistry, and others||10
+16|Climate study||7
+17|Mathematics, Artificial intelligence, Physics||1
+18|Aerospace, Engineering||3
+19|Genetics||8
+20|Astronomy||3
+21|Data analysis, machine learning||6
+22|Cryptography, Mathematics||6
+23|Cryptography||6
+24|Software testing, game-playing||6
+25|Molecular biology||8
+26|Artificial intelligence||6
+27|Various Spanish projects||10
+28|Chemistry||4
+29|Physics||1
+30|Epidemiology||8
+31|Cognitive science||8
+32|Neural network||8
+33|Integer factorization||1
+34|Mathematics, finance, and artificial neural networks||1
+35|Number theory||1
+36|Optimization||6
+37|Seismology||9
+38|Software testing||6
+39|Cryptanalysis, Mathematics||1
+40|Astrobiology||8
+41|Materials science||4
+42|Genetic linkage analysis||8
+43|Cellular Biology||8
+44|Statistics||1
+45|Software testing, Mathematics||6
+46|Mathematics, physics, and evolution||1
