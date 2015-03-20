@@ -221,3 +221,20 @@ class UsersApplications(models.Model):
     run_count = models.IntegerField(default=1) 
     def __unicode__(self):
         return self.application
+
+
+class RawApplications(models.Model):
+    
+    id = models.CharField(max_length=10, primary_key=True)
+    name = models.CharField(max_length=128)
+    start_date = models.DateTimeField(null=True)
+    institution = models.CharField(max_length=128,null=True)
+    branch = models.CharField(max_length=128,null=True)
+    category = models.CharField(max_length=128,null=True)
+    subcategory = models.CharField(max_length=128,null=True)
+    research_focus = models.TextField(null=True)
+    boinc_based = models.BooleanField()
+    performance = models.CharField(max_length=128,null=True)
+    url = models.CharField(max_length=128,null=True)
+    def __unicode__(self):
+        return self.name
