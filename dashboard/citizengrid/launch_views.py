@@ -1,10 +1,10 @@
-import citizengrid.settings
+from citizengrid.settings.production import *
 
 import tempfile
 import os
 import utils
 import simplejson
-from subprocess import call
+import subprocess
 
 import boto.ec2
 
@@ -72,16 +72,6 @@ jnlp_base = """
 def launchapp(request, appid, launchtype, apptag):
     print "Request to launch app with ID <" + appid + "> and launch type <" + launchtype + ">" + "> with tag name <" + apptag +">"
     print "requesting user is " + str(request.user.id)
-    if apptag != "NONE":
-        print "Create an ISO with Group <" + apptag + ">"
-        (tagname,tagid) = str(apptag).split("-")
-        if tagname.lower() == 'vas':
-            print "create  VAS contextualized ISO"
-        elif tagname.lower() == 'boinc':
-            print "create BOINC contextualized ISO"
-        else:
-          pass
-
 
     appObject = ApplicationBasicInfo.objects.get(id=appid)
 
@@ -117,11 +107,9 @@ def launchapp(request, appid, launchtype, apptag):
 
         launcher_args = '    <argument>' + vm_name + '</argument>'
         for app in app_files:
-            launcher_args += '\n    <argument>' + os.path.join(request.build_absolute_uri("/"), 'media', app_owner, os.path.basename(app.file.name)) + '</argument>'
+            launcher_args += '\n    <argument>' + os.path.join(request.build_absolute_uri("/"), 'media', app_owner, vm_name, os.path.basename(app.file.name)) + '</argument>'
 
         fs = FileSystemStorage()
-
-
 
         filedir = os.path.join(fs.location, 'jnlp', request.user.get_username())
 
@@ -131,6 +119,25 @@ def launchapp(request, appid, launchtype, apptag):
 
         jnlp_file_name = tempfile.mktemp(suffix='.jnlp', dir=filedir)
         jnlp_file_url_path = os.path.join('/media', 'jnlp', request.user.get_username(), os.path.basename(jnlp_file_name))
+        executable_file_name = os.path.join(fs.location,'isocreator', os.path.basename(ISO_GENERATOR_EXE))
+        print "executable file"+ executable_file_name
+        if apptag != "NONE":
+            print "Create an ISO with Group <" + apptag + ">"
+            (tagname,tagid) = str(apptag).split("-")
+
+            if tagname.lower() == 'vas':
+                print "create  VAS contextualized ISO"
+                iso_file_name = tempfile.mktemp(suffix='.iso', dir=filedir)
+                iso_file_url_path = os.path.join('/media', 'jnlp', request.user.get_username(), os.path.basename(iso_file_name))
+                arg = [executable_file_name] + [tagid] + [iso_file_name]
+                subprocess.call(arg)
+                launcher_args += '\n    <argument>' + os.path.join(request.build_absolute_uri("/"), 'media', 'jnlp', request.user.get_username(), os.path.basename(iso_file_name)) + '</argument>'
+            elif tagname.lower() == 'boinc':
+                print "create BOINC contextualized ISO"
+            else:
+                pass
+        else:
+            pass
 
         # We now generate the jnlp file which will be returned to the client in order
         # to begin the webstart process that will download and run the image.
