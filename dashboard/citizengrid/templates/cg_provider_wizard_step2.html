@@ -51,10 +51,11 @@ color:white}
 
 {% block content %}
 <p>Step {{ wizard.steps.step1 }} of {{ wizard.steps.count }}</p> <br>
-<b>Provide Server image details in this page!</b>
-    <br>
+<b>Provide server image details for your application on this page:</b>
+<br/>
+<br/>
 <form id="step2" action="#" method="post">{% csrf_token %}
-<table>
+<table id="wizard-table-2">
 {{ wizard.management_form }}
 {% if wizard.form.forms %}
     {{ wizard.form.management_form }}
@@ -70,8 +71,11 @@ color:white}
 			<th>Server image <br>id</th>
 			<td>
 				<div class="lg-col-12">
-				<input type="text" class="form-control input-medium col-md-4" id="{{ field.id_for_label }}" name="{{ field.html_name }}" value="{{field.value}}"/>
+				<input type="text" class="form-control input-medium col-md-4" id="{{ field.id_for_label }}" name="{{ field.html_name }}" placeholder="{{field.value}}"/>
 				</div>
+			</td>
+			<td>
+			    <span class="glyphicon glyphicon-question-sign wizard-field-info" data-toggle="tooltip" data-placement="right" title="Enter the EC2 or OpenStack image ID for your server here (e.g. ami-00000001) if you are using a cloud platform for your server image."></span>
 			</td>
 		</tr>
 
@@ -80,11 +84,24 @@ color:white}
 			<th>Server image <br>location</th>
 			<td>
 				<div class="lg-col-12">
-					<input type="text" class="form-control input-medium col-md-4" id="{{ field.id_for_label }}" name="{{ field.html_name }}" value="{{field.value}}"/>
+					<input type="text" class="form-control input-medium col-md-4" id="{{ field.id_for_label }}" name="{{ field.html_name }}" placeholder="{{field.value}}"/>
 				</div>
 			</td>
+			<td>
+			    <span class="glyphicon glyphicon-question-sign wizard-field-info" data-toggle="tooltip" data-placement="right" title="If you are using a cloud platform for your server image, enter the EC2/OpenStack endpoint URL for the target platform here (e.g. http://targetcloud.domain:8773/services/Cloud)."></span>
+			</td>
 		</tr>
-	          {% else %}
+		{% elif field.label == 'Server hosting platform' %}
+		<tr>
+			<th valign="top">{{field.label}}</th>
+			<td>
+				{{field}}
+			</td>
+		    <td>
+			    <span class="glyphicon glyphicon-question-sign wizard-field-info" data-toggle="tooltip" data-placement="right" title="Select the hosting platform for the server element of this application. If the server is hosted externally from CitizenGrid, select None, you can provide client details on the next page."></span>
+			</td>
+		</tr>
+	    {% else %}
 		<tr>
 			<th valign="top">{{field.label}}</th>
 			<td>
@@ -135,7 +152,9 @@ color:white}
     <div class="col-lg-2"></div>
     </div>
     </td>
-
+    <td>
+	    <span class="glyphicon glyphicon-question-sign wizard-field-info" data-toggle="tooltip" data-placement="right" title="Upload a VirtualBox image here if you selected 'Local' for your server hosting platform. File upload does not apply if you wish to use a cloud platform and have provided an image ID and cloud endpoint URL."></span>
+	</td>
     </tr>
     </tbody>
 {% endif %}
