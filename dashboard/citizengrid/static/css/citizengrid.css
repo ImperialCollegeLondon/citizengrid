@@ -336,3 +336,51 @@ i {
 .top-two {
     margin-top: 2cm;
 }
+
+#wizard-table-1 {
+	table-layout: fixed;
+	width: 640px;
+}
+
+#wizard-table-1 th {
+	width: 100px;
+	padding-right: 10px;
+}
+
+#wizard-table-1 .wizard-control {
+	width: 480px;
+}
+
+#wizard-table-1 td {
+	vertical-align: top;
+}
+
+#wizard-table-2 td {
+	vertical-align: top;
+}
+
+#wizard-table-3 {
+	table-layout: fixed;
+	width: 640px;
+}
+
+#wizard-table-3 td {
+	vertical-align: top;
+}
+
+#wizard-table-3 .wizard-control {
+	width: 280px;
+}
+
+#wizard-table-3 th {
+	width: 140px;
+	padding-right: 10px;
+	vertical-align: top;
+}
+
+.wizard-field-info {
+	color: #777;
+	padding-left: 14px;
+	padding-top: 8px;
+	cursor: pointer;
+}

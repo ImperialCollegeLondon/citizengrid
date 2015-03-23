@@ -31,9 +31,13 @@ color:white}
 
 {% block content %}
 <p>Step {{ wizard.steps.step1 }} of {{ wizard.steps.count }}</p> <br/>
-<b class="bottom-three" >Provide the main type of client image details in this page! For more images, go to <b> manage images </b> in application info section once the application is successfully created!  </b> <br/> <br>
+<b class="bottom-three" >Provide details for the client image for your application on this page.
+<br/>
+ If you want to register information for multiple clients (which may use different image types), provide details for the first client here and use the <em>manage images</em> link on the application info page to configure additional clients once the application has been successfully created.</b>
+ <br/>
+ <br/>
 <form action="#" id="step3" method="post">{% csrf_token %}
-<table>
+<table id="wizard-table-3">
 {{ wizard.management_form }}
 {% if wizard.form.forms %}
     {{ wizard.form.management_form }}
@@ -46,28 +50,45 @@ color:white}
 	{% if field.label == 'Client image id' %}
 		<tr>
 			<th>Client image <br>id</th>
-			<td>
+			<td class="wizard-control">
 				<div class="lg-col-12">
-				<input type="text" class="form-control input-medium col-md-4" id="{{ field.id_for_label }}" name="{{ field.html_name }}"/>
+				<input type="text" class="form-control input-medium col-md-4" id="{{ field.id_for_label }}" name="{{ field.html_name }}" placeholder="None"/>
 				</div>
+			</td>
+			<td>
+			    <span class="glyphicon glyphicon-question-sign wizard-field-info" data-toggle="tooltip" data-placement="right" title="Enter the EC2 or OpenStack image ID for your client image here (e.g. ami-00000001) if you are providing a client image that the user will run on an cloud platform."></span>
 			</td>
 		</tr>
 
 		{% elif field.label == 'Client image location' %}
 		<tr>
 			<th>Client image <br>location</th>
-			<td>
+			<td class="wizard-control">
 				<div class="lg-col-12">
-					<input type="text" class="form-control input-medium col-md-4" id="{{ field.id_for_label }}" name="{{ field.html_name }}"/>
+					<input type="text" class="form-control input-medium col-md-4" id="{{ field.id_for_label }}" name="{{ field.html_name }}" placeholder="None"/>
 				</div>
 			</td>
+			<td>
+			    <span class="glyphicon glyphicon-question-sign wizard-field-info" data-toggle="tooltip" data-placement="right" title="If you are using a cloud platform for your client image, enter the EC2/OpenStack endpoint URL for the target platform here (e.g. http://targetcloud.domain:8773/services/Cloud)."></span>
+			</td>
 		</tr>
-	          {% else %}
+		{% elif field.label == 'Client platform' %}
 		<tr>
 			<th>{{field.label}}</th>
-			<td>
+			<td class="wizard-control">
 				{{field}}
 			</td>
+			<td>
+			    <span class="glyphicon glyphicon-question-sign wizard-field-info" data-toggle="tooltip" data-placement="right" title="Select the hosting platform for the client element of this application. If you are only hosting a server for this application on CitizenGrid, select None."></span>
+			</td>
+		</tr>
+	    {% else %}
+		<tr>
+			<th>{{field.label}}</th>
+			<td class="wizard-control">
+				{{field}}
+			</td>
+			<td></td>
 		</tr>
           {% endif %}
 	 {% endfor %}
@@ -114,7 +135,9 @@ color:white}
     <div class="col-lg-2"></div>
     </div>
     </td>
-
+    <td>
+	    <span class="glyphicon glyphicon-question-sign wizard-field-info" data-toggle="tooltip" data-placement="right" title="Upload a VirtualBox image here if you selected 'Local' for your client platform. File upload does not apply if you are configuring a client image here to run on a cloud platform."></span>
+	</td>
     </tr>
     </tbody>
 {% endif %}
@@ -140,7 +163,12 @@ color:white}
     {% endfor %}
 {% endif %}
 {% endblock %}
-<script>
+<script type="text/javascript">
+//Activate the info tooltips in the wizard
+$(document).ready(function() {
+	$('.wizard-field-info').tooltip();
+});
+
  $(function() {
 	    function toggle(id) {
 	         $('ul li input:checkbox').filter(function () {
