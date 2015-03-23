@@ -21,6 +21,7 @@ from citizengrid.models import UserCloudCredentials
 from citizengrid.models import ApplicationOpenstackImages
 from citizengrid.models import ApplicationEC2Images
 from citizengrid.models import CloudInstancesOpenstack
+from citizengrid.models import CloudInstancesAWS
 from citizengrid.models import UsersApplications
 from django.http.response import HttpResponseNotFound
 
@@ -158,7 +159,7 @@ def launchapp(request, appid, launchtype, apptag):
         return HttpResponse(formatted_jnlp, content_type='application/x-java-jnlp-file')
 
 
-def start_server(appid, cred, endpoint, imageRecord, instance_type, image_info, request):
+def start_server(appid, cred, endpoint, cloud, imageRecord, instance_type, image_info, request):
     if cred:
         print 'Retrieved credentials successfully.'
     else:
@@ -201,15 +202,25 @@ def start_server(appid, cred, endpoint, imageRecord, instance_type, image_info, 
     for i in reservation.instances:
         instance_ids.append(i.id)
     app = ApplicationBasicInfo.objects.get(id=appid)
-    appimg = ApplicationOpenstackImages.objects.get(id=imageRecord)
+    #appimg = ApplicationOpenstackImages.objects.get(id=imageRecord)
     creds = UserCloudCredentials.objects.get(id=cred.id)
     for id in instance_ids:
-        instanceRecord = CloudInstancesOpenstack(owner=request.user,
+        if cloud == 'os':
+            instanceRecord = CloudInstancesOpenstack(owner=request.user,
                                                  application=app,
-                                                 application_image=appimg,
+                                                 application_image=image_info,
                                                  credentials=creds,
                                                  instance_id=id,
                                                  status='PENDING')
+        elif cloud == 'ec2':
+            instanceRecord = CloudInstancesAWS(owner=request.user,
+                                                 application=app,
+                                                 application_image=image_info,
+                                                 credentials=creds,
+                                                 instance_id=id,
+                                                 status='PENDING')
+        else:
+            pass
         instanceRecord.save()
     response_data['result'] = 'OK'
     response_data['reservationId'] = reservation.id
@@ -248,7 +259,7 @@ def launchserver(request, appid, launchtype):
         # Error, an invalid cloud was specified
         pass
 
-    return start_server(appid, cred, endpoint, imageRecord,instance_type, image_info, request)
+    return start_server(appid, cred, endpoint, cloud, imageRecord, instance_type, image_info, request)
 
 @require_POST
 @login_required
@@ -261,60 +272,68 @@ def manage_instances(request, task, appid, instancerecord):
         print 'Request to undertake management task <' + task + '> for application id <' + appid + '>'
 
         application = ApplicationBasicInfo.objects.get(id=appid)
-        instances = CloudInstancesOpenstack.objects.filter(owner=request.user, application=application)
+        instances_openstack = CloudInstancesOpenstack.objects.filter(owner=request.user, application=application)
+        instances_ec2 = CloudInstancesAWS.objects.filter(owner=request.user, application=application)
 
-        if len(instances) == 0:
+        if len(instances_openstack) + len(instances_ec2) == 0:
             return HttpResponse(simplejson.dumps(response_data), content_type="application/json")
 
         # Prepare Openstack connection
-        credentials = instances[0].credentials
-        (access_key, secret_key) = utils.decrypt_cred_pair(credentials.access_key, credentials.secret_key)
-        parsed_url = urlparse(credentials.endpoint)
-        ip = parsed_url.netloc.split(':')[0]
-        local_region = boto.ec2.regioninfo.RegionInfo(name="openstack", endpoint=ip)
-        conn = boto.connect_ec2(aws_access_key_id=access_key,aws_secret_access_key=secret_key,is_secure=False,region=local_region,port=parsed_url.port,path=parsed_url.path)
-
-        #TODO: Add timeout if instance not accessible
-
-        print 'Set up connection with IP <' + ip + '>, port <' + str(parsed_url.port) + '> and path <' + parsed_url.path + '>.'
-
-        for instance in instances:
-            print 'Getting updated data for instance: ' + instance.instance_id
-            if instance.credentials.id != credentials.id:
-                print "Instance " + instance.instance_id + " uses different credentials, updated openstack connection..."
+        if len(instances_openstack) != 0:
+            for instance in instances_openstack:
+                print 'Getting updated data for EC2 instance: ' + instance.instance_id
                 credentials = instance.credentials
                 (access_key, secret_key) = utils.decrypt_cred_pair(credentials.access_key, credentials.secret_key)
                 parsed_url = urlparse(credentials.endpoint)
                 ip = parsed_url.netloc.split(':')[0]
                 local_region = boto.ec2.regioninfo.RegionInfo(name="openstack", endpoint=ip)
                 conn = boto.connect_ec2(aws_access_key_id=access_key,aws_secret_access_key=secret_key,is_secure=False,region=local_region,port=parsed_url.port,path=parsed_url.path)
-
-            instance_data= conn.get_all_instances(instance_ids=[instance.instance_id])
-#             r1 = instance_data[0]
-#             instance = r1.instances[0]
-#             print instance.state
-#             print r1
-            #instance_data = conn.get_only_instances(instance_ids=[instance.instance_id])
-            # If nothing was returned, we assume this instance has shut down so delete it from the DB
-            if len(instance_data) == 0:
-                CloudInstancesOpenstack.objects.filter(instance_id=instance.instance_id).delete()
-                print 'Deleted record for server with instance ID <' + instance.instance_id + '> that no longer exists.'
-            else:
-                print 'Instance <' + instance_data[0].instances[0].id + '> currently in state <' + instance_data[0].instances[0].state + '> with IP <' + instance_data[0].instances[0].public_dns_name + '>'
-
-                instance_info = {}
-                instance_info['id'] = instance_data[0].instances[0].id
-                instance_info['state'] = instance_data[0].instances[0].state
-                # Update instance state in DB
-                if instance_info['state'] != instance.status:
-                    instance.status = instance_info['state']
-                    instance.save()
-                instance_info['ip'] = instance_data[0].instances[0].public_dns_name
-
-                response_data[instance_data[0].instances[0].id] = instance_info
+                reservations = conn.get_all_instances(instance_ids=[instance.instance_id])
+                if len(reservations) == 0:
+                    CloudInstancesOpenstack.objects.filter(instance_id=instance.instance_id).delete()
+                else:
+                    for reservation in reservations:
+                        print 'Reservation ID: ' + reservation.id
+                        for instanceOS in reservation.instances:
+                            print 'Instance ID: ' + instanceOS.id
+                            instance_info = {}
+                            instance_info['id'] = instanceOS.id
+                            instance_info['state'] = instanceOS.state
+                            # Update instance state in DB
+                            if instance_info['state'] != instance.status:
+                                instance.status = instance_info['state']
+                                instance.save()
+                                instance_info['ip'] = instanceOS.public_dns_name
+                            response_data[instanceOS.id] = instance_info
 
 
-
+        if len(instances_ec2) != 0:
+            for instance in instances_ec2:
+                print 'Getting updated data for EC2 instance: ' + instance.instance_id
+                credentials = instance.credentials
+                (access_key, secret_key) = utils.decrypt_cred_pair(credentials.access_key, credentials.secret_key)
+                parsed_url = urlparse(credentials.endpoint)
+                ip = parsed_url.netloc.split(':')[0]
+                local_region = boto.ec2.regioninfo.RegionInfo(name="openstack", endpoint=ip)
+                conn = boto.connect_ec2(aws_access_key_id=access_key,aws_secret_access_key=secret_key,is_secure=False,region=local_region,port=parsed_url.port,path=parsed_url.path)
+                reservations = conn.get_all_instances(instance_ids=[instance.instance_id])
+                if len(reservations) == 0:
+                    CloudInstancesAWS.objects.filter(instance_id=instance.instance_id).delete()
+                else:
+                    for reservation in reservations:
+                        print 'Reservation ID: ' + reservation.id
+                        for instanceEC2 in reservation.instances:
+                            print 'Instance ID: ' + instanceEC2.id
+                            instance_info = {}
+                            instance_info['id'] = instanceEC2.id
+                            instance_info['state'] = instanceEC2.state
+                            instance_info['ip'] = instanceEC2.public_dns_name
+                            # Update instance state in DB
+                            if instance_info['state'] != instance.status:
+                                instance.status = instance_info['state']
+                                instance.save()
+                                instance_info['ip'] = instanceEC2.public_dns_name
+                            response_data[instanceEC2.id] = instance_info
 
     elif task == 'shutdown':
         print 'Request to shutdown instance ' + instancerecord + ' for application: ' + appid
@@ -324,14 +343,20 @@ def manage_instances(request, task, appid, instancerecord):
         try:
             instance = CloudInstancesOpenstack.objects.get(owner=request.user, application=application, instance_id=instancerecord)
         except CloudInstancesOpenstack.DoesNotExist:
-            print 'A cloud instance could not be found for ID ' + instancerecord + ' for application: ' + appid + " for the current user."
+            print 'The OpenStack cloud instance could not be found for ID ' + instancerecord + ' for application: ' + appid + " for the current user."
+
+        if instance == None:
+            try:
+                instance = CloudInstancesAWS.objects.get(owner=request.user, application=application, instance_id=instancerecord)
+            except CloudInstancesOpenstack.DoesNotExist:
+                print 'The AWS cloud instance could not be found for ID ' + instancerecord + ' for application: ' + appid + " for the current user."
 
         if instance != None:
             #print '<' + str(instance.length) + '> matching instances found. Shutting down the first matching instance.'
             print 'Matching instance found. Shutting this instance down.'
 
             inst_for_shutdown = instance
-            # Prepare Openstack connection
+            # Prepare Openstack/EC2 connection
             credentials = inst_for_shutdown.credentials
             (access_key, secret_key) = utils.decrypt_cred_pair(credentials.access_key, credentials.secret_key)
             parsed_url = urlparse(credentials.endpoint)

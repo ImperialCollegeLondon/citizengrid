@@ -214,6 +214,20 @@ class CloudInstancesOpenstack(models.Model):
     status = models.CharField(max_length=32)
     image_type = models.CharField(max_length=1, choices=IMAGE_TYPE, default='C')
 
+class CloudInstancesAWS(models.Model):
+
+    IMAGE_TYPE = (
+        ('C', 'Client'),
+        ('S', 'Server'),
+    )
+    owner =  models.ForeignKey(User)
+    application = models.ForeignKey(ApplicationBasicInfo)
+    application_image = models.ForeignKey(ApplicationEC2Images)
+    credentials = models.ForeignKey(UserCloudCredentials)
+    instance_id = models.CharField(max_length=16)
+    status = models.CharField(max_length=32)
+    image_type = models.CharField(max_length=1, choices=IMAGE_TYPE, default='C')
+
 class UsersApplications(models.Model):
     user =  models.ForeignKey(User)
     application = models.ForeignKey(ApplicationBasicInfo)

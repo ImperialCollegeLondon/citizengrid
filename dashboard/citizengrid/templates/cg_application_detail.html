@@ -37,7 +37,8 @@
                                             <th></th>
                                             <th></th>
                                     </thead>
-                                    <tbody></tbody>
+                                    <tbody>
+                                    </tbody>
                                 </table>
                             </div>
                         </div>
@@ -142,7 +143,7 @@
                             </select>
                         </div>
                         <div class="form-group">
-                            <label for="selectTags">Application tags</label>
+                            <label for="selectTagsCloudServer">Application tags</label>
                             <div class="" id="selectTagsCloudServer">
 
                             </div>
@@ -202,7 +203,6 @@
 $(".btn-launch").on("click", function(event) {
 	var appName = $(event.target).data("appname");
 	var appId = $(event.target).data("appid");
-    var appTag = $("#selectTags" ).val();
     var appIcon = $(event.target).data("appicon");
           $.ajax({
             url: 'cg/manage/applicationgrouptag/' + appId,
@@ -214,12 +214,10 @@ $(".btn-launch").on("click", function(event) {
         });
 
 
-   // $('#launchAppModal').modal("show");
 	$(".modal-body #appimg").attr("src", appIcon);
 	$(".modal-body #appname").html("Application: <b>" + appName + "</b>");
 	$(".modal-footer #launchappbtn").data("id", appId);
 	$('.launchapp-btn').data("id", appId);
-    $('.launchapp-btn').data("tag", appTag);
 
 });
 
@@ -232,7 +230,7 @@ $(".launchapp-btn").on("click", function(event) {
 	if(console && console.log) {
 		console.log('About to launch application with ID: ' + appId);
 	}
-    alert("appTag" + appTag);
+    alert("appTag " + appTag);
     if(console && console.log) {
 		console.log('About to launch application with tag: ' + appTag);
 	}
@@ -295,7 +293,7 @@ $(".launchapp-btn").on("click", function(event) {
         // variables
         var url = $('#selectCloud').text();
         var credAlias = $('#selectCredentials').text().split(" - ")[0];
-        var appTag = $("#selectTags").val();
+        //var appTag = $("#selectTags").val();
         var appId = $('#startCloudServerForm input[name=appid]').val();
         var recordId = $('#startCloudServerForm input[name=recordid]').val();
         var resource_type = $("#resourceType" ).val()
@@ -307,9 +305,9 @@ $(".launchapp-btn").on("click", function(event) {
             console.log('App ID: ' + appId);
             console.log('Record ID: ' + recordId);
             console.log('Resource Type: ' + resource_type);
-            console.log('Tag name: ' + appTag);
+           // console.log('Tag name: ' + appTag);
         }
-        alert("appTag" + appTag);
+       // alert("appTag " + appTag);
         $('#start-cloud-loading').show();
         $.ajax({
             url: '/cg/launchserver/' + appId + '/',
