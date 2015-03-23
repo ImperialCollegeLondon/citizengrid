@@ -5,6 +5,7 @@ import os
 import utils
 import simplejson
 import subprocess
+import base64
 
 import boto.ec2
 
@@ -159,7 +160,23 @@ def launchapp(request, appid, launchtype, apptag):
         return HttpResponse(formatted_jnlp, content_type='application/x-java-jnlp-file')
 
 
-def start_server(appid, cred, endpoint, cloud, imageRecord, instance_type, image_info, request):
+def start_server(appid, cred, endpoint, cloud, imageRecord, appTag, instance_type, image_info, request):
+
+    contextData = ""
+    if appTag != "NONE":
+            print "Start server with Group ID <" + appTag + ">"
+            (tagname,tagid) = str(appTag).split("-")
+
+            if tagname.lower() == 'vas':
+                print "Create  VAS contextualization"
+                contextData ="[amiconfig]\nplugins=cernvm\n\n[cernvm]\ncontextualization_key=cfcbde8ad2d4431d8ecc6dd801015252\nliveq_queue_id="
+                contextData += appTag
+                print "Context Data \n" + contextData
+            elif tagname.lower() == 'boinc':
+                print "Create Boinc contextualization"
+            else:
+                pass
+
     if cred:
         print 'Retrieved credentials successfully.'
     else:
@@ -195,7 +212,8 @@ def start_server(appid, cred, endpoint, cloud, imageRecord, instance_type, image
     else:
         print 'Image is available, about to start image with id <' + image_data.id + '>...'
     response_data = {}
-    reservation = conn.run_instances(image_data.id, 1, 1, key_name=None, security_groups=None, user_data=None,
+
+    reservation = conn.run_instances(image_data.id, 1, 1, key_name=None, security_groups=None, user_data=contextData,
                                      addressing_type=None, instance_type=instance_type, placement=None)
     print 'Instance pending with reservation ID: ' + reservation.id
     instance_ids = []
@@ -232,18 +250,20 @@ def start_server(appid, cred, endpoint, cloud, imageRecord, instance_type, image
 @require_POST
 @login_required
 def launchserver(request, appid, launchtype):
-    print 'Request to launch cloud server for application: ' + appid
+    print "Request to launch cloud server for application: " + appid
+    print "requesting user is " + str(request.user.id)
 
     endpoint = request.POST['endpoint']
     instance_type = request.POST['resource_type']
     #instance_type = 'Large'
     alias = request.POST['alias']
     recordId = request.POST['recordId']
+    appTag = request.POST['appTag']
     cloud = recordId.split(':')[0]
     imageRecord = recordId.split(':')[1]
 
     print instance_type
-
+    print 'appTag received' + appTag
     print 'Launch server on cloud <' + cloud + '> with image record <' + imageRecord + '> using credential alias <' + alias + '> and cloud url <' + endpoint + '>'
 
     # Lookup credentials for this user and the specified endpoint
@@ -259,7 +279,7 @@ def launchserver(request, appid, launchtype):
         # Error, an invalid cloud was specified
         pass
 
-    return start_server(appid, cred, endpoint, cloud, imageRecord, instance_type, image_info, request)
+    return start_server(appid, cred, endpoint, cloud, imageRecord, appTag, instance_type, image_info, request)
 
 @require_POST
 @login_required

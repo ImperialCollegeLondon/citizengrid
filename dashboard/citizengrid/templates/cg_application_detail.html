@@ -293,7 +293,7 @@ $(".launchapp-btn").on("click", function(event) {
         // variables
         var url = $('#selectCloud').text();
         var credAlias = $('#selectCredentials').text().split(" - ")[0];
-        //var appTag = $("#selectTags").val();
+        var appTag = $(".modal-body #tagid" ).val()
         var appId = $('#startCloudServerForm input[name=appid]').val();
         var recordId = $('#startCloudServerForm input[name=recordid]').val();
         var resource_type = $("#resourceType" ).val()
@@ -305,17 +305,18 @@ $(".launchapp-btn").on("click", function(event) {
             console.log('App ID: ' + appId);
             console.log('Record ID: ' + recordId);
             console.log('Resource Type: ' + resource_type);
-           // console.log('Tag name: ' + appTag);
+            console.log('Tag name: ' + appTag);
         }
        // alert("appTag " + appTag);
         $('#start-cloud-loading').show();
         $.ajax({
-            url: '/cg/launchserver/' + appId + '/',
+            url: '/cg/launchserver/' + appId + "/",
             data: {
                 endpoint: url,
                 alias: credAlias,
                 recordId: recordId,
-                resource_type:resource_type
+                resource_type:resource_type,
+                appTag: appTag,
             },
             type: 'POST',
             success: function(data) {
