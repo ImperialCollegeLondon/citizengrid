@@ -261,7 +261,8 @@ def launchserver(request, appid, launchtype):
     #instance_type = 'Large'
     alias = request.POST['alias']
     recordId = request.POST['recordId']
-    appTag = request.POST['appTag']
+
+    appTag = request.POST.get('appTag', '')
     cloud = recordId.split(':')[0]
     imageRecord = recordId.split(':')[1]
 

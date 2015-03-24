@@ -739,6 +739,7 @@ TEMPLATES = {"step1": "cg_provider_wizard_step1.html",
 class ApplicationNewAppWizard(SessionWizardView):
 
         file_storage = FileSystemStorage(location=os.path.join('citizengrid','media'))
+        print 'media folder is ' + str(file_storage)
         def get_template_names(self):
             return [TEMPLATES[self.steps.current]]
 
@@ -782,7 +783,7 @@ class ApplicationNewAppWizard(SessionWizardView):
         """
         def get_form_initial(self, step):
             print self.get_form_list()
-            print "Entering Now" + str(self.storage.get_step_data('step2'))
+            print "Entering Now " + str(self.storage.get_step_data('step2'))
             initial ={}
             if self.storage.get_step_data('step1') is not None:
                 val = self.storage.get_step_data('step1')
