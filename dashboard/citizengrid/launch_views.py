@@ -256,6 +256,7 @@ def launchserver(request, appid, launchtype):
     print "Request to launch cloud server for application: " + appid
     print "requesting user is " + str(request.user.id)
 
+    appTag = "NONE"
     endpoint = request.POST['endpoint']
     instance_type = request.POST['resource_type']
     #instance_type = 'Large'
@@ -265,6 +266,9 @@ def launchserver(request, appid, launchtype):
     appTag = request.POST.get('appTag', '')
     cloud = recordId.split(':')[0]
     imageRecord = recordId.split(':')[1]
+
+    if appTag =="":
+        appTag = "NONE"
 
     print instance_type
     print 'appTag received' + appTag
