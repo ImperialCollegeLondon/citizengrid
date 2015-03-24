@@ -173,7 +173,7 @@ def start_server(appid, cred, endpoint, cloud, imageRecord, appTag, instance_typ
             if tagname.lower() == 'vas':
                 print "Create  VAS contextualization"
                 contextData ="[amiconfig]\nplugins=cernvm\n\n[cernvm]\ncontextualization_key=cfcbde8ad2d4431d8ecc6dd801015252\nliveq_queue_id="
-                contextData += appTag
+                contextData += tagid
                 print "Context Data \n" + contextData
             elif tagname.lower() == 'boinc':
                 print "Create Boinc contextualization"
