@@ -25,76 +25,25 @@
 				          You first ran this application on {{ my_stats.creation_time }}
 				          <p>You have run this application {{ my_stats.run_count }} times</p>
 				      	</div>
-      					<hr>
-      					<!-- 
-						<h4>Available Cloud Instances</h4>
-						<table class="appinfo">
-							<tr>
-								<td class="cloud_images" style="vertical-align: top;">
-									<div class="table-responsive">
-										<table class="table table-condensed">
-											<thead>
-												<th>Type</th>
-												<th>Cloud</th>
-												<th>Image ID</th>
-												<th>Cloud URL</th>
-											</thead>
-											<tbody>
-												{% for image in ec2_images %} 
-													<tr>
-														<td>{{ image.image_type }}</td>
-														<td>EC2</td>
-														<td>{{ image.image_id }}</td>
-														<td>{{ image.zone_url }}</td>
-													</tr>
-												{% endfor %} 
-													
-												{% for image in os_images %} 
-													<tr>
-														<td>{{ image.image_type }}</td>
-														<td>Openstack</td>
-														<td>{{ image.image_id }}</td>
-														<td>{{ image.zone_url }}</td>
-													</tr>
-													{% endfor %}
-												</tbody>
-											</table>
-										</div>
-									</td>
-								</tr>
-							</table>
-						</div>	
-		
+      					<hr>			
 						<div class="appinfo">
-							<h4>Files</h4>
-							<table class="appinfo">
-								<tr>
-									<td class="cloud_images" style="vertical-align: top;">
-										<div class="table-responsive">
-											<table class="table table-condensed">
-												<thead>
-													<th>Type</th>
-													<th>Name</th>
-												</thead>
-												<tbody>
-									{% for key, files_list_dict in file_info.items %} 
-										{% for app_file_dict in files_list_dict %}
-										<tr>
-											<td>{{ app_file_dict.formatstring }}</td>
-											<td>{{ app_file_dict.name }}</td>
-										</tr>
-										{% endfor %} 
-									{% endfor %}
-												</tbody>
-											</table>
-										</div>
-									</td>
-								</tr>
-							</table>
-						</div>		
-						-->			
-						<div class="appinfo">
-							<h4>Current Status</h4>
+						
+							<span>Running server instances: <img class="loading" src="/static/img/loading.gif"></img></span>
+
+                            <div class="table-responsive">
+							        <table class="table table-condensed" id="my_instance_info_{{ app.id }}">
+                                    <thead>
+                                        <tr>
+                                            <th>Instance ID</th>
+                                            <th>Status</th>
+                                            <th>Address</th>
+                                            <th></th>
+                                            <th></th>
+                                    </thead>
+                                    <tbody></tbody>
+                                </table>
+                                </div>
+                                	<h4>Current Status</h4>
 								<table class="table table-condensed">
 									<thead>
 											<th>Instance ID</th>

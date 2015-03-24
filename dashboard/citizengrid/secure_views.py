@@ -22,7 +22,7 @@ from django.http.response import HttpResponseNotAllowed, HttpResponseNotFound,\
 from django.forms.util import ErrorList
 from django.template.loader import render_to_string
 from citizengrid.models import UserInfo, ApplicationBasicInfo, ApplicationServerInfo, ApplicationClientInfo, Branch, Category, SubCategory, \
-    UserCloudCredentials,UsersApplications, CloudInstancesOpenstack
+    UserCloudCredentials,UsersApplications, CloudInstancesOpenstack,CloudInstancesAWS
 from citizengrid.models import ApplicationEC2Images, ApplicationOpenstackImages
 from citizengrid.forms import ApplicationBasicInfoForm, ApplicationServerInfoForm, ApplicationClientInfoForm, CloudCredentialsForm, CloudImageForm, \
     UpdateUserCreationForm,LocalImageForm
@@ -1075,41 +1075,47 @@ def my_application(request, appid):
     
     my_stats = UsersApplications.objects.get(user=request.user,application=appid)
     
-    instances = CloudInstancesOpenstack.objects.filter(owner=request.user, application=app)
+    os_instances = CloudInstancesOpenstack.objects.filter(owner=request.user, application=app)
 
-    files = ApplicationFile.objects.filter(application=appid)
+    aws_instances = CloudInstancesAWS.objects.filter(owner=request.user, application=app)
     
-    os_client_images = ApplicationOpenstackImages.objects.filter(application=appid)
+    #local_instances = what?
     
-    ec2_client_images = ApplicationEC2Images.objects.filter(application=appid)
+    #files = ApplicationFile.objects.filter(application=appid)
+    
+    #os_client_images = ApplicationOpenstackImages.objects.filter(application=appid)
+    
+    #ec2_client_images = ApplicationEC2Images.objects.filter(application=appid)
 
-    file_info_dict = {}
     instance_list = []
     
-    for appfile in files:
-        if appfile.application.id not in file_info_dict:
-            file_info_dict[appfile.application.id] = []
-        file_info = {}
-        print "Got file " + str(appfile)
-        file_info['appfile'] = appfile
-        file_info['name'] = appfile.filename()
-        file_info['path'] = os.path.join('media', request.user.username, appfile.filename())
-        file_info['formatstring'] = appfile.file_format
-        file_info_dict[appfile.application.id].append(file_info)
-        
-   
-    if len(instances) > 0:
-        print "Found " + str(len(instances)) + " openstack cloud instances"
-        credentials = instances[0].credentials
+    #for appfile in files:
+    #    if appfile.application.id not in file_info_dict:
+    #        file_info_dict[appfile.application.id] = []
+    #    file_info = {}
+     #   file_info['appfile'] = appfile
+    #    file_info['name'] = appfile.filename()
+    #    file_info['path'] = os.path.join('media', request.user.username, appfile.filename())
+    #    file_info['formatstring'] = appfile.file_format
+    #    file_info_dict[appfile.application.id].append(file_info)
+         
+    if len(os_instances) > 0:
+        print "Found " + str(len(os_instances)) + " openstack cloud instances"
+        credentials = os_instances[0].credentials
         (access_key, secret_key) = utils.decrypt_cred_pair(credentials.access_key, credentials.secret_key)
         parsed_url = urlparse(credentials.endpoint)
         ip = parsed_url.netloc.split(':')[0]
         local_region = boto.ec2.regioninfo.RegionInfo(name="openstack", endpoint=ip)
-        conn = boto.connect_ec2(aws_access_key_id=access_key,aws_secret_access_key=secret_key,is_secure=False,region=local_region,port=parsed_url.port,path=parsed_url.path)
+        conn = boto.connect_ec2(aws_access_key_id=access_key,
+                                aws_secret_access_key=secret_key,
+                                is_secure=False,
+                                region=local_region,
+                                port=parsed_url.port,
+                                path=parsed_url.path)
 
         print 'Set up connection with IP ' + ip + ', port ' + str(parsed_url.port) + ', path ' + parsed_url.path
 
-        for instance in instances:
+        for instance in os_instances:
             print 'For each instance: ' + instance.instance_id
             if instance.credentials.id != credentials.id:
                 print "Instance " + instance.instance_id + " uses different credentials, updated openstack connection..."
@@ -1131,7 +1137,7 @@ def my_application(request, appid):
                 instance_list.append( instance_info )
 
 
-    return render_to_response('cg_myapp_detail_template.html', {'my_stats':my_stats, 'app':app,'instance_list':instance_list, 'file_info': file_info_dict,'os_images':os_client_images, 'ec2_images':ec2_client_images })
+    return render_to_response('cg_myapp_detail_template.html', {'my_stats':my_stats, 'app':app,'instance_list':instance_list })
 
 
     #===================================================================================================================================

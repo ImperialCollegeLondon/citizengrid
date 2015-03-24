@@ -83,14 +83,7 @@ def launchapp(request, appid, launchtype, apptag):
     #    from subprocess import call
     #    call([], executable=settings.ISO_GENERATOR_EXE)
     
-    try:
-        rec = UsersApplications.objects.get(user=request.user,application=appObject)   
-        rec.run_count = rec.run_count + 1   
-        print "Updated record to UsersApplications"   
-    except UsersApplications.DoesNotExist:
-        rec = UsersApplications(user=request.user,application=appObject)          
-        print "Inserted new record to UsersApplications"   
-    rec.save()
+
     # removed owner_id=request.user as any user can launch the application
     #app_files = ApplicationFile.objects.filter(owner_id=request.user, file_type='S', application_id=appid)
     app_files = ApplicationFile.objects.filter( file_type='S', application_id=appid,image_type='C')
@@ -157,6 +150,16 @@ def launchapp(request, appid, launchtype, apptag):
         with open(jnlp_file_name, 'w') as f:
             f.write(formatted_jnlp)
 
+
+        try:
+            rec = UsersApplications.objects.get(user=request.user,application=appObject)   
+            rec.run_count = rec.run_count + 1   
+            print "Updated record to UsersApplications"   
+        except UsersApplications.DoesNotExist:
+            rec = UsersApplications(user=request.user,application=appObject)          
+            print "Inserted new record to UsersApplications"   
+        rec.save()
+    
         return HttpResponse(formatted_jnlp, content_type='application/x-java-jnlp-file')
 
 

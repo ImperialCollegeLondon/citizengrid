@@ -9,6 +9,7 @@ secret_key.py
 *.pyc
 *.class
 */target/
+*.zip
 *.db
 *.swp
 *.backup
