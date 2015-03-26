@@ -505,16 +505,8 @@ public class ClientVboxLauncher extends JFrame {
 	 * @param fileLoc
 	 * @return
 	 */
-	private static String extractFileExtension(String fileLoc)  {
-		String extension = "";
-		if ( fileLoc != null ) {
-			int len = fileLoc.length();
-			int pos = fileLoc.lastIndexOf(".");
-			if ( pos > 0 ) {
-				extension = fileLoc.substring(pos, len);
-			}
-		}
-		return extension;
+	private static String extractFileExtension(String fileLoc) {
+		return fileLoc.substring(fileLoc.lastIndexOf("."), fileLoc.length());
 	}
 
 	public String downloadFile(String filename) {
