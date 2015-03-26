@@ -13,6 +13,7 @@ secret_key.py
 *.db
 *.swp
 *.backup
+*.pem
 media/
 migrations/
 */citizengrid/migrations/

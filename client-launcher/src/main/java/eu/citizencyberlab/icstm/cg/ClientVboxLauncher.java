@@ -1,4 +1,4 @@
-package main.java.eu.citizencyberlab.icstm.cg;
+package eu.citizencyberlab.icstm.cg;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
@@ -505,8 +505,16 @@ public class ClientVboxLauncher extends JFrame {
 	 * @param fileLoc
 	 * @return
 	 */
-	private static String extractFileExtension(String fileLoc) {
-		return fileLoc.substring(fileLoc.lastIndexOf("."), fileLoc.length());
+	private static String extractFileExtension(String fileLoc)  {
+		String extension = "";
+		if ( fileLoc != null ) {
+			int len = fileLoc.length();
+			int pos = fileLoc.lastIndexOf(".");
+			if ( pos > 0 ) {
+				extension = fileLoc.substring(pos, len);
+			}
+		}
+		return extension;
 	}
 
 	public String downloadFile(String filename) {
