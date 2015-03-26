@@ -18,6 +18,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.security.cert.CertificateException;
+import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
@@ -42,6 +44,9 @@ import org.apache.http.HttpEntity;
 import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
+import org.apache.http.conn.ssl.AllowAllHostnameVerifier;
+import org.apache.http.conn.ssl.SSLContextBuilder;
+import org.apache.http.conn.ssl.TrustStrategy;
 import org.apache.http.entity.BufferedHttpEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
@@ -268,7 +273,16 @@ public class ClientVboxLauncher extends JFrame {
 
 		@Override
 		protected String doInBackground() throws Exception {
-			CloseableHttpClient httpClient = HttpClients.createDefault();
+			//CloseableHttpClient httpClient = HttpClients.createDefault();
+			CloseableHttpClient httpClient = 
+					HttpClients.custom().setHostnameVerifier(new AllowAllHostnameVerifier()).
+                    setSslcontext(new SSLContextBuilder().
+                    loadTrustMaterial(null, new TrustStrategy() {
+                        public boolean isTrusted(X509Certificate[] arg0, String arg1) throws CertificateException
+                        {
+                            return true;
+                        }
+                    }).build()).build();
 			HttpGet getreq = new HttpGet(url);
 			CloseableHttpResponse response = null;
 			try {
@@ -455,7 +469,7 @@ public class ClientVboxLauncher extends JFrame {
 		boolean registerAppliance = false;
 		for (String fileLoc : fileLocations) {
 			sLog.info(fileLoc);
-			sLog.info("sinze of the file is " + fileLocations.size());
+			sLog.info("size of the file is " + fileLocations.size());
 
 			String extn = extractFileExtension(fileLoc);
 			sLog.info("Extension of file <" + fileLoc + "> is <" + extn + ">");
@@ -484,7 +498,7 @@ public class ClientVboxLauncher extends JFrame {
 		launcher.getInfoPanel().updateInfo(
 				"Starting CitizenGrid Application...");
 
-		launcher.vboxRunMachine(mgr, machineId);
+		launcher.vboxRunMachine(mgr, machineId, appName);
 		if (mgr != null) {
 			sLog.info("Value of mgr after run machine: " + mgr.toString());
 		} else {
@@ -667,16 +681,23 @@ public class ClientVboxLauncher extends JFrame {
 		return "";
 	}
 
-	public void vboxRunMachine(VirtualBoxManager mgr, IMachine machineId) {
+	public void vboxRunMachine(VirtualBoxManager mgr, IMachine machineId, String appName) {
 		System.out.println("\nAttempting to start VM '" + machineId + "'");
 		IVirtualBox vbox = mgr.getVBox();
 		ISession session = mgr.getSessionObject();
+		//sLog.info("We are going to launch: " + machineId.getName());
 		for (IMachine mach : vbox.getMachines()) {
 
 			sLog.info("Sessions state " + session.getState().toString());
-
-			IProgress p = mach.launchVMProcess(session, "gui", "");
-			p.waitForCompletion(10000);
+			sLog.info("Looking at machine: " + mach.getName());
+			if(mach.getName().equals(appName)) {
+				IProgress p = mach.launchVMProcess(session, "gui", "");
+				p.waitForCompletion(10000);	
+			}
+			else {
+				sLog.info("<" + mach.getName() + "> is not our machine continue search...");
+			}
+			
 		}
 
 		session.unlockMachine();
