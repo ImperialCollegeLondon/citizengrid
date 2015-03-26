@@ -4,7 +4,7 @@
   <head>
     <title>{% block title %}Citizen Cyberlab{% endblock %}</title>
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
+	<link rel="shortcut icon" type="image/png" href="{{ STATIC_URL }}img/favicon.ico">
     <!-- Bootstrap -->
     <link href="/css/bootstrap.min.css" rel="stylesheet" media="screen">
     <link rel="stylesheet" href="/css/font-awesome.min.css">
@@ -204,24 +204,45 @@
 	    </div>
 	  </div>
 	</div>
- <!-- Piwik -->
-<script type="text/javascript">
-  var _paq = _paq || [];
-  _paq.push(["setDocumentTitle", document.domain + "/" + document.title]);
-  _paq.push(["setCookieDomain", "*.146.169.46.115",  "*.146.169.2.12"]);
 
-  _paq.push(['trackPageView']);
-  _paq.push(['enableLinkTracking']);
-  (function() {
-    var u=(("https:" == document.location.protocol) ? "https" : "http") + "://piwik.mobilecollective.co.uk/";
-    _paq.push(['setTrackerUrl', u+'piwik.php']);
-    _paq.push(['setSiteId', 3]);
-    var d=document, g=d.createElement('script'), s=d.getElementsByTagName('script')[0]; g.type='text/javascript';
-    g.defer=true; g.async=true; g.src=u+'piwik.js'; s.parentNode.insertBefore(g,s);
-  })();
+<script type="text/javascript">
+! function () {
+    $(document).ready(function () {
+        var build_div = function () {
+            $('body').append('<div class="alert alert-info" role="alert" id="alert-modal" style="display:none"> <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button><div class="alert-body"></div></div>');
+
+        };
+    // override default alert action
+        window.alert = function (m) {
+            build_div();
+            
+            $($('#alert-modal .alert-body').get(0)).html(m);
+ 
+            $('#alert-modal').css({
+                position: 'fixed',
+                bottom: 0,
+                width: $(window).width(),
+                'padding-left': '20%',
+                opacity: 1,
+                'z-index': 99999
+            
+            });
+
+            $('#alert-modal').slideDown(500, function () {
+                setTimeout(function () {
+                    $('#alert-modal').fadeOut(1000,function(){
+                       // finally, remove the div
+                        $('#alert-modal').remove();
+                    });
+
+                }, 3000);
+            });
+
+        };
+    });
+}();
 </script>
-<noscript><p><img src="http://piwik.mobilecollective.co.uk/piwik.php?idsite=3" style="border:0;" alt="" /></p></noscript>
-<!-- End Piwik Code -->
+
 
  <!-- Google Tag Manager -->
 <noscript><iframe src="//www.googletagmanager.com/ns.html?id=GTM-WHPS24"
