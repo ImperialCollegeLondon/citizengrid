@@ -18,6 +18,7 @@
         <div class="panel-body">
             <div>
                 <div class="appinfo"><img class="app-icon" src={{ app.iconfile }}>{{ app.description }} </div>
+				
 				{% if has_client == True %}
                 <div  id="client-launch" data-toggle="modal" 
                 						data-appname="{{ app.name }}" 
@@ -27,11 +28,7 @@
                 						class="btn btn-success btn-launch">
                 						Launch Application Client Locally
                 </div>
-                {% elif "http" in app.keywords %}
-                <div class="appinfo"><a href='{{ app.keywords }}' target='_blank'>{{ app.keywords }}</a>
-                </div>
-				{% endif %}
-            </div>
+
 
                  <div class="server-instances" id="server_instances">
                        <hr/><span>Running server instances: <img class="loading" src="/static/img/loading.gif"></span>
@@ -118,6 +115,14 @@
         	</div>{% endcomment %}
         	<hr class="appdivider">
         	<div class="appreginfo">Application registered by {{ app.owner.username }} at {{ app.creation_time|date:'H:i' }} on {{ app.creation_time|date:'d/m/Y' }}.</div>
+        
+        
+                        {% elif "http" in app.keywords %}
+                <div class="appinfo"><a href='{{ app.keywords }}' target='_blank'>{{ app.keywords }}</a>
+                </div>
+				{% endif %}
+            </div>
+            
         </div>
       </div>
       {% endfor%}
