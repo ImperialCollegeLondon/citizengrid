@@ -10,3 +10,8 @@ DATABASES = {
         'PORT': '',                      # Set to empty string for default. Not used with sqlite3.
     }
 }
+
+#For deploying CitizenGrid on MAC OS, uncomment the below line
+#ISO_GENERATOR_EXE = '/media/isocreator/cg_vams_iso_gen_mac'
+#For deploying CitizenGrid on Linux, uncomment the below line
+ISO_GENERATOR_EXE = '/media/isocreator/cg_vams_iso_gen'
