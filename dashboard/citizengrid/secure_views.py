@@ -1032,7 +1032,7 @@ def application_detail(request,appid):
     app = ApplicationBasicInfo.objects.filter(public=True,id=appid)
     # Get the list of app ids that we're going to look up application files for.
     app_ids = [appid]
-    print 'Looking up file for apps: ' + str(app_ids)
+    print 'Getting appliation details: looking up file for app: ' + str(appid)
 
     files = ApplicationFile.objects.filter(file_type='S', image_type= 'C', application=int(appid))
     os_client_images = ApplicationOpenstackImages.objects.filter(application=int(appid), image_type= 'C')
@@ -1054,7 +1054,12 @@ def application_detail(request,appid):
                    'OVF' : 'OVF Appliance',
                    'OVA' : 'Local Appliance Archive (OVA)'}
 
+    has_client = False
+    
     for appfile in files:
+        if appfile.image_type == 'C':
+            has_client = True
+
         if appfile.application.id not in file_info_dict:
             file_info_dict[appfile.application.id] = []
         file_info = {}
@@ -1063,7 +1068,12 @@ def application_detail(request,appid):
         file_info['path'] = os.path.join('media', request.user.username, appfile.filename())
         file_info['formatstring'] = file_formats[appfile.file_format]
         file_info_dict[appfile.application.id].append(file_info)
-    return render_to_response('cg_application_detail.html', {'apps':app, 'file_info': file_info_dict,'os_images':os_client_images, 'ec2_images':ec2_client_images, })
+        
+    if has_client == True:
+        print 'This application has a client image: will display launcher'
+    else:
+        print 'This application has no client image: will display url'
+    return render_to_response('cg_application_detail.html', {'apps':app, 'file_info': file_info_dict,'os_images':os_client_images, 'ec2_images':ec2_client_images, 'has_client':has_client })
 
     #===============================================================================
     #  Shows MY application detail
@@ -1082,23 +1092,28 @@ def my_application(request, appid):
     
     #local_instances = what?
     
-    #files = ApplicationFile.objects.filter(application=appid)
+    files = ApplicationFile.objects.filter(application=appid)
     
     #os_client_images = ApplicationOpenstackImages.objects.filter(application=appid)
     
     #ec2_client_images = ApplicationEC2Images.objects.filter(application=appid)
 
     instance_list = []
+    file_info_dict = {}
+    has_client = False
     
-    #for appfile in files:
-    #    if appfile.application.id not in file_info_dict:
-    #        file_info_dict[appfile.application.id] = []
-    #    file_info = {}
-     #   file_info['appfile'] = appfile
-    #    file_info['name'] = appfile.filename()
-    #    file_info['path'] = os.path.join('media', request.user.username, appfile.filename())
-    #    file_info['formatstring'] = appfile.file_format
-    #    file_info_dict[appfile.application.id].append(file_info)
+    for appfile in files:
+        if appfile.image_type == 'C':
+            has_client = True
+        
+        if appfile.application.id not in file_info_dict:
+            file_info_dict[appfile.application.id] = []
+        file_info = {}
+        file_info['appfile'] = appfile
+        file_info['name'] = appfile.filename()
+        file_info['path'] = os.path.join('media', request.user.username, appfile.filename())
+        file_info['formatstring'] = appfile.file_format
+        file_info_dict[appfile.application.id].append(file_info)
          
     if len(os_instances) > 0:
         print "Found " + str(len(os_instances)) + " openstack cloud instances"
@@ -1138,7 +1153,7 @@ def my_application(request, appid):
                 instance_list.append( instance_info )
 
 
-    return render_to_response('cg_myapp_detail_template.html', {'my_stats':my_stats, 'app':app,'instance_list':instance_list })
+    return render_to_response('cg_myapp_detail_template.html', {'my_stats':my_stats, 'app':app,'instance_list':instance_list,'has_client':has_client,'file_info': file_info_dict })
 
 
     #===================================================================================================================================

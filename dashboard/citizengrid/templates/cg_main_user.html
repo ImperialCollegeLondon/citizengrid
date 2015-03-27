@@ -156,6 +156,7 @@ function welcomeCheckboxClick() {
 
 							$("#ajax_app_detail").load("cg/appdetail/" + $(this).attr("value"));
 							$("#ajax_app_detail").show();
+							$(document).scrollTop("#ajax_app_detail");
 						});
 
 				$('#table').dataTable({

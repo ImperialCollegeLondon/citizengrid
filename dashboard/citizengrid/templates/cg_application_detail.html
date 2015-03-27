@@ -18,10 +18,19 @@
         <div class="panel-body">
             <div>
                 <div class="appinfo"><img class="app-icon" src={{ app.iconfile }}>{{ app.description }} </div>
-
-                <div  data-toggle="modal" data-appname="{{ app.name }}" data-appid="{{ app.id }}" data-appicon="{{ app.iconfile }}" href="#launchAppModal" class="btn btn-success btn-launch">Launch Application Client Locally
+				{% if has_client == True %}
+                <div  id="client-launch" data-toggle="modal" 
+                						data-appname="{{ app.name }}" 
+                						data-appid="{{ app.id }}" 
+                						data-appicon="{{ app.iconfile }}" 
+                						href="#launchAppModal" 
+                						class="btn btn-success btn-launch">
+                						Launch Application Client Locally
                 </div>
-
+                {% elif "http" in app.keywords %}
+                <div class="appinfo"><a href='{{ app.keywords }}' target='_blank'>{{ app.keywords }}</a>
+                </div>
+				{% endif %}
             </div>
 
                  <div class="server-instances" id="server_instances">
