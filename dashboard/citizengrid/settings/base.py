@@ -27,10 +27,13 @@ ADMINS = (
     ('admin', 'admin@localhost'),
 )
 
-DEFAULT_FROM_EMAIL = 'webmaster@localhost'
+EMAIL_HOST = 'automail.cc.ic.ac.uk'
+EMAIL_PORT = 25
+EMAIL_USE_SSL = True
+DEFAULT_FROM_EMAIL = 'Poonam Yadav <pyadav@imperial.ac.uk>'
 DEFAULT_INDEX_TABLESPACE = ' '
 DEFAULT_TABLESPACE = ''
-EMAIL_PORT = 1025
+
 
 MANAGERS = ADMINS
 
