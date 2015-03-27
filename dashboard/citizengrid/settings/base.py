@@ -96,6 +96,12 @@ STATICFILES_FINDERS = (
 #    'django.contrib.staticfiles.finders.DefaultStorageFinder',
 )
 
+#SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTOCOL', 'https')
+#os.environ['HTTPS'] = "on"
+#SESSION_COOKIE_SECURE = True
+#CSRF_COOKIE_SECURE = True
+#
+
 # SECURITY WARNING: keep the secret key used in production secret!
 # The secret key is no longer required here. Using approach based on
 # info at http://stackoverflow.com/questions/4664724/distributing-django-projects-with-unique-secret-keys
@@ -183,6 +189,7 @@ INSTALLED_APPS = (
     'rest_framework',
 
 )
+
 
 # A sample logging configuration. The only tangible logging
 # performed by this configuration is to send an email to
