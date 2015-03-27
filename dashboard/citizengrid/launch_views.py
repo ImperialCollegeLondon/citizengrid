@@ -99,7 +99,6 @@ def launchapp(request, appid, launchtype, apptag):
         vm_name = str(app.application.name)
         app_owner = str(ApplicationBasicInfo.objects.filter(id=appid)[0].owner.username)
         #request.user.get_username()
-
         launcher_args = '    <argument>' + vm_name + '</argument>'
         #launcher_args = ''
         for app in app_files:
