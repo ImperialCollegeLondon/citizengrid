@@ -79,10 +79,7 @@ STATIC_ROOT = os.path.join(PROJECT_ROOT, 'static')
 # Example: "http://media.lawrence.com/static/"
 STATIC_URL = '/static/'
 
-#For deploying CitizenGrid on MAC OS, uncomment the below line
-ISO_GENERATOR_EXE = '/media/isocreator/cg_vams_iso_gen_mac'
-#For deploying CitizenGrid on Linux, uncomment the below line
-#ISO_GENERATOR_EXE = '/media/isocreator/cg_vams_iso_gen'
+#JMS: i've moved the ISO_GENERATOR_EXE strings to the dev and production subfiles
 
 # Additional locations of static files
 STATICFILES_DIRS = (
