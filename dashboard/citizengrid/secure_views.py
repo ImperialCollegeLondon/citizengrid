@@ -329,7 +329,7 @@ def groups(request):
     print " Entering all applications method "
     apps = MyGroup.objects.select_related().exclude(user=request.user)
     select_data = """ <select name =groups[] id="joingroup" class="form-control"  placeholder="Groups" name="group" multiple> """
-    for mg in groups :
+    for mg in apps :
         select_data = select_data + "<option value=\"" + str(mg.id) + "\">" + mg.name + "</option>"
     select_data = select_data + """</select> """
     print select_data
