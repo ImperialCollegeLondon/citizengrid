@@ -12,18 +12,12 @@
          <div id="myModalBody" class="modal-body">     
          	<div class="panel panel-primary">
 				<div class="panel-body">
-					<!--  
-					<div>
-						<div class="appinfo">
-							<img class="app-icon" src={{app.iconfile }}>{{ app.description }}
-						</div>
-					</div>
-					-->
 					<div class="appinfo">
 						<h4>Usage</h4>	
 						<div class="content">
-				          You first ran this application on {{ my_stats.creation_time }}
-				          <p>You have run this application {{ my_stats.run_count }} times</p>
+				          <p>You first ran this application on {{ my_stats.creation_time }}
+				          <p>This application has been launched in total {{ app.client_downloads }} times
+				          <p>You have launched this application {{ my_stats.run_count }} times
 				      	</div>
       					<hr>			
 						<div class="appinfo">
@@ -31,6 +25,7 @@
 								<table class="table table-condensed">
 									<thead>
 											<th>Instance ID</th>
+											<th>Cloud</th>
 											<th>Address</th>
 											<th>Status</th>
 									</thead>
@@ -38,6 +33,7 @@
 									{% for instance in instance_list %} 
 									<tr>
 										<td>{{ instance.id }}</td>
+										<td>{{ instance.cloud }}</td>
 										<td>{{ instance.ip }}</td>
 										<td>{{ instance.state }}</td>
 									</tr>

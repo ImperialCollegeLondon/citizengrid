@@ -151,10 +151,14 @@ def launchapp(request, appid, launchtype, apptag):
             f.write(formatted_jnlp)
 
 
+        appObject.client_downloads = appObject.client_downloads + 1
+        appObject.save()
+        print "Updated client_download in ApplicationBasicInfo"   
+         
         try:
             rec = UsersApplications.objects.get(user=request.user,application=appObject)   
-            rec.run_count = rec.run_count + 1   
-            print "Updated record to UsersApplications"   
+            rec.run_count = rec.run_count + 1             
+            print "Updated run count in UsersApplications"   
         except UsersApplications.DoesNotExist:
             rec = UsersApplications(user=request.user,application=appObject)          
             print "Inserted new record to UsersApplications"   
