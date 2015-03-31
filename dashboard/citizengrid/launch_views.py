@@ -76,16 +76,6 @@ def launchapp(request, appid, launchtype, apptag):
     print "requesting user is " + str(request.user.id)
 
     appObject = ApplicationBasicInfo.objects.get(id=appid)
-
-    #if appid == <the id of vams>:
-    #   Generate context iso
-
-    #    from subprocess import call
-    #    call([], executable=settings.ISO_GENERATOR_EXE)
-    
-
-    # removed owner_id=request.user as any user can launch the application
-    #app_files = ApplicationFile.objects.filter(owner_id=request.user, file_type='S', application_id=appid)
     app_files = ApplicationFile.objects.filter( file_type='S', application_id=appid,image_type='C')
     print "Found " + str(len(app_files)) + " files for this application."
 
