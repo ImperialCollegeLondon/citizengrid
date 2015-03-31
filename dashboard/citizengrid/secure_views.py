@@ -329,7 +329,7 @@ def groups(request):
     print " Entering all applications method "
     apps = MyGroup.objects.select_related().exclude(user=request.user)
     select_data = """ <select name =groups[] id="joingroup" class="form-control"  placeholder="Groups" name="group" multiple> """
-    for mg in groups :
+    for mg in apps :
         select_data = select_data + "<option value=\"" + str(mg.id) + "\">" + mg.name + "</option>"
     select_data = select_data + """</select> """
     print select_data
@@ -1089,71 +1089,67 @@ def my_application(request, appid):
     os_instances = CloudInstancesOpenstack.objects.filter(owner=request.user, application=app)
 
     aws_instances = CloudInstancesAWS.objects.filter(owner=request.user, application=app)
-    
-    #local_instances = what?
-    
+       
     files = ApplicationFile.objects.filter(application=appid)
     
-    #os_client_images = ApplicationOpenstackImages.objects.filter(application=appid)
-    
-    #ec2_client_images = ApplicationEC2Images.objects.filter(application=appid)
-
     instance_list = []
-    file_info_dict = {}
     has_client = False
     
     for appfile in files:
         if appfile.image_type == 'C':
             has_client = True
-        
-        if appfile.application.id not in file_info_dict:
-            file_info_dict[appfile.application.id] = []
-        file_info = {}
-        file_info['appfile'] = appfile
-        file_info['name'] = appfile.filename()
-        file_info['path'] = os.path.join('media', request.user.username, appfile.filename())
-        file_info['formatstring'] = appfile.file_format
-        file_info_dict[appfile.application.id].append(file_info)
-         
-    if len(os_instances) > 0:
-        print "Found " + str(len(os_instances)) + " openstack cloud instances"
-        credentials = os_instances[0].credentials
+
+    print 'It is ' + str(has_client) + ' that his app has a client image'
+    print "Found " + str(len(os_instances)) + " openstack cloud instances"
+    for instance in os_instances:
+        credentials = instance.credentials
         (access_key, secret_key) = utils.decrypt_cred_pair(credentials.access_key, credentials.secret_key)
         parsed_url = urlparse(credentials.endpoint)
         ip = parsed_url.netloc.split(':')[0]
         local_region = boto.ec2.regioninfo.RegionInfo(name="openstack", endpoint=ip)
         conn = boto.connect_ec2(aws_access_key_id=access_key,
-                                aws_secret_access_key=secret_key,
-                                is_secure=False,
-                                region=local_region,
-                                port=parsed_url.port,
-                                path=parsed_url.path)
+                                    aws_secret_access_key=secret_key,
+                                    is_secure=False,
+                                    region=local_region,
+                                    port=parsed_url.port,
+                                    path=parsed_url.path)
 
-        print 'Set up connection with IP ' + ip + ', port ' + str(parsed_url.port) + ', path ' + parsed_url.path
+        instance_data = conn.get_all_instances(instance_ids=[instance.instance_id])
+        for i in instance_data:
+            print 'Instance ID: ' + i.id
+            instance_info = {}
+            instance_info['id'] = i.id
+            instance_info['state'] = i.state
+            instance_info['ip'] = i.public_dns_name
+            instance_info['cloud'] = 'OpenStack'
+            instance_list.append( instance_info )
 
-        for instance in os_instances:
-            print 'For each instance: ' + instance.instance_id
-            if instance.credentials.id != credentials.id:
-                print "Instance " + instance.instance_id + " uses different credentials, updated openstack connection..."
-                credentials = instance.credentials
-                (access_key, secret_key) = utils.decrypt_cred_pair(credentials.access_key, credentials.secret_key)
-                parsed_url = urlparse(credentials.endpoint)
-                ip = parsed_url.netloc.split(':')[0]
-                local_region = boto.ec2.regioninfo.RegionInfo(name="openstack", endpoint=ip)
-                conn = boto.connect_ec2(aws_access_key_id=access_key,aws_secret_access_key=secret_key,is_secure=False,region=local_region,port=parsed_url.port,path=parsed_url.path)
+    print "Found " + str(len(aws_instances)) + " AWS cloud instances"
+    for instance in aws_instances:
+        credentials = instance.credentials
+        (access_key, secret_key) = utils.decrypt_cred_pair(credentials.access_key, credentials.secret_key)
+        parsed_url = urlparse(credentials.endpoint)
+        ip = parsed_url.netloc.split(':')[0]
+        local_region = boto.ec2.regioninfo.RegionInfo(name="eu-west-1", endpoint=ip)
+        conn = boto.connect_ec2(aws_access_key_id=access_key,
+                                    aws_secret_access_key=secret_key,
+                                    is_secure=False,
+                                    region=local_region,
+                                    port=parsed_url.port,
+                                    path=parsed_url.path)
 
-            instance_data = conn.get_all_instances(instance_ids=[instance.instance_id])
-            if len(instance_data) > 0:
-                count = 1
-                print 'Instance ID ' + instance_data[0].instances[0].id + ' in state ' + instance_data[0].instances[0].state + ' with IP ' + instance_data[0].instances[0].public_dns_name
-                instance_info = {}
-                instance_info['id'] = instance_data[0].instances[0].id
-                instance_info['state'] = instance_data[0].instances[0].state
-                instance_info['ip'] = instance_data[0].instances[0].public_dns_name
-                instance_list.append( instance_info )
+        instance_data = conn.get_all_instances(instance_ids=[instance.instance_id])
+        for i in instance_data:
+            print 'Instance ID: ' + i.id
+            instance_info = {}
+            instance_info['id'] = i.id
+            instance_info['state'] = i.state
+            instance_info['ip'] = i.public_dns_name
+            instance_info['cloud'] = 'EC2'
+            instance_list.append( instance_info )
 
-
-    return render_to_response('cg_myapp_detail_template.html', {'my_stats':my_stats, 'app':app,'instance_list':instance_list,'has_client':has_client,'file_info': file_info_dict })
+    print 'instances list is ' + str(instance_list)
+    return render_to_response('cg_myapp_detail_template.html', {'my_stats':my_stats, 'app':app,'instance_list':instance_list,'has_client':has_client})
 
 
     #===================================================================================================================================
