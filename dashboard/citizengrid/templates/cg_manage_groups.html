@@ -51,13 +51,13 @@
           <tr>
           	<td style="width: 220px;"><div id="groupname" class="col-md-1 col-md-offset-1 groupname"><a href="#apptagModal" data-toggle="modal" id="{{ group.id }}" type ="grouptagdetail" class="" title="Application Group detail">{{ group.name }}</a><br><div id="attach_tag"></div></div></td>
           	<td style="width: 220px;"><div id="groupdesc" class="col-md-8">{{ group.description }}</div></td>
-            <td style="width: 220px;"><div id="grouprole" class="col-md-1">{{ group.get_group_role_display }}</div></td>
+            <td style="width: 220px;"><div id="grouprole" class="col-md-1">{{group.group_role}}</div></td>
             <td style="width: 220px;"><div id="groupmembers" class="col-md-1">{{ group.user.all|length }}</div></td>
 
 			<td style="width: 100px;">
 		  	<div class="container" id="groupfunction" class="col-md-1">
 		    	<div class="row">
-                    {% if group.group_role == 'M'  %}
+                    {% if group.group_role == 'Member'  %}
 		    		<div class="editgrp col-md-1"><a href="#groupModal" data-toggle="modal" id="{{ group.id }}" type="editgrp" class="" title="edit group"><i class="glyphicon glyphicon-wrench"></i></a></div>
 		  			<div class="leavegrp col-md-1"><a href="javascript:void(0)" id="{{ group.id }}" type="leavegrp" class="" title="leave group"><i class=" glyphicon glyphicon-plane"></i></a></div>
                     <div class="attachapp col-md-1"><a href="#attachAppToGrpModal" data-toggle="modal" id="{{ group.id }}" type="attachapp" class="" title="attach app to group"><i class="icon-link icon-white"></i></a></div>

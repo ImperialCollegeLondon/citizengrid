@@ -304,9 +304,15 @@ def manage_credentials(request):
 @login_required
 def manage_groups(request):
     print " Inside manage groups."
-    groups = MyGroup.objects.select_related().all().filter(user=request.user)
+    group_role ={}
 
-    print 'in manage groups with groups retrieved ' + str(len(groups))
+    groups = MyGroup.objects.select_related().all().filter(user=request.user)
+    for group in groups:
+     if str(request.user) == str(group.owner):
+        group.group_role = 'Owner'
+     else:
+        group.group_role = 'Member'
+    #print 'in manage groups with groups retrieved ' + str(len(groups))
 
     role = view_utils.return_role(request)
     return render_to_response('cg_manage_groups.html', {'next':'/', 'groups':groups,'role':role}, context_instance=RequestContext(request))
@@ -424,7 +430,7 @@ def add_group(request):
         try:
 
             #with transaction.atomic:
-                mg = MyGroup(name=str(request.POST['grpname']),description=str(request.POST['grpdesc']),group_role='O')
+                mg = MyGroup(name=str(request.POST['grpname']),description=str(request.POST['grpdesc']),owner=request.user, group_role ='Owner')
                 mg.save()
                 mg.user.add(request.user)
         except IntegrityError as e:

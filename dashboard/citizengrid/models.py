@@ -77,16 +77,17 @@ class Role(models.Model):
 class MyGroup(models.Model):
 
     GROUP_ROLE = (
-        ('O','Owner'),
-        ('M','Member'),
+        ('Owner', 'Owner'),
+        ('Member','Member'),
     )
 
     name = models.CharField(max_length=128)
+    owner =  models.CharField(max_length=128)
     description = models.TextField()
     creation_time = models.DateTimeField(auto_now_add=True)
     user = models.ManyToManyField(User,default='NONE')
+    group_role = models.CharField(max_length=1, choices=GROUP_ROLE, default='Member')
 
-    group_role = models.CharField(max_length=1, choices=GROUP_ROLE, default='M')
     def __unicode__(self):
         return self.name
 
