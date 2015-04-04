@@ -267,7 +267,7 @@ def launchserver(request, appid, launchtype):
     print instance_type
     print 'appTag received' + appTag
     print 'Launch server on cloud <' + cloud + '> with image record <' + imageRecord + '> using credential alias <' + alias + '> and cloud url <' + endpoint + '>'
-
+    
     # Lookup credentials for this user and the specified endpoint
     if cloud == 'os':
         cred = UserCloudCredentials.objects.get(user=request.user, endpoint=endpoint, key_alias=alias)
@@ -281,6 +281,17 @@ def launchserver(request, appid, launchtype):
         # Error, an invalid cloud was specified
         pass
 
+    app = ApplicationBasicInfo.objects.get(id=appid)
+    try:
+        rec = UsersApplications.objects.get(user=request.user,application=app)   
+        rec.run_count = rec.run_count + 1             
+        print "Updated run count in UsersApplications"   
+    except UsersApplications.DoesNotExist:
+        rec = UsersApplications(user=request.user,application=app)          
+        print "Inserted new record to UsersApplications"   
+    rec.save()
+
+        
     return start_server(appid, cred, endpoint, cloud, imageRecord, appTag, instance_type, image_info, request)
 
 @require_POST
