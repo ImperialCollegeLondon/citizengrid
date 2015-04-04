@@ -1121,14 +1121,15 @@ def my_application(request, appid):
                                     path=parsed_url.path)
 
         instance_data = conn.get_all_instances(instance_ids=[instance.instance_id])
-        for i in instance_data:
-            print 'Instance ID: ' + i.id
-            instance_info = {}
-            instance_info['id'] = i.id
-            instance_info['state'] = i.state
-            instance_info['ip'] = i.public_dns_name
-            instance_info['cloud'] = 'OpenStack'
-            instance_list.append( instance_info )
+        for i in instance_data: 
+            for instanceEC2 in i.instances:
+                print 'Instance ID: ' + instanceEC2.id
+                instance_info = {}
+                instance_info['id'] = instanceEC2.id
+                instance_info['state'] = instanceEC2.state
+                instance_info['cloud'] = 'OpenStack'
+                instance_info['ip'] = instanceEC2.public_dns_name
+                instance_list.append( instance_info)
 
     print "Found " + str(len(aws_instances)) + " AWS cloud instances"
     for instance in aws_instances:
@@ -1145,14 +1146,16 @@ def my_application(request, appid):
                                     path=parsed_url.path)
 
         instance_data = conn.get_all_instances(instance_ids=[instance.instance_id])
-        for i in instance_data:
-            print 'Instance ID: ' + i.id
-            instance_info = {}
-            instance_info['id'] = i.id
-            instance_info['state'] = i.state
-            instance_info['ip'] = i.public_dns_name
-            instance_info['cloud'] = 'EC2'
-            instance_list.append( instance_info )
+        for i in instance_data: 
+            for instanceEC2 in i.instances:
+                print 'Instance ID: ' + instanceEC2.id
+                instance_info = {}
+                instance_info['id'] = instanceEC2.id
+                instance_info['state'] = instanceEC2.state
+                instance_info['cloud'] = 'EC2'
+                instance_info['ip'] = instanceEC2.public_dns_name
+                instance_list.append( instance_info)
+            
 
     print 'instances list is ' + str(instance_list)
     return render_to_response('cg_myapp_detail_template.html', {'my_stats':my_stats, 'app':app,'instance_list':instance_list,'has_client':has_client})
