@@ -18,7 +18,7 @@
         <div class="panel-body">
             <div>
                 <div class="appinfo"><img class="app-icon" src={{ app.iconfile }}>{{ app.description }} </div>
-				
+
 				{% if has_client == True %}
                 <div  id="client-launch" data-toggle="modal" 
                 						data-appname="{{ app.name }}" 
@@ -29,7 +29,8 @@
                 						Launch Application Client Locally
                 </div>
 
-
+                {% endif %}
+                {% if ec2_images|length > 0 or os_images|length > 0 %}
                  <div class="server-instances" id="server_instances">
                        <hr/><span>Running server instances: <img class="loading" src="/static/img/loading.gif"></span>
 
@@ -49,7 +50,7 @@
                             </div>
                         </div>
 
-            <div class="panel panel-default appimageinfo">
+                 <div class="panel panel-default appimageinfo">
                         <div class="panel-heading">Launch Application on a Cloud</div>
                         <div class="panel-body">
                             <table id="provider_image_info">
@@ -98,6 +99,7 @@
 
                         </div>
                     </div>
+                {% endif %}
 
            {% comment %} <div class="panel panel-default appimageinfo">
         	    <div class="panel-heading">Image details</div>
@@ -117,7 +119,7 @@
         	<div class="appreginfo">Application registered by {{ app.owner.username }} at {{ app.creation_time|date:'H:i' }} on {{ app.creation_time|date:'d/m/Y' }}.</div>
         
         
-                        {% elif "http" in app.keywords %}
+                        {% if "http" in app.keywords %}
                 <div class="appinfo"><a href='{{ app.keywords }}' target='_blank'>{{ app.keywords }}</a>
                 </div>
 				{% endif %}
