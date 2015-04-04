@@ -16,8 +16,8 @@
 						<h4>Usage</h4>	
 						<div class="content">
 				          <p>You first ran this application on {{ my_stats.creation_time }}
-				          <p>This application has been launched in total {{ app.client_downloads }} times
-				          <p>You have launched this application {{ my_stats.run_count }} times
+				          <p>This application has been launched locally  {{ app.client_downloads }} times
+				          <p>You have launched this application on cloud {{ my_stats.run_count }} times
 				      	</div>
       					<hr>			
 						<div class="appinfo">
@@ -36,6 +36,13 @@
 										<td>{{ instance.cloud }}</td>
 										<td>{{ instance.ip }}</td>
 										<td>{{ instance.state }}</td>
+                                        <td>
+                                            {% if instance.state == 'running' %}
+                                            <a id = "{{instance.id}}"  data-appid="{{app.id}}" class="shutdown-server glyphicon glyphicon-remove"  title="terminate instance"></a>
+
+                                            {%endif %}
+
+                                        </td>
 									</tr>
 									{% endfor %}
 										
@@ -54,7 +61,62 @@
 		         </div>
       		</div><!-- /.modal-content -->
 		</div><!-- /.modal -->
+    <script type="text/javascript">
+$(document).ready(function(e) {
+
+        function shutdownRunningServer(appid, instanceid) {
+        if (console && console.log) {
+            console.log("Request to shutdown running server with ID <" + instanceid + ">...");
+        }
+
+        var csrftoken = getCookie('csrftoken');
+
+        $.ajaxSetup({
+            crossDomain: false, // obviates need for sameOrigin test
+            beforeSend: function(xhr, settings) {
+                xhr.setRequestHeader("X-CSRFToken", csrftoken);
+            }
+        });
+
+        $.ajax({
+            url: '/cg/manage/instances/shutdown/' + appid + '/' + instanceid,
+            data: {
+                'instanceid': instanceid
+            },
+            type: 'POST',
+            success: function(data) {
+                if (console && console.log) {
+                    console.log('Request sent to shutdown server. Result: ' + data.result);
+                    alert('Request sent to shutdown server. Result: ' + data.result);
+                    $("#myModal").modal("hide")
+                }
+            },
+            complete: function() {
+                // Schedule the next request when the current one's complete
+                //setTimeout(updateRunningServers(appid), 5000);
+            }
+        });
+    }
+
+    $(document).on('click', ".shutdown-server", function (e) {
+
+        console.log("id is" + this.id);
+        var instance_id = this.id;
+        var appid = $(this).data("appid");
+        console.log(appid)
+        shutdownRunningServer(appid, instance_id);
+
+
+
+
+    });
+
+
+});
+
+    </script>
 {% endblock %}
+
 
 
 
