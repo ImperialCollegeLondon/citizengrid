@@ -253,6 +253,33 @@ urlpatterns = patterns('',
                            cg_api_views.stopinstance,
                            name='stopinstance'),
 
+                       # Group web api urls
+
+                       # List all groups
+                       url(r'^api/citizengrid/manage/group$',
+                           cg_api_views.MyGroupList.as_view(),
+                           name='MyGroupList'),
+
+                       url(r'^api/citizengrid/manage/group/(?P<pk>\d+)$',
+                           cg_api_views.MyGroupDetailView.as_view(),
+                           name='MyGroupDetailView'),
+
+                       url(r'^api/citizengrid/manage/group/(?P<groupid>\d+)/leave$',
+                           cg_api_views.leave_group,
+                           name='leave_group'),
+
+                       url(r'^api/citizengrid/manage/group/join',
+                           cg_api_views.leave_group,
+                           name='join_group'),
+
+                       url(r'^api/citizengrid/manage/group/(?P<groupid>\d+)/attachapp$',
+                           cg_api_views.GroupApplicationTagView.as_view(),
+                           name='GroupApplicationTagView'),
+
+                       url(r'^api/citizengrid/manage/group/(?P<groupid>\d+)/detachapp/(?P<id>\d+)$',
+                           cg_api_views.GroupApplicationTagDetailView.as_view(),
+                           name='GroupApplicationTagDetailView'),
+
                        url(r'^api/citizengrid/', include(router.urls)),
 
                        url(r'^api-auth/citizengrid/',

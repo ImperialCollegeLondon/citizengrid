@@ -8,7 +8,7 @@ from rest_framework.renderers import JSONRenderer
 from citizengrid import launch_views, DATA_K
 from citizengrid.models import UserInfo, ApplicationBasicInfo, ApplicationFile, ApplicationServerInfo, \
     ApplicationClientInfo, Branch, Category, SubCategory, \
-    UserCloudCredentials, ApplicationOpenstackImages, ApplicationEC2Images, CloudInstancesOpenstack
+    UserCloudCredentials, ApplicationOpenstackImages, ApplicationEC2Images, CloudInstancesOpenstack, GroupApplicationTag
 from rest_framework.decorators import api_view, permission_classes
 from django.contrib.auth.decorators import login_required
 from rest_framework.permissions import IsAdminUser, IsAuthenticatedOrReadOnly, IsAuthenticated
@@ -20,11 +20,13 @@ from rest_framework.response import Response
 from citizengrid.serializers import UserSerializer, PasswordSerializer, GroupSerializer, ApplicationsSerializer, \
     ApplicationFileSerializer, ApplicationOsImagesSerializer, ApplicationEc2Serializer, BranchSerializer, \
     CategorySerializer, SubCategorySerializer, \
-    ApplicationFileDetailSerializer, UserCloudCredentialsSerializer, CloudInstancesSerializer, MyApplicationSerializer
+    ApplicationFileDetailSerializer, UserCloudCredentialsSerializer, CloudInstancesSerializer, MyApplicationSerializer, MyGroupSerializer,GroupApplicationTagSerializer
 from rest_framework import routers, views, reverse, response
 from django.views.decorators.csrf import *
-from django.db import transaction
+from django.db import transaction, IntegrityError
 from citizengrid.view_utils import delete_application
+from citizengrid.models import MyGroup
+from rest_framework.status import HTTP_404_NOT_FOUND, HTTP_400_BAD_REQUEST
 
 """
 Responsible for web-api and associated features of CitizenGrid.
@@ -831,4 +833,164 @@ def start_Ec2server(request, *args, **kwargs):
             erromessage = 'Post Data not in right format!'
         return HttpResponse(json.dumps({'appid': appid, 'error_status': "1", 'errormsg': erromessage}),
                             content_type="application/json")
+
+class MyGroupList(generics.ListCreateAPIView):
+    """
+    API endpoint to
+    1) list all Groups
+    2) Create group
+    """
+    serializer_class = MyGroupSerializer
+    permission_classes = ( IsAuthenticated,)
+
+    """
+        List all the groups for a user
+    """
+
+    def get_queryset(self):
+        user = self.request.user
+        print " Inside manage groups."
+
+        return MyGroup.objects.select_related().all().filter(user=user)
+
+    """
+        Creates a group
+    """
+    def post(self, request, *args, **kwargs):
+        user = self.request.user
+        msg =""
+        if 'name' in request.POST and 'description' in request.POST:
+            grpname = request.POST['name']
+            grpdesc = request.POST['description']
+            try:
+
+                mg = MyGroup(name=str(grpname),description=str(grpdesc),owner=request.user, group_role ='Owner')
+                mg.save()
+                mg.user.add(user)
+            except IntegrityError as e:
+                msg = e.message
+            else:
+                msg = "Group created succesfully!"
+                return HttpResponse(json.dumps({'grpname': grpname, 'grpdesc': grpdesc, 'message': msg}),content_type="application/json")
+        else:
+            msg = "GroupName and GroupDesc not found in post parameters!!. You would need to add them in the post request."
+            return HttpResponse(json.dumps({ 'message': msg}),content_type="application/json")
+
+
+class MyGroupDetailView(generics.RetrieveUpdateDestroyAPIView):
+    """
+    API endpoint to \n
+    1) find group detail identified by groupid \n
+    2) delete a group \n
+    3) edit a group
+    """
+    serializer_class = MyGroupSerializer
+    permission_classes = ( IsAuthenticated,)
+
+    def get_queryset(self):
+        groupid = self.kwargs['pk']
+        print groupid
+        return MyGroup.objects.filter(id=int(groupid))
+
+    def delete(self, request, *args, **kwargs):
+        print "Inside group delete"
+        groupid = self.kwargs['pk']
+        try:
+            MyGroup.objects.filter(id=groupid).delete()
+        except IntegrityError as e:
+            return HttpResponse(json.dumps({ 'errormessage': 'Cannot Delete the group' + e.message}),content_type="application/json")
+        else:
+            return HttpResponse(json.dumps({ 'message': "Successfully deleted group"}),content_type="application/json")
+
+    def put(self, request, *args, **kwargs):
+        print "Inside Edit group view"
+        groupid = self.kwargs['pk']
+        try:
+            group = MyGroup.objects.get(id=int(groupid))
+        except MyGroup.DoesNotExist:
+            return Response(status=HTTP_404_NOT_FOUND)
+        else:
+            print request.DATA
+            grpname = request.DATA.get('name')
+            grpdesc = request.DATA.get('description')
+            print grpname
+            try:
+
+                serializer = MyGroupSerializer(group,data=request.DATA)
+                group.name = grpname
+                group.description = grpdesc
+                group.save()
+            except IntegrityError as e:
+                return Response(serializer.errors, status=HTTP_400_BAD_REQUEST)
+            else:
+                return Response(serializer.data)
+            return Response(serializer.errors, status=HTTP_400_BAD_REQUEST)
+
+class GroupApplicationTagView(generics.CreateAPIView):
+    serializer_class = GroupApplicationTagSerializer
+    permission_classes = ( IsAuthenticated,)
+
+    def post(self, request, *args, **kwargs):
+        pass
+
+class GroupApplicationTagDetailView(generics.ListAPIView,generics.DestroyAPIView):
+    serializer_class = GroupApplicationTagSerializer
+    permission_classes = ( IsAuthenticated,)
+
+    def get_queryset(self):
+        id = self.kwargs.get('id')
+        return GroupApplicationTag.objects.filter(id=int(id))
+
+    def delete(self, request, *args, **kwargs):
+        groupid = kwargs.get('groupid')
+        id = kwargs.get('id')
+        try:
+            GroupApplicationTag.objects.get(id=id).delete()
+        except GroupApplicationTag.DoesNotExist:
+            return HttpResponse(json.dumps({ 'errormessage': 'Cannot Detach the application from the group' }),content_type="application/json")
+        else:
+            return HttpResponse(json.dumps({ 'message': 'Successfully detached application!!' }),content_type="application/json")
+
+
+
+
+
+@api_view(['POST'])
+@permission_classes((IsAuthenticated, ))
+def leave_group(request, *args, **kwargs):
+    groupid = kwargs.get('groupid')
+    user = request.user
+    print "Leaving group with Groupid" + groupid
+    try:
+        groups = MyGroup.objects.select_related().filter(user=request.user).get(id=groupid)
+        if groups.group_role == 'Owner':
+            return HttpResponse(json.dumps({ 'errormessage': 'Error !!, You are an administrator and cannot leave the group.You might want to delete the group' }),content_type="application/json")
+        else:
+            groups.user.remove(request.user)
+            groups.save()
+            print "Removing association user from group"
+    except IntegrityError as e:
+        return HttpResponse(json.dumps({ 'errormessage': 'Error !!, Cannot Leave the group' + e.message}),content_type="application/json")
+    else:
+        return HttpResponse(json.dumps({ 'message': "User has succesfully left the group"}),content_type="application/json")
+
+@api_view(['POST'])
+@permission_classes((IsAuthenticated, ))
+def join_group(request, *args, **kwargs):
+    user = request.user
+    groupd_ids = request.POST['group_ids']
+    int_ids = [int(str(i)) for i in groupd_ids]
+    print "Joining the  group(s) with Groupid(s)" + str(int_ids)
+    try:
+        with transaction.atomic():
+            for i in int_ids:
+                group = MyGroup.objects.select_related().get(id=i)
+                group.user.add(request.user)
+                group.save()
+    except IntegrityError as e:
+        return HttpResponse(json.dumps({ 'errormessage': 'Error !!, Cannot Join the group' + e.message}),content_type="application/json")
+    else:
+        return HttpResponse(json.dumps({ 'message': "User has succesfully joined the group|groups"}),content_type="application/json")
+
+
 

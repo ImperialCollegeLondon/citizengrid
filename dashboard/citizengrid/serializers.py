@@ -4,7 +4,7 @@
 import os
 from rest_framework import serializers
 from citizengrid.models import Branch,Category, SubCategory, ApplicationBasicInfo, ApplicationFile, ApplicationOpenstackImages, ApplicationEC2Images, \
-    UserCloudCredentials, CloudInstancesOpenstack
+    UserCloudCredentials, CloudInstancesOpenstack,MyGroup, GroupApplicationTag
 from django.contrib.auth.models import User, Group
 
 
@@ -132,6 +132,23 @@ class CloudInstancesSerializer(serializers.ModelSerializer):
     class Meta:
         model = CloudInstancesOpenstack
         fields = ('owner','application','application_image','instance_id','status')
+
+class MyGroupSerializer(serializers.ModelSerializer):
+    user = serializers.RelatedField(many=True)
+    class Meta:
+        model = MyGroup
+        fields = ('name','description','owner','group_role')
+        read_only_fields = ('owner','group_role')
+
+class GroupApplicationTagSerializer(serializers.ModelSerializer):
+    #application = serializers.RelatedField(many=False)
+    #group = serializers.RelatedField(many=False)
+    class Meta:
+        model = GroupApplicationTag
+        fields = ('tagname','description','group','application','tagid')
+        read_only_fields = ('group',)
+
+
 
 
 
