@@ -858,10 +858,11 @@ class MyGroupList(generics.ListCreateAPIView):
     """
     def post(self, request, *args, **kwargs):
         user = self.request.user
+        print "Inside Create Groups"
         msg =""
-        if 'name' in request.POST and 'description' in request.POST:
-            grpname = request.POST['name']
-            grpdesc = request.POST['description']
+        if 'name' in request.DATA and 'description' in request.DATA:
+            grpname = request.DATA['name']
+            grpdesc = request.DATA['description']
             try:
 
                 mg = MyGroup(name=str(grpname),description=str(grpdesc),owner=request.user, group_role ='Owner')
@@ -870,8 +871,8 @@ class MyGroupList(generics.ListCreateAPIView):
             except IntegrityError as e:
                 msg = e.message
             else:
-                msg = "Group created succesfully!"
-                return HttpResponse(json.dumps({'grpname': grpname, 'grpdesc': grpdesc, 'message': msg}),content_type="application/json")
+                msg = "Group created successfully!"
+                return HttpResponse(json.dumps({'data': {'name': grpname, 'description': grpdesc}, 'message': msg}),content_type="application/json",status=201)
         else:
             msg = "GroupName and GroupDesc not found in post parameters!!. You would need to add them in the post request."
             return HttpResponse(json.dumps({ 'message': msg}),content_type="application/json")
