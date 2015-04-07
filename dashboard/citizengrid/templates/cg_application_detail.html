@@ -257,7 +257,9 @@ $(".launchapp-btn").on("click", function(event) {
 
 <script>
 
- $(document).on("click", ".open-StartCloudServerModal", function(e) {
+
+ $(document).off('click', ".open-StartCloudServerModal").on("click", ".open-StartCloudServerModal", function(e) {
+
         var cloudUrl = $(this).data("cloudurl");
         var appId = $(this).data("appid");
         var recordId = $(this).data("record-id");
@@ -305,7 +307,7 @@ $(".launchapp-btn").on("click", function(event) {
 
  var startServerModalData = null;
 
-    $(document).on("click", "#cloudServerLaunch", function() {
+    $(document).off("click","#cloudServerLaunch").on("click", "#cloudServerLaunch", function() {
         // variables
         var url = $('#selectCloud').text();
         var credAlias = $('#selectCredentials').text().split(" - ")[0];
@@ -403,7 +405,7 @@ $(".launchapp-btn").on("click", function(event) {
                     console.log('Application ID: ' + appid);
                 }
 
-                if (Object.keys(data).length > 0) {
+                if (Object.keys(data).length > 0 ) {
                     if (console && console.log) {
                         console.log('Still have running instances, updating in 10 seconds...');
                     }
@@ -413,24 +415,39 @@ $(".launchapp-btn").on("click", function(event) {
                     var keys = Object.keys(data);
                     for (i = 0; i < keys.length; i++) {
                         console.log('ID: ' + keys[i]);
+                        console.log('Length: ' + $('#' + keys[i]).length);
+
                         if ($('#' + keys[i]).length) {
-                            console.log("terminal" + $('#' + keys[i] + ' .state').text())
+                            console.log("Instance state on gui  " + $('#' + keys[i] + ' .state').text())
                             console.log(document.getElementsByClassName("state")[0].innerHTML)
                             // element exists - check if an update is required
                             // if status terminated, delete the instance from the table
                             if (!$('#' + keys[i] + ' .state').text() == 'terminated') {
                                 $('#' + keys[i]).remove();
                                 delete shuttingDown[keys[i]];
-                            } else {
+                            } else{
                                 if (!$('#' + keys[i] + ' .state').text() != data[keys[i]].state) {
-                                    $('#' + keys[i] + ' .state').text(data[keys[i]].state);
-                                    if (data[keys[i]].state != 'running') {
+                                    console.log("Instance state on backend  " + data[keys[i]].state)
+                                    $('#' + keys[i] + ' .state').text(data[keys[i]].state); }
+                                if ((data[keys[i]].state != 'running') || (Object.keys(shuttingDown).length > 0)) {
                                         allRunning = false;
                                     }
-                                }
+
                                 // element exists - check if an update is required
                                 if (!$('#' + keys[i] + ' .ip').text() != data[keys[i]].ip) {
                                     $('#' + keys[i] + ' .ip').text(data[keys[i]].ip);
+                                    if(data[keys[i]].ip =='undefined' ){
+                                        allRunning = false;
+                                    }
+
+                                }
+                                if (Object.keys(shuttingDown).length > 0) {
+                                    for (i = 0; i < Object.keys(shuttingDown).length; i++) {
+                                        if ($('#' + keys[i]).length) {
+                                            $('#' + keys[i]).remove();
+                                            delete shuttingDown[keys[i]];
+                                        } //end of if
+                                    }//end of for
                                 }
                             }
                         } else {
@@ -441,10 +458,9 @@ $(".launchapp-btn").on("click", function(event) {
                             allRunning = false;
                         }
                     }
-
-                    if ((!allRunning) || (shuttingDown.length > 0)) {
-                                            console.log("Running status" + allRunning)
-                    console.log("shutting down" + shuttingDown.length)
+                    console.log("shutting down " + Object.keys(shuttingDown).length)
+                    console.log("Running status " + allRunning)
+                    if ((!allRunning) || (Object.keys(shuttingDown).length > 0)) {
                         setTimeout(function() {
                             updateRunningServers(appid);
                         }, 10000);
@@ -452,20 +468,21 @@ $(".launchapp-btn").on("click", function(event) {
                 } else {
                     if (console && console.log) {
                         console.log('No more running instances for application <' + appid + '>, cancelling updates');
-                    }
-                }
+                    } //end of if
+                } //end of if-else
                 if (console && console.log) {
                     console.log('Completed updatedRunningServers success function');
-                }
-            },
+                }//end of if
+            }, //end of success
             complete: function() {
                 // Schedule the next request when the current one's complete
-                //setTimeout(updateRunningServers(appid), 5000);
-            }
-        });
-    }
+                //setTimeout(funcname????, 5000);
+            } //complete function end
+        }); //ajax function end
+    }//end of updated serverfunction
 
-    $(document).on("click", ".shutdown-server", function(e) {
+
+    $(document).off("click",".shutdown-server").on("click", ".shutdown-server", function(e) {
         var instanceId = $(this).data("instance");
         var appid = $(this).data("appid");
 
@@ -474,6 +491,7 @@ $(".launchapp-btn").on("click", function(event) {
         }
 
         shuttingDown[instanceId] = 'shutting-down';
+        console.log("called shutting down " + Object.keys(shuttingDown).length )
 
         setTimeout(function() {
             shutdownRunningServer(appid, instanceId);
@@ -508,12 +526,12 @@ $(".launchapp-btn").on("click", function(event) {
             },
             complete: function() {
                 // Schedule the next request when the current one's complete
-                //setTimeout(updateRunningServers(appid), 5000);
+                setTimeout(updateRunningServers(appid), 10000);
             }
         });
     }
 
-    $('#cloudServerOk').on("click", function() {
+    $('#cloudServerOk').off("click").on("click", function() {
         if ($('#cloudServerOk').is(":visible")) {
             // If OK button is visible, we accept the click event
             // Close the modal, replace the HTML content and re-activate
@@ -530,13 +548,14 @@ $(".launchapp-btn").on("click", function(event) {
             $('#cloudServerLaunch').show();
 
             var appid = $('#startCloudServerForm input[name=appid]').val();
+            alert("appid is "+ appid);
 
             setTimeout(function() {
                 updateRunningServers(appid);
             }, 0);
         }
     });
-$(document.body).on('click'," a.run-image",function(e) {
+$(document.body).off("click"," a.run-image").on('click'," a.run-image",function(e) {
    // get all the tags
     var appid = $(this).attr("data-appid")
     console.log(appid)

@@ -348,6 +348,7 @@ def detail_group(request,id):
     group = MyGroup.objects.select_related().get(id=id)
     all_apps = []
     all_applications = ApplicationBasicInfo.objects.all()
+    role = view_utils.return_role(request)
     for a in all_applications:
         app = {}
         app['id'] = a.id
@@ -355,7 +356,7 @@ def detail_group(request,id):
         app['name'] = a.name
         all_apps.append(app)
     return HttpResponse(
-            json.dumps({'id': group.id, 'grpname': group.name, 'grpdesc': group.description,'apps':all_apps}),
+            json.dumps({'id': group.id, 'grpname': group.name, 'grpdesc': group.description,'apps':all_apps,'role':role}),
             content_type="application/json")
 
 @login_required
@@ -382,7 +383,7 @@ def edit_group(request,id):
         return HttpResponseRedirect('/cg/manage/group')
     else:
         print "Sufficient information not present in the request to create a group"
-        return HttpResponse( "<p> Invalida Data </p>",content_type="application/html")
+        return HttpResponse( "<p> Invalid Data </p>",content_type="application/html")
         #return "<p> Invalida Data </p>"
 
 
