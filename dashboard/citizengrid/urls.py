@@ -269,7 +269,7 @@ urlpatterns = patterns('',
                            name='leave_group'),
 
                        url(r'^api/citizengrid/manage/group/join',
-                           cg_api_views.leave_group,
+                           cg_api_views.join_group,
                            name='join_group'),
 
                        url(r'^api/citizengrid/manage/group/(?P<groupid>\d+)/attachapp$',

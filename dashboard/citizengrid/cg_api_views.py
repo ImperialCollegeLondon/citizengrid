@@ -26,7 +26,7 @@ from django.views.decorators.csrf import *
 from django.db import transaction, IntegrityError
 from citizengrid.view_utils import delete_application
 from citizengrid.models import MyGroup
-from rest_framework.status import HTTP_404_NOT_FOUND, HTTP_400_BAD_REQUEST
+from rest_framework.status import HTTP_404_NOT_FOUND, HTTP_400_BAD_REQUEST, HTTP_200_OK, HTTP_201_CREATED
 
 """
 Responsible for web-api and associated features of CitizenGrid.
@@ -703,7 +703,6 @@ class CloudInstancesList(generics.ListAPIView):
         user = self.request.user
         application = self.kwargs['appid']
         queryset = CloudInstancesOpenstack.objects.filter(application=application)
-        #serializer = ApplicationsSerializer(queryset)
         return queryset
 
 
@@ -790,13 +789,19 @@ def start_OpenstackServer(request, *args, **kwargs):
     fileid = kwargs.get('fileid')
     endpoint = request.DATA.get('endpoint')
     key_alias = request.DATA.get('alias')
-    instance_type = request.DATA.get('instance_type')
-    print "Endpint is" + endpoint
+    instance_type = request.DATA.get('resource_type')
+    recordId = request.DATA.get('recordId')
+    appTag = request.DATA.get('appTag')
+    cloud = recordId.split(':')[0]
+    imageRecord = recordId.split(':')[1]
+
+    print "Endpoint is" + endpoint
     if endpoint is not None and key_alias is not None and instance_type is not None:
         creds = UserCloudCredentials.objects.filter(user_id=request.user, endpoint=endpoint, key_alias=key_alias)
         print creds[0].access_key, creds[0].secret_key
         image_info = ApplicationOpenstackImages.objects.get(id=appid)
-        return launch_views.start_server(appid, creds[0], endpoint, image_info.id, instance_type, image_info, request)
+        return launch_views.start_server(appid, creds[0], endpoint, cloud,imageRecord,appTag,instance_type,image_info.id, request)
+
     else:
         return HttpResponse(
             json.dumps({'appid': appid, 'error_status': "1", 'errormsg': 'Post Data not in right format!'}),
@@ -814,14 +819,19 @@ def start_Ec2server(request, *args, **kwargs):
     appid = kwargs.get('appid')
     fileid = kwargs.get('fileid')
     endpoint = request.DATA.get('endpoint')
+    recordId = request.DATA.get('recordId')
     key_alias = request.DATA.get('alias')
-    instance_type = request.DATA.get('instance_type')
-    print request.DATA.get('instance_type')
+    instance_type = request.DATA.get('resource_type')
+    appTag = request.DATA.get('appTag')
+    cloud = recordId.split(':')[0]
+    imageRecord = recordId.split(':')[1]
+    errormessage = ""
+
     if endpoint is not None and key_alias is not None and instance_type is not None:
         creds = UserCloudCredentials.objects.filter(user_id=request.user, endpoint=endpoint, key_alias=key_alias)
         print creds[0].access_key, creds[0].secret_key
         image_info = ApplicationEC2Images.objects.get(id=appid)
-        return launch_views.start_server(appid, creds[0], endpoint, image_info.id, instance_type, image_info, request)
+        return launch_views.start_server(appid, creds[0], endpoint,cloud,imageRecord,appTag,instance_type, image_info.id, image_info, request)
     else:
         post_data = {'endpoint': endpoint, 'key_alias': key_alias, 'instance_type': instance_type}
         keys_not_in_data = [k for k, v in post_data.items() if v is None]
@@ -830,8 +840,8 @@ def start_Ec2server(request, *args, **kwargs):
         elif len(keys_not_in_data) > 1:
             errormessage = 'The following keys' + keys_not_in_data + ' were needed but was not posted'
         else:
-            erromessage = 'Post Data not in right format!'
-        return HttpResponse(json.dumps({'appid': appid, 'error_status': "1", 'errormsg': erromessage}),
+            errormessage = 'Post Data not in right format!'
+        return HttpResponse(json.dumps({'appid': appid, 'error_status': "1", 'errormsg': errormessage}),
                             content_type="application/json")
 
 class MyGroupList(generics.ListCreateAPIView):
@@ -890,18 +900,17 @@ class MyGroupDetailView(generics.RetrieveUpdateDestroyAPIView):
 
     def get_queryset(self):
         groupid = self.kwargs['pk']
-        print groupid
         return MyGroup.objects.filter(id=int(groupid))
 
     def delete(self, request, *args, **kwargs):
         print "Inside group delete"
         groupid = self.kwargs['pk']
         try:
-            MyGroup.objects.filter(id=groupid).delete()
-        except IntegrityError as e:
-            return HttpResponse(json.dumps({ 'errormessage': 'Cannot Delete the group' + e.message}),content_type="application/json")
+            MyGroup.objects.get(id=groupid).delete()
+        except MyGroup.DoesNotExist as e:
+            return HttpResponse(json.dumps({ 'errormessage': 'Cannot Delete the group' + e.message}),content_type="application/json",status=HTTP_400_BAD_REQUEST)
         else:
-            return HttpResponse(json.dumps({ 'message': "Successfully deleted group"}),content_type="application/json")
+            return HttpResponse(json.dumps({ 'message': "Successfully deleted group"}),content_type="application/json",status=HTTP_200_OK)
 
     def put(self, request, *args, **kwargs):
         print "Inside Edit group view"
@@ -914,7 +923,6 @@ class MyGroupDetailView(generics.RetrieveUpdateDestroyAPIView):
             print request.DATA
             grpname = request.DATA.get('name')
             grpdesc = request.DATA.get('description')
-            print grpname
             try:
 
                 serializer = MyGroupSerializer(group,data=request.DATA)
@@ -924,8 +932,7 @@ class MyGroupDetailView(generics.RetrieveUpdateDestroyAPIView):
             except IntegrityError as e:
                 return Response(serializer.errors, status=HTTP_400_BAD_REQUEST)
             else:
-                return Response(serializer.data)
-            return Response(serializer.errors, status=HTTP_400_BAD_REQUEST)
+                return Response(serializer.data,HTTP_200_OK)
 
 class GroupApplicationTagView(generics.CreateAPIView):
     serializer_class = GroupApplicationTagSerializer
@@ -961,25 +968,26 @@ class GroupApplicationTagDetailView(generics.ListAPIView,generics.DestroyAPIView
 def leave_group(request, *args, **kwargs):
     groupid = kwargs.get('groupid')
     user = request.user
-    print "Leaving group with Groupid" + groupid
+    print "user id " + str(user)
     try:
         groups = MyGroup.objects.select_related().filter(user=request.user).get(id=groupid)
-        if groups.group_role == 'Owner':
-            return HttpResponse(json.dumps({ 'errormessage': 'Error !!, You are an administrator and cannot leave the group.You might want to delete the group' }),content_type="application/json")
+        if groups.owner == str(user):
+            print "Cannot remove association"
+            return HttpResponse(json.dumps({ 'errormessage': 'Error !!, You are an administrator and cannot leave the group.You might want to delete the group' }),content_type="application/json",status=HTTP_400_BAD_REQUEST)
         else:
             groups.user.remove(request.user)
             groups.save()
             print "Removing association user from group"
-    except IntegrityError as e:
-        return HttpResponse(json.dumps({ 'errormessage': 'Error !!, Cannot Leave the group' + e.message}),content_type="application/json")
+    except (MyGroup.DoesNotExist,IntegrityError) as e:
+        return HttpResponse(json.dumps({ 'errormessage': 'Error !!, Cannot Leave the group' + e.message}),content_type="application/json",status=HTTP_400_BAD_REQUEST)
     else:
-        return HttpResponse(json.dumps({ 'message': "User has succesfully left the group"}),content_type="application/json")
+        return HttpResponse(json.dumps({ 'message': "User has succesfully left the group"}),content_type="application/json",status=HTTP_200_OK)
 
 @api_view(['POST'])
 @permission_classes((IsAuthenticated, ))
 def join_group(request, *args, **kwargs):
     user = request.user
-    groupd_ids = request.POST['group_ids']
+    groupd_ids = request.DATA['group_ids']
     int_ids = [int(str(i)) for i in groupd_ids]
     print "Joining the  group(s) with Groupid(s)" + str(int_ids)
     try:
@@ -988,10 +996,10 @@ def join_group(request, *args, **kwargs):
                 group = MyGroup.objects.select_related().get(id=i)
                 group.user.add(request.user)
                 group.save()
-    except IntegrityError as e:
-        return HttpResponse(json.dumps({ 'errormessage': 'Error !!, Cannot Join the group' + e.message}),content_type="application/json")
+    except (MyGroup.DoesNotExist,IntegrityError) as e:
+        return HttpResponse(json.dumps({ 'errormessage': 'Error !!, Cannot Join the group'}),content_type="application/json",status=HTTP_400_BAD_REQUEST)
     else:
-        return HttpResponse(json.dumps({ 'message': "User has succesfully joined the group|groups"}),content_type="application/json")
+        return HttpResponse(json.dumps({ 'message': "User has succesfully joined the group|groups"}),content_type="application/json",status=HTTP_201_CREATED)
 
 
 
