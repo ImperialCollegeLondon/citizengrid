@@ -731,7 +731,7 @@ class CloudInstancesDetail(generics.ListCreateAPIView):
         appid = self.kwargs['appid']
         instanceid = self.kwargs['instanceid']
         task = request.POST.get('status')
-        print "In Stop with instanceid as %s" % (instanceid)
+        print "In stop instance method with instanceid as %s" % (instanceid)
         if instanceid is not None:
             response = launch_views.manage_instances(request, task, appid, instanceid)
             if task == 'status':
@@ -989,31 +989,62 @@ class MyGroupDetailView(generics.RetrieveUpdateDestroyAPIView):
             else:
                 return Response(serializer.data,HTTP_200_OK)
 
-class GroupApplicationTagView(generics.CreateAPIView):
+class GroupApplicationTagView(generics.ListAPIView):
     serializer_class = GroupApplicationTagSerializer
     permission_classes = ( IsAuthenticated,)
 
-    def post(self, request, *args, **kwargs):
-        pass
+    def get(self, request, *args, **kwargs):
+        if 'groupid' in request.DATA:
+            groupid = request.DATA['id']
+            gats = GroupApplicationTag.objects.filter(group=groupid)
+            return HttpResponse(json.dumps(gats),content_type="application/json",status=HTTP_200_OK)
+        else:
+            return HttpResponse(json.dumps({ 'errormessage': 'Cannot Retrieve details of application tags for the group'}),content_type="application/json",status=HTTP_400_BAD_REQUEST)
 
-class GroupApplicationTagDetailView(generics.ListAPIView,generics.DestroyAPIView):
+
+
+
+class GroupApplicationTagDetailView(generics.ListAPIView):
     serializer_class = GroupApplicationTagSerializer
     permission_classes = ( IsAuthenticated,)
 
     def get_queryset(self):
         id = self.kwargs.get('id')
-        return GroupApplicationTag.objects.filter(id=int(id))
+        return GroupApplicationTag.objects.filter(application=int(id))
 
-    def delete(self, request, *args, **kwargs):
-        groupid = kwargs.get('groupid')
-        id = kwargs.get('id')
-        try:
-            GroupApplicationTag.objects.get(id=id).delete()
-        except GroupApplicationTag.DoesNotExist:
-            return HttpResponse(json.dumps({ 'errormessage': 'Cannot Detach the application from the group' }),content_type="application/json")
-        else:
-            return HttpResponse(json.dumps({ 'message': 'Successfully detached application!!' }),content_type="application/json")
 
+@api_view(['POST'])
+@permission_classes((IsAuthenticated, ))
+def attachapp(request, *args, **kwargs):
+    groupid = kwargs['groupid']
+    tagname = request.DATA['tagname']
+    tagdesc = request.DATA['tagdesc']
+    tagid = request.DATA['tagid']
+    appid = request.DATA['appid']
+    application =  ApplicationBasicInfo.objects.get(id=appid)
+    mg = MyGroup.objects.get(id=groupid)
+
+    try:
+        gat = GroupApplicationTag(tagname=tagname,description=tagdesc,tagid=tagid,application=application,group=mg)
+        gat.save()
+    except IntegrityError as e:
+        return HttpResponse(json.dumps({ 'errormessage': 'Cannot Attach the application to the group' }),content_type="application/json",status=HTTP_400_BAD_REQUEST)
+    else:
+        return HttpResponse(json.dumps({ 'message': 'Successfully attached the  application!!' }),content_type="application/json",status=HTTP_201_CREATED)
+
+
+@api_view(['POST'])
+@permission_classes((IsAuthenticated, ))
+def detachapp(request, *args, **kwargs):
+    id = kwargs.get('appid')
+    gat = GroupApplicationTag.objects.get(id=id)
+    grpid = gat.group.id
+    try:
+        GroupApplicationTag.objects.get(id=id).delete()
+    except GroupApplicationTag.DoesNotExist:
+        return HttpResponse(json.dumps({ 'errormessage': 'Cannot Detach the application from the group' }),content_type="application/json")
+    else:
+        return HttpResponse(json.dumps({ 'message': 'Successfully detached application!!' }),content_type="application/json",status=HTTP_200_OK)
 
 
 

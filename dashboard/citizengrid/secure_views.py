@@ -485,7 +485,7 @@ def application_grp_tag_detail(request):
 @login_required()
 def application_grp_tag(request,id):
     print "Entering Group application tag to retrieve all tags"
-    gats = gats = GroupApplicationTag.objects.select_related().filter(application=id)
+    gats = GroupApplicationTag.objects.select_related().filter(application=id)
     select_data = """ <select name=tag id="tagid" class="form-control"  placeholder="Tags">
     <option value="NONE">Nothing Selected</option>
     """

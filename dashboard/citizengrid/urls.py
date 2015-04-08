@@ -283,12 +283,12 @@ urlpatterns = patterns('',
                            name='join_group'),
 
                        url(r'^api/citizengrid/manage/group/(?P<groupid>\d+)/attachapp$',
-                           cg_api_views.GroupApplicationTagView.as_view(),
-                           name='GroupApplicationTagView'),
+                           cg_api_views.attachapp,
+                           name='attachapp'),
 
-                       url(r'^api/citizengrid/manage/group/(?P<groupid>\d+)/detachapp/(?P<id>\d+)$',
-                           cg_api_views.GroupApplicationTagDetailView.as_view(),
-                           name='GroupApplicationTagDetailView'),
+                       url(r'^api/citizengrid/manage/group/detachapp/(?P<appid>\d+)$',
+                           cg_api_views.detachapp,
+                           name='detachapp'),
 
                        url(r'^api/citizengrid/', include(router.urls)),
 

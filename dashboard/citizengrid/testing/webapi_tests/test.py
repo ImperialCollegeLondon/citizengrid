@@ -4,11 +4,12 @@ Tests the endpoints
 
 from django.test import TestCase
 from django.core.urlresolvers import reverse
+from pandas.parser import k
 from rest_framework import status
 from rest_framework.authtoken.models import Token
 from django.contrib.auth.models import User
 import json
-from citizengrid.models import MyGroup,ApplicationBasicInfo,CloudInstancesOpenstack
+from citizengrid.models import MyGroup,GroupApplicationTag,ApplicationBasicInfo,CloudInstancesOpenstack
 
 from rest_framework.test import APITestCase, APIClient
 
@@ -113,6 +114,40 @@ class GroupTests(APITestCase):
         response = self.client.post(url,format='json')
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
+    def test_attach_app_to_group(self):
+        """
+            Attaches application to the group
+        """
+        APIClient(enforce_csrf_checks=True)
+        mg = MyGroup(name="demo",description="demo description",owner="foo", group_role ='Owner')
+        mg.save()
+        mg.user.add(self.user)
+        app = ApplicationBasicInfo(owner=self.user,name="demo",description="name",public=True,client_downloads=0)
+        app.save()
+        url = reverse('attachapp',kwargs={'groupid':1})
+        data = {'tagname':'tagname','tagdesc':'tagdesc','tagid':'tagid','appid':1}
+        mg = MyGroup(name="demo",description="demo description",owner="foo", group_role ='Owner')
+        mg.save()
+        mg.user.add(self.user)
+        response = self.client.post(url,data,format='json')
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+
+    def test_detach_app_from_group(self):
+        """
+            Test to detach application from the group
+        """
+        APIClient(enforce_csrf_checks=True)
+        app = ApplicationBasicInfo(owner=self.user,name="demo",description="name",public=True,client_downloads=0)
+        app.save()
+        mg = MyGroup(name="demo",description="demo description",owner="foo", group_role ='Owner')
+        mg.save()
+        gat = GroupApplicationTag(group=mg,tagname='tagname',description='tagdesc',tagid='tagid',application=app)
+        gat.save()
+        url = reverse('detachapp',kwargs={'appid':1})
+
+        response = self.client.post(url,format='json')
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
 class CredentialsTest(APITestCase):
     """
     Test for API endpoints for managing credentials
@@ -158,6 +193,13 @@ class CloudInstancesTest(APITestCase):
         pass
 
 
+    def test_get_aws_cloudinstances_list(self):
+        APIClient(enforce_csrf_checks=True)
+        app = ApplicationBasicInfo(owner=self.user,name="demo",description="name",public=True,client_downloads=0)
+        app.save()
+        url = reverse('AWSCloudInstancesList',kwargs={'appid':1})
+        response = self.client.get(url,format='json')
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
 
 
 
