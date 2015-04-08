@@ -8,7 +8,7 @@ from rest_framework.renderers import JSONRenderer
 from citizengrid import launch_views, DATA_K
 from citizengrid.models import UserInfo, ApplicationBasicInfo, ApplicationFile, ApplicationServerInfo, \
     ApplicationClientInfo, Branch, Category, SubCategory, \
-    UserCloudCredentials, ApplicationOpenstackImages, ApplicationEC2Images, CloudInstancesOpenstack, GroupApplicationTag
+    UserCloudCredentials, ApplicationOpenstackImages, CloudInstancesAWS,ApplicationEC2Images, CloudInstancesOpenstack, GroupApplicationTag
 from rest_framework.decorators import api_view, permission_classes
 from django.contrib.auth.decorators import login_required
 from rest_framework.permissions import IsAdminUser, IsAuthenticatedOrReadOnly, IsAuthenticated
@@ -20,7 +20,7 @@ from rest_framework.response import Response
 from citizengrid.serializers import UserSerializer, PasswordSerializer, GroupSerializer, ApplicationsSerializer, \
     ApplicationFileSerializer, ApplicationOsImagesSerializer, ApplicationEc2Serializer, BranchSerializer, \
     CategorySerializer, SubCategorySerializer, \
-    ApplicationFileDetailSerializer, UserCloudCredentialsSerializer, CloudInstancesSerializer, MyApplicationSerializer, MyGroupSerializer,GroupApplicationTagSerializer
+    ApplicationFileDetailSerializer, CloudInstancesAWSSerializer,UserCloudCredentialsSerializer, CloudInstancesSerializer, MyApplicationSerializer, MyGroupSerializer,GroupApplicationTagSerializer
 from rest_framework import routers, views, reverse, response
 from django.views.decorators.csrf import *
 from django.db import transaction, IntegrityError
@@ -709,8 +709,8 @@ class CloudInstancesList(generics.ListAPIView):
 class CloudInstancesDetail(generics.ListCreateAPIView):
     """
     API endpoint that
-    1. shows detail of an instance.
-    2. stops an running instance
+    1. shows detail of an Openstack instance.
+    2. stops an running Openstack instance
     """
     serializer_class = CloudInstancesSerializer
     permission_classes = ( IsAuthenticated,)
@@ -745,6 +745,60 @@ class CloudInstancesDetail(generics.ListCreateAPIView):
         else:
             return HttpResponse("Cannot stop application")
 
+class AWSCloudInstancesList(generics.ListAPIView):
+    """
+    API endpoint that list all AWS cloud instances of an application
+    """
+    serializer_class = CloudInstancesAWSSerializer
+    permission_classes = ( IsAuthenticated,)
+
+
+
+    def get_queryset(self):
+        user = self.request.user
+        application = self.kwargs['appid']
+        queryset = CloudInstancesAWS.objects.filter(application=application)
+        return queryset
+
+class AWSCloudInstancesDetail(generics.ListCreateAPIView):
+    """
+    API endpoint that \n
+    1. shows detail of an AWS instance. \n
+    2. stops an running AWS instance
+    """
+    serializer_class = CloudInstancesAWSSerializer
+    permission_classes = ( IsAuthenticated,)
+
+    def get_queryset(self):
+        user = self.request.user
+        application = self.kwargs['appid']
+        instance_id = self.kwargs['instanceid']
+        queryset = CloudInstancesAWS.objects.filter(application=application, instance_id=instance_id)
+        #serializer = ApplicationsSerializer(queryset)
+        return queryset
+
+    def post(self, request, *args, **kwargs):
+
+        """
+        Stops a running AWS cloud instance
+        """
+        appid = self.kwargs['appid']
+        instanceid = self.kwargs['instanceid']
+        task = request.POST.get('status')
+        print "In Stop with instanceid as %s" % (instanceid)
+        if instanceid is not None:
+            response = launch_views.manage_instances(request, task, appid, instanceid)
+            if task == 'status':
+
+                string = response.content
+                json_obj = json.loads(string)
+                res = json_obj[instanceid]
+                return HttpResponse(json.dumps(res), content_type="application/json")
+            else:
+                return response
+        else:
+            return HttpResponse("Cannot stop application")
+
 
 @login_required()
 @csrf_protect
@@ -756,11 +810,12 @@ def startapp_locally(request, appid):
     """
     print "In started"
     launchtype = request.GET.get("launchtype", None)
-    if launchtype is not None:
-        response = launch_views.launchapp(request, appid, launchtype)
-        return response
+    apptag = request.GET.get("apptag", None)
+    if launchtype is not None and apptag is not None:
+        response = launch_views.launchapp(request, appid, launchtype,apptag)
+        return HttpResponse(response,status=HTTP_200_OK)
     else:
-        return HttpResponse("Cannot start application")
+        return HttpResponse(json.dumps({ 'errormessage': 'Error !!, Cannot start the application locally. The request should both contain launchtype and apptag params'}),status=HTTP_400_BAD_REQUEST)
 
 
 @login_required()

@@ -237,15 +237,25 @@ urlpatterns = patterns('',
                            cg_api_views.UserCloudCredentialsDetailView.as_view(),
                            name='UserCloudCredentialsDetailView'),
 
-                       # Instances
-                       url(r'^api/citizengrid/apps/(?P<appid>\d+)/instances/$',
+                       # Openstack Instances
+                       url(r'^api/citizengrid/apps/(?P<appid>\d+)/osinstances/$',
                            cg_api_views.CloudInstancesList.as_view(),
                            name='CloudInstancesList'),
 
                        url(
-                           r'^api/citizengrid/apps/(?P<appid>\d+)/instances/(?P<instanceid>([a-zA-Z])-([0-9a-zA-Z])+)/$',
+                           r'^api/citizengrid/apps/(?P<appid>\d+)/osinstances/(?P<instanceid>([a-zA-Z])-([0-9a-zA-Z])+)/$',
                            cg_api_views.CloudInstancesDetail.as_view(),
                            name='CloudInstancesDetail'),
+
+                       # AWS Instances
+                       url(r'^api/citizengrid/apps/(?P<appid>\d+)/awsinstances/$',
+                           cg_api_views.AWSCloudInstancesList.as_view(),
+                           name='AWSCloudInstancesList'),
+
+                       url(
+                           r'^api/citizengrid/apps/(?P<appid>\d+)/awsinstances/(?P<instanceid>([a-zA-Z])-([0-9a-zA-Z])+)/$',
+                           cg_api_views.AWSCloudInstancesDetail.as_view(),
+                           name='AWSCloudInstancesDetail'),
 
                        # stop instance
                        url(
