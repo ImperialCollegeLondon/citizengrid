@@ -16,7 +16,9 @@
 			<h3 style="float: left;">
 				<img id="logo" src="/img/logo_trans.png"></img> <span>CitizenGrid</span>
 			</h3>
+            {% if user.is_authenticated %}
 			<div style="float: right; border: 1px #6E91E0 solid; color: #4B6FE4; background-color: rgba(245, 245, 245, 0.2); margin: 16px 0px; margin-right: 30px;" class="well well-sm">Current role: {{role}}</div>
+            {% endif %}
 		</span>
 	</div>
 </div>
