@@ -1,6 +1,7 @@
-{% extends "password_reset/base.html" %}{% load i18n %}{% load url from future %}
+{% extends "base.html" %}{% load i18n %}{% load url from future %}
 
-{% block content %}
+{% block container-content %}
+
 {% if invalid %}{% url "password_reset_recover" as recovery_url %}
 <p>{% blocktrans %}Sorry, this password reset link is invalid. You can still <a href="{{ recovery_url }}">request a new one</a>.{% endblocktrans %}</p>
 {% else %}
