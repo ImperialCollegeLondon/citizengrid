@@ -2,6 +2,13 @@
 
 {% block title %}{% trans "New password set" %}{% endblock %}
 
-{% block content %}
-<p>{% trans "Your password has successfully been reset. You can use it right now on the login page." %}</p>
+{% block container-content %}
+<div id="reset-done-message" class="container">
+	<h4>{% trans "Your password has successfully been reset. You can use it right now on the login page." %}</h4>
+</div>
+<style>
+#reset-done-message {
+margin-top: 30px;
+}
+</style>
 {% endblock %}
