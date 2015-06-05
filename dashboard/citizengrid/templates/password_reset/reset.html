@@ -1,15 +1,62 @@
-{% extends "base.html" %}{% load i18n %}{% load url from future %}
+{% extends "base.html" %}
+{% load i18n %}
+{% load url from future %}
 
 {% block container-content %}
+<div class="container">
+ {% if invalid %}{% url "password_reset_recover" as recovery_url %}
 
-{% if invalid %}{% url "password_reset_recover" as recovery_url %}
-<p>{% blocktrans %}Sorry, this password reset link is invalid. You can still <a href="{{ recovery_url }}">request a new one</a>.{% endblocktrans %}</p>
-{% else %}
-<p>{% blocktrans %}Hi, <strong>{{ username }}</strong>. Please choose your new password.{% endblocktrans %}</p>
-<form method="post" action="{% url "password_reset_reset" token %}">
-{% csrf_token %}
-{{ form.as_p }}
-<p><input type="submit" value="{% trans "Set new password" %}"></p>
+	<div>
+		{% blocktrans %}Sorry, this password reset link is invalid. You can still
+		<a href="{{ recovery_url }}">request a new one</a>
+		.{% endblocktrans %}
+	</div>
+	{% else %}
+	<div>
+		{% blocktrans %}Hi, <strong>{{ username }}</strong>. Please choose your new password.{% endblocktrans %}
+	</div>
+	<!-- 
+	<form role="form" method="post" action="{% url "password_reset_reset" token %}">
+		{% csrf_token %} {{ form.as_p }}
+		<p>
+			<input type="submit" value="{% trans " Setnewpassword" %}">
+		</p>
+	</form>
+	 -->
+	 <form method="post" action="{% url 'password_reset_reset' token %}">{% csrf_token %}
+    
+        <legend>{{ title }}</legend>
+        {% for field in form %}
+            {% if field.errors %}
+                <div class="form-group error">
+                    <label class="control-label">{{ field.label }}</label> 
+                    <div class="controls">{{ field }}
+                        <span class="help-inline">
+                            {% for error in  field.errors %}{{ error }}{% endfor %}
+                        </span>
+                    </div>
+                </div>
+            {% else %}
+                <div class="from-group">
+                    <label class="control-label">{{ field.label }}</label> 
+                    <div class="form-controls">{{ field }}
+                        {% if field.help_text %}
+                            <p class="help-inline"><small>{{ field.help_text }}</small></p>
+                        {% endif %}
+                    </div>
+                </div>
+            {% endif %}
+        {% endfor %}
+   
+    
+        <button id="newpass-button" type="submit" class="btn btn-success"  value="{% trans 'Setnewpassword' %}">Submit</button>
+    
 </form>
-{% endif %}
+</div>
+<style>
+#newpass-button {
+margin-top: 10px;
+}
+</style>
+{% endif %} 
 {% endblock %}
