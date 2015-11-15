@@ -17,13 +17,21 @@
         <div class="panel-heading">Application: <b>{{ app.name }}</b></div>
         <div class="panel-body">
             <div>
+                {% if app.iconfile|first == "/" %}
                 <div class="appinfo"><img class="app-icon" src={{ app.iconfile }}>{{ app.description }} </div>
+                {% else %}
+                <div class="appinfo"><img class="app-icon" src=/{{ app.iconfile }}>{{ app.description }} </div>
+                {% endif %}
 
 				{% if has_client == True %}
                 <div  id="client-launch" data-toggle="modal" 
                 						data-appname="{{ app.name }}" 
-                						data-appid="{{ app.id }}" 
-                						data-appicon="{{ app.iconfile }}" 
+                						data-appid="{{ app.id }}"
+                						{% if app.iconfile|first == "/" %}
+                						data-appicon="{{ app.iconfile }}"
+                						{% else %}
+                						data-appicon="/{{ app.iconfile }}"
+                						{% endif %}
                 						href="#launchAppModal" 
                 						class="btn btn-success btn-launch">
                 						Launch Application Client Locally

@@ -61,7 +61,7 @@
 					{% endif %}
 			        </div>
 			        <button class="btn btn-primary" type="submit">Sign in</button>
-			        <input type="hidden" name="next" value="/cg" />
+			        <input type="hidden" name="next" value="{{ next }}" />
 			        {% csrf_token %}
 			        <a href="/accounts/register/">Create an account...</a>
                    {% csrf_token %}

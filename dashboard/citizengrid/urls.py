@@ -171,6 +171,11 @@ urlpatterns = patterns('',
                            'citizengrid.secure_views.my_application'),
                        url(r'^cg/delete/(?P<id>[\w-]+)$',
                            'citizengrid.secure_views.cg_delete'),
+                       # jcohen02 - added to support request in issue #20
+                       # Start virtualbox application client 
+                       url(r'^cg/apps/(?P<appname>\w+)/start/$',
+                           'citizengrid.secure_views.start_app_client',
+                           name='start_app_client'),
                        (r'^branch/(?P<branch>\d+)/all_json_category/$',
                         'citizengrid.views.all_json_category'),
                        (r'^category/(?P<category>\d+)/all_json_subcategory/$',

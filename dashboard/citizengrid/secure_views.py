@@ -18,7 +18,7 @@ from django.shortcuts import redirect
 import simplejson
 from rest_framework import status
 from django.http.response import HttpResponseNotAllowed, HttpResponseNotFound,\
-    HttpResponseForbidden, HttpResponseRedirect
+    HttpResponseForbidden, HttpResponseRedirect, HttpResponseBadRequest
 from django.forms.util import ErrorList
 from django.template.loader import render_to_string
 from citizengrid.models import UserInfo, ApplicationBasicInfo, ApplicationServerInfo, ApplicationClientInfo, Branch, Category, SubCategory, \
@@ -39,7 +39,12 @@ import views
 from django.db import IntegrityError, transaction
 from visicon import gen_icon
 
-
+import logging
+LOG = logging.getLogger(__name__)
+logging.basicConfig(level=logging.DEBUG,
+                    format='%(asctime)s %(name)-12s %(levelname)-8s %(message)s',
+                    datefmt='%m-%d %H:%M')
+logging.getLogger(__name__).setLevel(logging.DEBUG)
 
 @login_required
 def update_user_account(request):
@@ -1222,3 +1227,58 @@ def handle_uploaded_file_icon(appname,request,fs,file):
             for chunk in file.chunks():
                 destination.write(chunk)
             destination.close()
+
+# jcohen02 - added to support request in issue #20
+# Start virtualbox application client passing specified configuration metadata
+@login_required
+def start_app_client(request, appname):
+    user = request.user
+    
+    get_params = request.GET
+    config_params = {}
+    
+    LOG.debug('Get params: <%s>' % get_params)
+    
+    for param in get_params:
+        LOG.debug('PARAMETER: <%s>' % param)
+        LOG.debug('PARAMETER VALUE: <%s>' % get_params.get(param))
+        if param.startswith('config['):
+            config_params[param[7:-1]] = get_params.get(param, '')
+    
+    LOG.debug('PROCESSED CONFIG PARAMS: <%s>' % config_params)
+    
+    LOG.debug('Request to start app via API...\nReceived request from user '
+              '<%s> with app name <%s>' % (user.username, appname))
+    
+    role = view_utils.return_role(request)
+       
+    # Lookup the specified app name and for now, display the info page for this
+    # app or return a 404 if it doesn't exist.
+    specified_app = ApplicationBasicInfo.objects.filter(name__iexact=appname)
+    app_id = None
+    app_name = None
+    app_group = config_params.get('group','')
+    if len(specified_app) > 1:
+        return HttpResponseBadRequest('ERROR: Multiple applications found with '
+                                      'the name <%s>. Unable to select the '
+                                      'specific application required.' % appname)
+    elif len(specified_app) == 0:
+        return HttpResponseNotFound('The specified application <%s> was not '
+                                    'found.' % appname)
+    else:
+        app_id = specified_app[0].id
+        app_name = specified_app[0]
+    
+    if (not specified_app[0].public) and (request.user != specified_app[0].owner):
+        LOG.debug('Specified app <%s> is not public and the requesting user '
+                  '<%s> is not the application owner.' 
+                  % (appname, request.user.username))
+        return HttpResponseForbidden('The specified app is not public. You are '
+                                     'not authorised to use it.')
+
+    return render_to_response('cg_start_app.html', {'appId': app_id,
+                                                    'appName': app_name,
+                                                    'group': app_group,
+                                                    'role': role,
+                                                    'selected_app':specified_app}, 
+                              context_instance=RequestContext(request))
