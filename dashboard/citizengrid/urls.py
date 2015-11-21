@@ -1,5 +1,5 @@
 from django.conf.urls import patterns, include, url
-from citizengrid import cg_api_views
+from citizengrid import cg_api_views, cvm_webapi
 import os
 from . import settings
 
@@ -300,6 +300,9 @@ urlpatterns = patterns('',
                        url(r'^api-auth/citizengrid/',
                            include('rest_framework.urls',
                                    namespace='rest_framework')),
+
+                       # CernVM Web API VMCP endpoint
+                       url(r'^vmcp$', cvm_webapi.vmcp, name='vmcp'),
 
                        # admin
                        url(r'^admin/', include(admin.site.urls)),
