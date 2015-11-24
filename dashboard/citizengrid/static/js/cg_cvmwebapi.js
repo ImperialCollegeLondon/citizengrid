@@ -36,7 +36,7 @@ function prepareCVMWebAPI() {
 
 function initCVMWebAPISession(app_id) {
 		log('****** INIT initCVMWebAPISession CALLED ******');
-		window.plugin.requestSession('http://test.local:8000/vmcp?appid=' + app_id, function(session) {
+		window.plugin.requestSession('http://test.local:8080/vmcp?appid=' + app_id, function(session) {
 			log('**** Initialising CVMWebAPI Session...')
 			
 			window.session = session;

@@ -39,6 +39,7 @@ router.add_api_view("usercredentials",
 
 urlpatterns = patterns('',
                        # Examples:
+                       url(r'^cg-webapi/', include('cg_webapi.urls')),
                        url(r'^$', 'citizengrid.views.home', name='home'),
                        url(r'^about', 'citizengrid.views.about', name='about'),
                        url(r'^contact',
@@ -301,8 +302,9 @@ urlpatterns = patterns('',
                            include('rest_framework.urls',
                                    namespace='rest_framework')),
 
-                       # CernVM Web API VMCP endpoint
+                       # CernVM Web API VMCP endpoint + endpoint for non-HTTP
                        url(r'^vmcp$', cvm_webapi.vmcp, name='vmcp'),
+                       url(r'^webapi_start$', cvm_webapi.webapi_start, name='webapi_start'),
 
                        # admin
                        url(r'^admin/', include(admin.site.urls)),

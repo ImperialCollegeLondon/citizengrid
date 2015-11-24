@@ -4,10 +4,13 @@ import logging
 import hashlib
 import base64
 import urllib
+import uuid
 from django.http.response import HttpResponseNotAllowed, HttpResponse,\
-    HttpResponseServerError
+    HttpResponseServerError, HttpResponseRedirect
 from citizengrid.models import ApplicationBasicInfo, ApplicationFile
+from cg_webapi.models import VmcpRequest
 from django.conf import settings
+import urlparse
 
 LOG = logging.getLogger(__name__)
 logging.basicConfig(level=logging.DEBUG,
@@ -180,11 +183,48 @@ def sha256_checksum(file_path):
     return base64_hash
 
 def vmcp(request):
+    MACHINE_CONFIG = _generate_vmcp_config(request)
+    
+    if 'cvm_salt' not in request.GET:
+        LOG.error('Required cvm_salt parameter not found in vmcp request.')
+        return HttpResponseServerError('{"status":"error", "errorText":"Required cvm_salt parameter not found in vmcp request."}')
+    else:
+        cvm_salt = request.GET['cvm_salt']
+    
+    signer = VMCPSigner(settings.VMCP_KEY_PATH)
+    LOG.debug('VMCP signer: <%s>' % signer)
+    
+    signed_request = signer.sign(MACHINE_CONFIG, cvm_salt)
+        
+    return HttpResponse(json.dumps(signed_request), content_type="application/json")
+    
+# This endpoint is for use when running behind HTTPS and redirecting to an HTTP
+# URL for starting a VM. Get the signed VCMP request (via HTTPS request) and 
+# then save this against a unique key. Then send an HTTP redirect to access this    
+def webapi_start(request):
+    MACHINE_CONFIG = _generate_vmcp_config(request)
+    
+    # Now save the signed request
+    unique_id = uuid.uuid4()
+    vr = VmcpRequest(vmcp_key=unique_id, content=json.dumps(MACHINE_CONFIG))
+    vr.save()
+    
+    # Now send a redirect to an HTTP page passing the unique_id
+    # Get the current URI
+    uri = request.build_absolute_uri()
+    parsed_url = urlparse.urlparse(uri)
+    redirect_url = ('http://%s/cg-webapi/launch/?id=%s' % 
+                    (parsed_url.netloc, unique_id))
+    LOG.debug('Redirecting secure VMCP request to <%s>' % redirect_url)    
+    return HttpResponseRedirect(redirect_url)    
+
+def _generate_vmcp_config(request):
     if request.method != 'GET':
         return HttpResponseNotAllowed(['GET'])
     
     app_id = request.GET['appid']
-    #app_tag = request.GET['apptag']
+    app_tag = request.GET['apptag']
+    
     LOG.debug('Getting VMCP config for application with ID [%s]' % app_id)
     
     file_formats = { 'NONE': 'Local file (Unknown type)',
@@ -235,14 +275,7 @@ def vmcp(request):
     if app.name.lower() == 'vas':
         MACHINE_CONFIG['userData'] = "[amiconfig]\nplugins=cernvm\n\n[cernvm]\ncontextualization_key=cfcbde8ad2d4431d8ecc6dd801015252\nliveq_queue_id=${app_tag}"
     
-        LOG.debug('VMCP requested...')
+        LOG.debug('VMCP MACHINE_CONFIG requested and configured...')
+        
+    return MACHINE_CONFIG
     
-    if 'cvm_salt' not in request.GET:
-        LOG.error('Required cvm_salt parameter not found in vmcp request.')
-        return HttpResponseServerError('{"status":"error", "errorText":"Required cvm_salt parameter not found in vmcp request."}')
-    # If testing on the test.local domain
-    signer = VMCPSigner(os.path.join(settings.PROJECT_ROOT, 'settings', 'test-local.pem'))
-    LOG.debug('VMCP signer: <%s>' % signer)
-    # If running in production on cyberlab.doc
-    #signer = VMCPSigner(os.path.join(settings.PROJECT_ROOT, 'settings', 'cyberlab.doc.ic.ac.uk-cernvmwebapi_rsa.pem'))
-    return HttpResponse(json.dumps(signer.sign(MACHINE_CONFIG, request.GET.get('cvm_salt', ''))), content_type="application/json")

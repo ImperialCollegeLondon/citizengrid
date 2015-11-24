@@ -1,10 +1,5 @@
 {% extends "base.html" %}
 
-{% block head %}
-<script src="/js/cvmwebapi-latest.js"></script>
-<script src="/js/cg_cvmwebapi.js"></script>
-{% endblock head %}
-
 {% load cg_template_filters %}
 
 {% block container-content %}
@@ -51,6 +46,11 @@
 </div>
 
 <script type="text/javascript">
+function log(msg) {
+	if(console && console.log) {
+		console.log(msg)
+	}
+}
 
 $(document).ready(function() {
 	var appId = $('#client-launch').data("appid");
@@ -65,14 +65,14 @@ $(document).ready(function() {
 			}
 			else {
 				// Disable the launch app button until the CVMWebAPI is available
-				$('.launchapp-btn').addClass('disabled');
+				/* $('.launchapp-btn').addClass('disabled');
 				$('#launchAppModal .modal-footer').prepend(
 					'<span id="api-loading" style="float:left; font-size:12px;">' + 
 					'<img src="/img/loading.gif" style="width:16px;" />&nbsp;' +
-					'&nbsp;Initialising VM plugin...</span>');
+					'&nbsp;Initialising VM plugin...</span>'); */
 				
 				// Add an element into server instances to report VM state
-				$('#server_instances').prepend('<div id="client-status">VM Status: <span></span></div>');
+				//$('#server_instances').prepend('<div id="client-status">VM Status: <span></span></div>');
 				
 				// Remove the old click handler and replace this with the 
 				// information for the passed in parameters.
@@ -92,33 +92,14 @@ $(document).ready(function() {
 	);
 	$("#ajax_app_detail").show();
 	$(document).scrollTop("#ajax_app_detail");
-	
-	$('.launchapp-btn').on('click', function(e) {
-		launchBtnClicked(e);
-	})
-	
-	// Config for CernVM WebAPI
-	var appId = $('#client-launch').data("appid");
-	if(window.plugin != undefined) {
-		getVMSession(appId);		
-	}
-	else {
-		log('Window plugin is not available...trying again in 1s');
-		setTimeout(function() {
-			var appId = $('#client-launch').data("appid");
-			getVMSession(appId);
-		}, 1000);
-		
-	}
-	log('Window Session: ' + window.session);
 });
 
 function populateLaunchModal(target) {
-	if(window.session && (STATES[window.session.state] == "Running")) {
+	/* if(window.session && (STATES[window.session.state] == "Running")) {
 		window.session.stop();
 		target.stopPropagation();
 		return;
-	}
+	} */
 	var appName = $(target).data("appname");
 	var appId = $(target).data("appid");
     var appIcon = $(target).data("appicon");
@@ -136,33 +117,35 @@ function populateLaunchModal(target) {
 
 }
 
-// Old launch handler for Java WebStart Launcher
-function launchAppFixedGroup(event) {
-	var appId = $(event.target).data("id");
-    var appGroup = $("#app-group").data("app-group");
-	var launchType = $('#launchtype').data("launchtype");
-	$(event.target).attr("href", "/cg/launchapp/" + appId + "/" + launchType + "/" + appGroup);
-	if(console && console.log) {
-		console.log('About to launch application with ID: ' + appId);
-	}
-
-    if(console && console.log) {
-		console.log('About to launch application with group: ' + appGroup);
-	}
-	$('#launchAppModal').modal("hide");
-}
-
 function launchAppWebAPI(event) {
 	event.preventDefault();
 	var appId = $(event.target).data("id");
 	var appTag = $("#app-group").data("app-group");
 	var launchType = $('#launchtype').data("launchtype");
-	//$(event.target).attr("href", "/cg/launchapp/" + appId + "/" + launchType + "/" + appTag);
 	
 	log('About to launch application with ID: ' + appId + " and tag: " + appTag);
-		
-	startSession({'app_tag':appTag});
-	$('#launchAppModal').modal("hide");
+	
+	// Prepare the URL and trigger the popup to launch the VM via webapi
+	var url = '/webapi_start?appid=' + appId + '&apptag=' + appTag;
+	log('Using URL <' + url + '> for VM start request...');
+
+    /* Open an [HTTP] window to handle this request */
+    var win_w = 700;
+	var win_h = 500;
+    var win = window.open(url, "webapi_popup", 
+         "width=" + win_w
+      + ",height=" + win_h
+      + ",left=" + ((window.screen.width - win_w) / 2)
+      + ",top=" + ((window.screen.height - win_h) / 2)
+      + ",location=no"
+      + ",menubar=no"
+      + ",resizable=no"
+      + ",scrollbars=no"
+      + ",titlebar=no"
+      + ",toolbar=no"
+    );
+
+    $('#launchAppModal').modal("hide");
 }
 
 </script>

@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>CitizenGrid VM Startup Window</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="/cg-webapi/js/jquery-1.11.1.min.js"></script>
+    <script src="/cg-webapi/js/cvmwebapi-latest.js"></script>
+  </head>
+  <body>
+    <h5>Preparing to start CitizenGrid VM, please do not close this window...</h5>
+    <h5 id="vm-status"></h5>
+    
+    <script type="text/javascript">
+    function log(msg) {
+    	if(console && console.log) {
+    		console.log(msg)
+    	}
+    }
+    
+    function launchVM(vmcp_url) {
+    	log("LaunchVM function called with URL: " + vmcp_url);
+    	window.launchMachine = (function(vmcp_url) {
+
+    		log("About to call startCVMWebAPI...");
+    		
+            // Initialize CernVM WebAPI
+            CVM.startCVMWebAPI(function(plugin) {
+                $("#vm-status").text("Status: CernVM WebAPI Ready");
+
+                log("In startCVMWebAPI, adding event listeners, vmcp_url: " + vmcp_url);
+                
+                // Bind progress listeners on the plugin instance
+                plugin.addEventListener('started', function() {
+                	log('Plugin: STARTED event received.');
+                });
+                plugin.addEventListener('completed', function() {
+                	log('Plugin: COMPLETED event received.');
+                });
+                plugin.addEventListener('progress', function() {
+                	log('Plugin: PROGRESS event received.');
+                });
+                plugin.addEventListener('failed', function() {
+                	log('Plugin: FAILED event received.');
+                });
+                plugin.addEventListener('disconnected', function() {
+                	log('Plugin: DISCONNECTED event received.');
+                });
+
+                log("Value of plugin: " + plugin);
+                
+                // Request a session through our specified VMCP endpoint
+                plugin.requestSession('http://test.local:8000/' + vmcp_url, function(session) {
+                	log("In requestSession...");
+                    $("#vm-status").text("Status: CVM Session opened, starting VM");
+
+                    // Bind progress listeners on the session instance
+                    session.addEventListener('started', function() {
+                    	log('Session: STARTED event received.');
+                    });
+                    session.addEventListener('completed', function() {
+                    	log('Session: COMPLETED event received.');
+                    });
+                    session.addEventListener('progress', function() {
+                    	log('Session: PROGRESS event received.');
+                    });
+                    session.addEventListener('failed', function() {
+                    	log('Session: FAILED event received.');
+                    });
+
+                    // Listen for state changed events
+                    session.addEventListener('stateChanged', function(newState) {
+                        // When we are running we don't need the window any more
+                        if (newState == 5) {
+                        	log('VM running, closing window...');
+                        	$("#vm-status").text("Status: VM started");
+                            window.close();
+                        }
+                        else {
+                        	log('SESSION STATE CHANGED TO: ' + newState);
+                        }
+                    });
+                    
+                    // We just start the session the moment we get it
+                    session.start();
+                });
+            });
+    	})(vmcp_url);
+    }
+    
+    $(document).ready(function() {
+    	launchVM("{{ vmcp_url }}");
+    });
+	</script>
+  </body>
+</html>
+
