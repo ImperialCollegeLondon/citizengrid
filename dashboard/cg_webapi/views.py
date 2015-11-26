@@ -15,9 +15,6 @@ logging.basicConfig(level=logging.DEBUG,
                     datefmt='%m-%d %H:%M')
 logging.getLogger(__name__).setLevel(logging.DEBUG)
 
-def cg_webapi_main(request):
-    return HttpResponse("Hello world!", content_type='text/plain')
-
 # This controller receives a request with a vmcp_id, this VCMP config is 
 # retrieved from the database, signed and returned to the caller to start the 
 # VM.

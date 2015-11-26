@@ -12,7 +12,6 @@ from django.conf import settings
 from cg_webapi import views
 
 urlpatterns = [
-    url(r'^main/$', views.cg_webapi_main),
     url(r'^vmcp/(?P<vmcp_id>.*)$', views.cg_webapi_vmcp),
     url(r'^launch/$', views.cg_webapi_launch),
     url(r'^js/(?P<path>.*)$', 'django.views.static.serve',

@@ -6,7 +6,7 @@ import base64
 import urllib
 import uuid
 from django.http.response import HttpResponseNotAllowed, HttpResponse,\
-    HttpResponseServerError, HttpResponseRedirect
+    HttpResponseServerError, HttpResponseRedirect, HttpResponseBadRequest
 from citizengrid.models import ApplicationBasicInfo, ApplicationFile
 from cg_webapi.models import VmcpRequest
 from django.conf import settings
@@ -202,6 +202,12 @@ def vmcp(request):
 # URL for starting a VM. Get the signed VCMP request (via HTTPS request) and 
 # then save this against a unique key. Then send an HTTP redirect to access this    
 def webapi_start(request):
+    # We need an appid and apptag for the request to succeed.
+    if 'appid' not in request.GET:
+        return HttpResponseBadRequest('Required parameter appid not provided.')
+    if 'apptag' not in request.GET:
+        return HttpResponseBadRequest('Required parameter apptag not provided.')
+    
     MACHINE_CONFIG = _generate_vmcp_config(request)
     
     # Now save the signed request
