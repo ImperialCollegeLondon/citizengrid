@@ -18,3 +18,6 @@ ISO_GENERATOR_EXE = '/media/isocreator/cg_vams_iso_gen_mac'
 
 # KEY PATH FOR VMCP SIGNING
 VMCP_KEY_PATH = os.path.join(PROJECT_ROOT, 'settings', 'test-local.pem')
+
+HTTP_PORT = 8000
+HTTPS_PORT = 8000

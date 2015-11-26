@@ -18,3 +18,6 @@ ISO_GENERATOR_EXE = '/media/isocreator/cg_vams_iso_gen'
 
 # KEY PATH FOR VMCP SIGNING
 VMCP_KEY_PATH = os.path.join(PROJECT_ROOT, 'settings', 'cyberlab.doc.ic.ac.uk-cernvmwebapi_rsa.pem')
+
+HTTP_PORT = 55080
+HTTPS_PORT = 55443

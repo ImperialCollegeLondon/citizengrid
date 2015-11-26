@@ -219,8 +219,10 @@ def webapi_start(request):
     # Get the current URI
     uri = request.build_absolute_uri()
     parsed_url = urlparse.urlparse(uri)
-    redirect_url = ('http://%s/cg-webapi/launch/?id=%s' % 
-                    (parsed_url.netloc, unique_id))
+    # See if we have a host/port
+    host_port = parsed_url.netloc.split(':')
+    redirect_url = ('http://%s:%s/cg-webapi/launch/?id=%s' % 
+                    (host_port[0], settings.HTTP_PORT, unique_id))
     LOG.debug('Redirecting secure VMCP request to <%s>' % redirect_url)    
     return HttpResponseRedirect(redirect_url)    
 
