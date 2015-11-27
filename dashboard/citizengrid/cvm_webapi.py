@@ -233,6 +233,9 @@ def _generate_vmcp_config(request):
     app_id = request.GET['appid']
     app_tag = request.GET['apptag']
     
+    # Get the group id from the app tag
+    group_id = app_tag[app_tag.find('-')+1:]
+    
     LOG.debug('Getting VMCP config for application with ID [%s]' % app_id)
     
     file_formats = { 'NONE': 'Local file (Unknown type)',
@@ -283,7 +286,7 @@ def _generate_vmcp_config(request):
     if app.name.lower() == 'vas':
         MACHINE_CONFIG['userData'] = ("[amiconfig]\nplugins=cernvm\n\n"
             "[cernvm]\ncontextualization_key=cfcbde8ad2d4431d8ecc6dd801015252\n"
-            "liveq_queue_id=%s\n" % app_tag)
+            "liveq_queue_id=%s\n" % group_id)
     
         LOG.debug('VMCP MACHINE_CONFIG requested and configured. User data: %s'
                   % MACHINE_CONFIG['userData'])
