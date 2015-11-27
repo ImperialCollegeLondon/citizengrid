@@ -281,9 +281,12 @@ def _generate_vmcp_config(request):
     LOG.debug('Using diskURL <%s>' % MACHINE_CONFIG['diskURL'])
     
     if app.name.lower() == 'vas':
-        MACHINE_CONFIG['userData'] = "[amiconfig]\nplugins=cernvm\n\n[cernvm]\ncontextualization_key=cfcbde8ad2d4431d8ecc6dd801015252\nliveq_queue_id=${app_tag}"
+        MACHINE_CONFIG['userData'] = ("[amiconfig]\nplugins=cernvm\n\n"
+            "[cernvm]\ncontextualization_key=cfcbde8ad2d4431d8ecc6dd801015252\n"
+            "liveq_queue_id=%s\n" % app_tag)
     
-        LOG.debug('VMCP MACHINE_CONFIG requested and configured...')
+        LOG.debug('VMCP MACHINE_CONFIG requested and configured. User data: %s'
+                  % MACHINE_CONFIG['userData'])
         
     return MACHINE_CONFIG
     
