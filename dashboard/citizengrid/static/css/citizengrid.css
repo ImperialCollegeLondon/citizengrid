@@ -258,6 +258,7 @@ h4 > .glyphicon {
 
 #provider_image_info .cloud_images td {
 	font-size: 8pt;
+	vertical-align: middle;
 }
 
 #server_instances table th {
@@ -384,3 +385,4 @@ i {
 	padding-top: 8px;
 	cursor: pointer;
 }
+

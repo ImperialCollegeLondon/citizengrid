@@ -76,27 +76,31 @@
                                                         <th>Image ID</th>
                                                         <th>Cloud URL</th>
                                                         <th></th>
+                                                        <th></th>
                                                 </thead>
                                                 <tbody>{% for image in ec2_images %} {% if image.application.id == app.id %}
                                                     <tr>
                                                         <td>{% if image.image_type == 'C' %}Client  &nbsp;
-                                                        <a href="#startCloudServerModal" class="run-image glyphicon glyphicon-play-circle open-StartCloudServerModal"
-                                                        data-original-title="Run application client on cloud" data-toggle="modal" data-cloudurl="{{ image.zone_url }}" data-appid="{{ app.id }}"
-                                                        data-record-id="ec2:{{ image.id }}"></a>{% else %}Server{% endif %}</td>
+                                                        {% else %}Server{% endif %}</td>
                                                         <td>EC2</td>
                                                         <td>{{ image.image_id }}</td>
                                                         <td>{{ image.zone_url }}</td>
                                                         <td></td>
+                                                        <td>{% if image.image_type == 'C' %}Client  &nbsp;
+                                                        <a href="#startCloudServerModal" class="run-image btn btn-xs btn-primary open-StartCloudServerModal"
+                                                        data-original-title="Run application client on cloud" data-toggle="modal" data-cloudurl="{{ image.zone_url }}" data-appid="{{ app.id }}"
+                                                        data-record-id="ec2:{{ image.id }}">Launch VM</a>{% endif %}</td>
                                                     </tr>{% endif %} {% endfor %} {% for image in os_images %} {% if image.application.id == app.id %}
                                                     <tr>
                                                         <td>{% if image.image_type == 'C' %}Client &nbsp;
-                                                        <a href="#startCloudServerModal" class="run-image glyphicon glyphicon-play-circle open-StartCloudServerModal"
-                                                        data-original-title="Run application client on cloud" data-toggle="modal" data-cloudurl="{{ image.zone_url }}" data-appid="{{ app.id }}"
-                                                        data-record-id="os:{{ image.id }}"></a>{% else %}Server{% endif %}</td>
+                                                        {% else %}Server{% endif %}</td>
                                                         <td>Openstack</td>
                                                         <td>{{ image.image_id }}</td>
                                                         <td>{{ image.zone_url }}</td>
                                                         <td></td>
+                                                        <td><a href="#startCloudServerModal" class="run-image btn btn-xs btn-primary open-StartCloudServerModal"
+                                                        data-original-title="Run application client on cloud" data-toggle="modal" data-cloudurl="{{ image.zone_url }}" data-appid="{{ app.id }}"
+                                                        data-record-id="os:{{ image.id }}">Launch VM</a></td>
                                                     </tr>{% endif %} {% endfor %}</tbody>
                                             </table>
                                         </div>
