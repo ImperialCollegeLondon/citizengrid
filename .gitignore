@@ -1,5 +1,4 @@
 *.classpath
-secret_key.py
 *.DS_Store
 *.project
 *.pydevproject
@@ -15,6 +14,4 @@ secret_key.py
 *.backup
 *.pem
 media/
-migrations/
-*/citizengrid/migrations/
-
+dashboard/config
