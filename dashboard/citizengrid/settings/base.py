@@ -21,7 +21,7 @@ PROJECT_ROOT = os.path.join(os.path.realpath(os.path.dirname(__file__)), '..')
 DEBUG = False
 TEMPLATE_DEBUG = DEBUG
 
-ALLOWED_HOSTS = ['127.0.0.1','localhost','cyberlab.doc.ic.ac.uk','test.local'] # Change to IP address and domain name in production
+ALLOWED_HOSTS = ['127.0.0.1','localhost','cyberlab.doc.ic.ac.uk'] # Change to IP address and domain name in production
 
 ADMINS = (
     ('admin', 'admin@localhost'),

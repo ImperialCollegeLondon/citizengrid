@@ -232,22 +232,6 @@
     <!-- /.modal-dialog -->
 </div>
 <!-- /.modal -->
-
-<!-- The template to display files available for upload -->{% jquery_upload_display_templates %}
-<!-- The jQuery UI widget factory, can be omitted if jQuery UI is already included -->
-<script src="/js/vendor/jquery.ui.widget.js"></script>
-<!-- The Templates plugin is included to render the upload/download listings -->
-<script src="/js/tmpl.min.js"></script>
-<!-- The Iframe Transport is required for browsers without support for XHR file uploads -->
-<script src="/js/jquery.iframe-transport.js"></script>
-<!-- The basic File Upload plugin -->
-<script src="/js/jquery.fileupload.js"></script>
-<!-- The File Upload processing plugin -->
-<script src="/js/jquery.fileupload-process.js"></script>
-<!-- The File Upload validation plugin -->
-<!-- <script src="/js/test/jquery.fileupload-validate.js"></script> -->
-<!-- The File Upload user interface plugin -->
-<script src="/js/jquery.fileupload-ui.js"></script>
 <script type="text/javascript">
     var chooseFileVisible = true;
     var urlboxVisible = true;
@@ -265,35 +249,15 @@
 
         $('.user-menu a').click(
 
-	        function() {
-	            var btnTarget = "#" + $(this).data("target");
-	            console.log(btnTarget)
-	            $(".pill-target").not(btnTarget).hide();
-	            populateAppDiv(btnTarget)
-	            $(btnTarget).show();
-	        }
-	    );
-        
-        // Set up ajax request to populate running instance table
-        var apps = $('.app-panel');
-        var i = 0;
-        for (i = 0; i < apps.length; i++) {
-            var appId = $(apps[i]).data("appid");
-            if (console && console.log) {
-                console.log('Information displayed for application: ' + appId);
-            }
-            setTimeout(function(applicationId) {
-                return function() {
-                    if (console && console.log) {
-                        console.log('About to update running servers for app: ' + applicationId);
-                    }
-                    updateRunningServers(applicationId);
-                };
-            }(appId), 0);
-        }
+        function() {
+            var btnTarget = "#" + $(this).data("target");
+            console.log(btnTarget)
+            $(".pill-target").not(btnTarget).hide();
+            populateAppDiv(btnTarget)
+            $(btnTarget).show();
+        });
 
     });
-    
     /*
      *    Populatediv - Populates div with Django's formwizard output. The function on submit posts the
      *    form data to FormWizard view and gets the next step data.
@@ -437,7 +401,23 @@
 
         }
     }
-
+</script>
+<!-- The template to display files available for upload -->{% jquery_upload_display_templates %}
+<!-- The jQuery UI widget factory, can be omitted if jQuery UI is already included -->
+<script src="/js/vendor/jquery.ui.widget.js"></script>
+<!-- The Templates plugin is included to render the upload/download listings -->
+<script src="/js/tmpl.min.js"></script>
+<!-- The Iframe Transport is required for browsers without support for XHR file uploads -->
+<script src="/js/jquery.iframe-transport.js"></script>
+<!-- The basic File Upload plugin -->
+<script src="/js/jquery.fileupload.js"></script>
+<!-- The File Upload processing plugin -->
+<script src="/js/jquery.fileupload-process.js"></script>
+<!-- The File Upload validation plugin -->
+<!-- <script src="/js/test/jquery.fileupload-validate.js"></script> -->
+<!-- The File Upload user interface plugin -->
+<script src="/js/jquery.fileupload-ui.js"></script>
+<script type="text/javascript">
     $(function() {
         'use strict';
 
@@ -523,6 +503,28 @@
             $('#hide-file-element-2').toggle(500);
             $('#urlbox').toggle(500);
         }
+    });
+
+    // Set up ajax request to populate running instance table
+    $(document).ready(function() {
+
+        var apps = $('.app-panel');
+        var i = 0;
+        for (i = 0; i < apps.length; i++) {
+            var appId = $(apps[i]).data("appid");
+            if (console && console.log) {
+                console.log('Information displayed for application: ' + appId);
+            }
+            setTimeout(function(applicationId) {
+                return function() {
+                    if (console && console.log) {
+                        console.log('About to update running servers for app: ' + applicationId);
+                    }
+                    updateRunningServers(applicationId);
+                };
+            }(appId), 0);
+        }
+
     });
 
     $(document).on("click", ".open-StartCloudServerModal", function(e) {

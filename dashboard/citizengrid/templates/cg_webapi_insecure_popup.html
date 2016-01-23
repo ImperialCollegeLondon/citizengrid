@@ -49,7 +49,8 @@
                 log("Value of plugin: " + plugin);
                 
                 // Request a session through our specified VMCP endpoint
-                plugin.requestSession('http://test.local:8000/' + vmcp_url, function(session) {
+                plugin.requestSession('http://cyberlab.doc.ic.ac.uk:55080/' + vmcp_url, function(session) {
+                //plugin.requestSession('http://test.local:8000/' + vmcp_url, function(session) {
                 	log("In requestSession...");
                     $("#vm-status").text("Status: CVM Session opened, starting VM");
 

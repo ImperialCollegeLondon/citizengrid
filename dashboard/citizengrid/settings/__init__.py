@@ -1,1 +1,1 @@
-from citizengrid.settings.dev import *
+from citizengrid.settings.production import *
