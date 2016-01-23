@@ -30,5 +30,7 @@ $(function() {
 
 // Activate the info tooltips in the wizard
 $(document).ready(function() {
-	$('.wizard-field-info').tooltip();
+	$('body').tooltip({
+	    selector: '.wizard-field-info'
+	});
 });
