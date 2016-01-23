@@ -753,6 +753,7 @@ class ApplicationNewAppWizard(SessionWizardView):
         file_storage = FileSystemStorage(location=os.path.join('citizengrid','media'))
         print 'media folder is ' + str(file_storage)
         def get_template_names(self):
+            LOG.debug('StepsHelper says current step is <%s>' % self.steps.current)
             return [TEMPLATES[self.steps.current]]
 
         #
@@ -760,13 +761,13 @@ class ApplicationNewAppWizard(SessionWizardView):
         #
         def get_context_data(self, form, **kwargs):
             context = super(ApplicationNewAppWizard, self).get_context_data(form=form, **kwargs)
-            initial_dict = self.get_form_initial('1')
-            if self.steps.current == '2':
-                step1_data = self.get_cleaned_data_for_step('1')
+            initial_dict = self.get_form_initial('step1')
+            if self.steps.current == 'step2':
+                step1_data = self.get_cleaned_data_for_step('step1')
                 context.update({'step1_data':step1_data,'category': Category.objects.all(),'branches':Branch.objects.all(),'subcategory':SubCategory.objects.all(),})
             else:
-                step1_data = self.get_cleaned_data_for_step('1')
-                step2_data = self.get_cleaned_data_for_step('2')
+                step1_data = self.get_cleaned_data_for_step('step1')
+                step2_data = self.get_cleaned_data_for_step('step2')
                 context.update({'step1_data':step1_data,'step2_data':step2_data,'category': Category.objects.all(),'branches':Branch.objects.all(),'subcategory':SubCategory.objects.all(),})
             return context
 
