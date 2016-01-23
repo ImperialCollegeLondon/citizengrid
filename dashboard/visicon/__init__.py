@@ -15,7 +15,8 @@ Prerequisites: ::
 
 """
 
-import md5
+#import md5
+import hashlib
 import os
 import random
 import sys
@@ -52,7 +53,7 @@ class Visicon(object):
         """
         self.string = string
         self.seed = seed
-        self.hash = md5.md5(self.string + self.seed).hexdigest()
+        self.hash = hashlib.md5(self.string + self.seed).hexdigest()
         self.size = size
         
         dec = lambda hex: int(hex, 16)

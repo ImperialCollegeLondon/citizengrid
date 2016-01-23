@@ -21,7 +21,7 @@ PROJECT_ROOT = os.path.join(os.path.realpath(os.path.dirname(__file__)), '..')
 DEBUG = False
 TEMPLATE_DEBUG = DEBUG
 
-ALLOWED_HOSTS = ['127.0.0.1','localhost','cyberlab.doc.ic.ac.uk'] # Change to IP address and domain name in production
+ALLOWED_HOSTS = ['127.0.0.1','localhost','cyberlab.doc.ic.ac.uk','test.local'] # Change to IP address and domain name in production
 
 ADMINS = (
     ('admin', 'admin@localhost'),
@@ -74,6 +74,7 @@ MEDIA_URL = '/media/'
 # in apps' "static/" subdirectories and in STATICFILES_DIRS.
 # Example: "/home/media/media.lawrence.com/static/"
 STATIC_ROOT = os.path.join(PROJECT_ROOT, 'static')
+WEBAPI_STATIC_ROOT = os.path.join(PROJECT_ROOT, '..', 'cg_webapi', 'static')
 
 # URL prefix for static files.
 # Example: "http://media.lawrence.com/static/"
@@ -182,6 +183,7 @@ INSTALLED_APPS = (
     'password_reset',
     'django.contrib.admindocs',
     'citizengrid',
+    'cg_webapi',
     'south',
     'django_nyt',
     'mptt',

@@ -46,8 +46,15 @@
 </div>
 
 <script type="text/javascript">
+function log(msg) {
+	if(console && console.log) {
+		console.log(msg)
+	}
+}
 
 $(document).ready(function() {
+	var appId = $('#client-launch').data("appid");
+	
 	$("#ajax_app_detail").load("/cg/appdetail/{{ appId }}",
 		function( response, status, xhr ) {
 			if ( status == "error" ) {
@@ -57,6 +64,16 @@ $(document).ready(function() {
 						"<br/></h5>");
 			}
 			else {
+				// Disable the launch app button until the CVMWebAPI is available
+				/* $('.launchapp-btn').addClass('disabled');
+				$('#launchAppModal .modal-footer').prepend(
+					'<span id="api-loading" style="float:left; font-size:12px;">' + 
+					'<img src="/img/loading.gif" style="width:16px;" />&nbsp;' +
+					'&nbsp;Initialising VM plugin...</span>'); */
+				
+				// Add an element into server instances to report VM state
+				//$('#server_instances').prepend('<div id="client-status">VM Status: <span></span></div>');
+				
 				// Remove the old click handler and replace this with the 
 				// information for the passed in parameters.
 				$('.btn-launch').unbind('click');
@@ -65,7 +82,8 @@ $(document).ready(function() {
 					populateLaunchModal(e.target);
 				});
 				$('.launchapp-btn').on('click', function(e) {
-					launchAppFixedGroup(e);
+					//launchAppFixedGroup(e); // Old WebStart launch function
+					launchAppWebAPI(e);
 				});
 				populateLaunchModal($('.btn-launch'));
 				$('#launchAppModal').modal("show");
@@ -73,10 +91,15 @@ $(document).ready(function() {
 		}
 	);
 	$("#ajax_app_detail").show();
-	$(document).scrollTop("#ajax_app_detail");	
+	$(document).scrollTop("#ajax_app_detail");
 });
 
 function populateLaunchModal(target) {
+	/* if(window.session && (STATES[window.session.state] == "Running")) {
+		window.session.stop();
+		target.stopPropagation();
+		return;
+	} */
 	var appName = $(target).data("appname");
 	var appId = $(target).data("appid");
     var appIcon = $(target).data("appicon");
@@ -84,28 +107,45 @@ function populateLaunchModal(target) {
     $('#selectTagslaunch').replaceWith('<div id="app-group" data-app-group="{{ group }}">'+
     		'Application group: <b>{{ group }}</b></div>');
     
-
-
 	$(".modal-body #appimg").attr("src", appIcon);
 	$(".modal-body #appname").html("Application: <b>" + appName + "</b>");
 	$(".modal-footer #launchappbtn").data("id", appId);
-	$('.launchapp-btn').data("id", appId);
+	var el = $('.launchapp-btn');
+	el.removeData("id");
+	el.removeAttr("data-id");
+	el.attr("data-id", appId);
 
 }
 
-function launchAppFixedGroup(event) {
+function launchAppWebAPI(event) {
+	event.preventDefault();
 	var appId = $(event.target).data("id");
-    var appGroup = $("#app-group").data("app-group");
+	var appTag = $("#app-group").data("app-group");
 	var launchType = $('#launchtype').data("launchtype");
-	$(event.target).attr("href", "/cg/launchapp/" + appId + "/" + launchType + "/" + appGroup);
-	if(console && console.log) {
-		console.log('About to launch application with ID: ' + appId);
-	}
+	
+	log('About to launch application with ID: ' + appId + " and tag: " + appTag);
+	
+	// Prepare the URL and trigger the popup to launch the VM via webapi
+	var url = '/webapi_start?appid=' + appId + '&apptag=' + appTag;
+	log('Using URL <' + url + '> for VM start request...');
 
-    if(console && console.log) {
-		console.log('About to launch application with group: ' + appGroup);
-	}
-	$('#launchAppModal').modal("hide");
+    /* Open an [HTTP] window to handle this request */
+    var win_w = 700;
+	var win_h = 500;
+    var win = window.open(url, "webapi_popup", 
+         "width=" + win_w
+      + ",height=" + win_h
+      + ",left=" + ((window.screen.width - win_w) / 2)
+      + ",top=" + ((window.screen.height - win_h) / 2)
+      + ",location=no"
+      + ",menubar=no"
+      + ",resizable=no"
+      + ",scrollbars=no"
+      + ",titlebar=no"
+      + ",toolbar=no"
+    );
+
+    $('#launchAppModal').modal("hide");
 }
 
 </script>
