@@ -10,7 +10,10 @@
 <noscript>
     <link rel="stylesheet" href="/css/jquery.fileupload-ui-noscript.css">
 </noscript>
-<script src="/js/jquery-1.11.1.min.js"></script>
+{% endblock head %}
+
+{% block script %}
+
 <script src="/js/app-provider.js?5"></script>
 <script type="text/javascript">
     function welcomeCheckboxClick() {
@@ -234,7 +237,7 @@
 <!-- /.modal -->
 
 <!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
-<script src="//netdna.bootstrapcdn.com/bootstrap/3.1.1/js/bootstrap.min.js"></script>
+<!-- <script src="//netdna.bootstrapcdn.com/bootstrap/3.1.1/js/bootstrap.min.js"></script>  -->
 <!-- The template to display files available for upload -->{% jquery_upload_display_templates %}
 <!-- The jQuery UI widget factory, can be omitted if jQuery UI is already included -->
 <script src="/js/vendor/jquery.ui.widget.js"></script>
@@ -260,11 +263,6 @@
     $(document).ready(function() {
         $.ajaxSetup({ cache: false });
         $('.pill-target').hide();
-
-        // Activate the info tooltips in the wizard
-        $('body').tooltip({
-    	    selector: '.wizard-field-info'
-    	});
         
         // Get the active item and make it visible
         var activeItem = $('.user-menu .active a').data("target");

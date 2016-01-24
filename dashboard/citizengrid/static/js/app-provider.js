@@ -24,6 +24,12 @@ $(function() {
             $(this).closest('ul li').find(':checkbox').prop('checked', this.checked);
         });
     });
-
-
 });
+
+$(document).ready(function() {
+    // Activate the info tooltips in the wizard
+    $('body').tooltip({
+    	selector: '.wizard-field-info'
+	});
+
+})
