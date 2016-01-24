@@ -233,6 +233,8 @@
 </div>
 <!-- /.modal -->
 
+<!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
+<script src="//netdna.bootstrapcdn.com/bootstrap/3.1.1/js/bootstrap.min.js"></script>
 <!-- The template to display files available for upload -->{% jquery_upload_display_templates %}
 <!-- The jQuery UI widget factory, can be omitted if jQuery UI is already included -->
 <script src="/js/vendor/jquery.ui.widget.js"></script>
@@ -259,6 +261,11 @@
         $.ajaxSetup({ cache: false });
         $('.pill-target').hide();
 
+        // Activate the info tooltips in the wizard
+        $('body').tooltip({
+    	    selector: '.wizard-field-info'
+    	});
+        
         // Get the active item and make it visible
         var activeItem = $('.user-menu .active a').data("target");
         $('#' + activeItem).show();
