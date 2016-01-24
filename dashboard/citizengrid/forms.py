@@ -1,8 +1,10 @@
+from django.conf import settings
 from django import forms
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.models import User
 from django.core.exceptions import ObjectDoesNotExist
 from django.core.exceptions import ValidationError
+from django.core.files.uploadedfile import InMemoryUploadedFile
 
 from citizengrid.models import UserInfo
 from citizengrid.models import ApplicationFile
@@ -11,7 +13,16 @@ from citizengrid.models import Branch
 from citizengrid.models import Category
 from citizengrid.models import SubCategory
 
+import os
 import urlparse
+import logging
+from shutil import copyfile
+
+LOG = logging.getLogger(__name__)
+logging.basicConfig(level=logging.DEBUG,
+                    format='%(asctime)s %(name)-12s %(levelname)-8s %(message)s',
+                    datefmt='%m-%d %H:%M')
+logging.getLogger(__name__).setLevel(logging.DEBUG)
 
 class ExtendedUserCreationForm(UserCreationForm):
     first_name = forms.CharField(label='First name', max_length=30)
@@ -107,7 +118,7 @@ class ApplicationBasicInfoForm(forms.Form):
 
     name = forms.CharField(max_length=128)
     description = forms.CharField()
-    iconfile = forms.FileField(
+    iconfile = forms.FileField(required=False,
         label='Select a logo file',
         help_text='jpg or png or gif'
     )
@@ -115,6 +126,24 @@ class ApplicationBasicInfoForm(forms.Form):
     select_category = forms.BooleanField(required=False)
     additional_Information = forms.CharField(required=False)
     keywords = forms.CharField(max_length=128, required=False)
+    
+    def clean_iconfile(self):
+        data = self.cleaned_data['iconfile']
+        LOG.debug('Content provided for iconfile: <%s>' % data)
+        icon_filename = 'noicon.png'
+        if not data or data == '':
+            # If no image was defined, we use the default
+            default_img = os.path.join(settings.PROJECT_ROOT, 'static','img', icon_filename)
+            #app_img_location = os.path.join(settings.PROJECT_ROOT, 'media', self.request.user.get_username(), icon_filename)
+            #copyfile(default_img, app_img_location)
+            img_file = open(default_img, 'rb')
+            fsize = os.fstat(img_file.fileno()).st_size
+            icon_file = InMemoryUploadedFile(img_file, None, icon_filename, 
+                                             'image/png', fsize, None)
+            return icon_file
+        
+        else:
+            return data
 
 class  ApplicationServerInfoForm(forms.Form):
     def __init__(self, *args, **kwargs):

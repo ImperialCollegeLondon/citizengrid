@@ -5,12 +5,12 @@
     # view functions
     #===============================================================================
 import os
-from visicon import gen_icon
 from django.core.files.storage import FileSystemStorage
 from citizengrid.forms import ApplicationBasicInfoForm
 from citizengrid.models import ApplicationBasicInfo,ApplicationEC2Images,ApplicationOpenstackImages, UserInfo, UserCloudCredentials,\
     ApplicationFile,Branch, SubCategory, Category
 from citizengrid.templatetags import cg_template_filters
+from django.db import transaction
 from django.db.models import Q
 from django.template.loader import render_to_string
 from citizengrid.templatetags import cg_myapp_template
@@ -20,7 +20,14 @@ import bz2
 import base64
 import binascii
 from Crypto.Cipher import AES
-from django.db import transaction
+import logging
+
+LOG = logging.getLogger(__name__)
+logging.basicConfig(level=logging.DEBUG,
+                    format='%(asctime)s %(name)-12s %(levelname)-8s %(message)s',
+                    datefmt='%m-%d %H:%M')
+logging.getLogger(__name__).setLevel(logging.DEBUG)
+
 #===============================================================================
 # Stores server and client Cloud image in the db
 # AWS - Server image
@@ -273,13 +280,9 @@ def application_provider_view_data(request):
                     tempfile.application = app
                     tempfile.save()
 
-                # Generate the identicon for the application
-                fs = FileSystemStorage()
-                icon_location = os.path.join(fs.location, '..', 'static', 'img', 'ident', str(app.id)+'.png')
-                print "Debug: IconLocation is %s" %(icon_location)
-                gen_icon.create_icon(icon_location)
-
-                app.iconfile = os.path.join('img', 'ident', str(app.id)+'.png')
+                # Setup app image file - image was previously generated here
+                app.iconfile = os.path.join('img', 'noicon.png')
+                LOG.debug('Using fixed application icon <%s>' % app.iconfile)
                 app.save()
 
             else:
@@ -292,7 +295,7 @@ def application_provider_view_data(request):
             form = ApplicationBasicInfoForm()
 
     else:
-        form = ApplicationBasicInfoForm()
+        form = ApplicationBasicInfoForm(request=request)
 
 
     # Populate the application list

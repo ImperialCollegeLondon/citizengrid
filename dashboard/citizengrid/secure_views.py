@@ -37,7 +37,6 @@ import utils
 import view_utils
 import views
 from django.db import IntegrityError, transaction
-from visicon import gen_icon
 
 import logging
 LOG = logging.getLogger(__name__)
@@ -771,6 +770,11 @@ class ApplicationNewAppWizard(SessionWizardView):
                 context.update({'step1_data':step1_data,'step2_data':step2_data,'category': Category.objects.all(),'branches':Branch.objects.all(),'subcategory':SubCategory.objects.all(),})
             return context
 
+        # Add the request to the form kwargs
+        def get_form_kwargs(self, step):
+            args = super(ApplicationNewAppWizard, self).get_form_kwargs(step)
+            args['request'] = self.request
+            return args
         #=======================================================================
         # Processes file upload of server and client images.
         # TODO - Processing file at this stage is incorrect, we
@@ -858,9 +862,6 @@ class ApplicationNewAppWizard(SessionWizardView):
                     fs = FileSystemStorage()
 
                     icon_location = os.path.join('media',request.user.get_username())
-                    #icon_location = os.path.join(fs.location, '..', 'static', 'img', 'ident')
-                    #gen_icon.create_icon(icon_location)
-                    #icon_location = os.path.join(fs.location, request.user.username, name)
                     iconfile_name = self.get_cleaned_data_for_step('step1')['iconfile'].name
                     print "inconfile is %s" %(self.get_cleaned_data_for_step('step1')['iconfile'].name)
                    # app.iconfile = os.path.join('img', 'ident', str(app.id)+'.png')
@@ -1218,16 +1219,16 @@ def handle_uploaded_file(appname,request,fs,file):
         destination.close()
 
 def handle_uploaded_file_icon(appname,request,fs,file):
-        location = ""
-        location = os.path.join(fs.location, request.user.get_username())
-        if not os.path.exists(location):
-            os.makedirs(location,0700)
-            print "Created user directory for  uploads: " + str(os.path.join(location))
+    location = ""
+    location = os.path.join(fs.location, request.user.get_username())
+    if not os.path.exists(location):
+        os.makedirs(location,0700)
+        print "Created user directory for  uploads: " + str(os.path.join(location))
 
-        with fs.open(os.path.join(location,file.name), 'wb+') as destination:
-            for chunk in file.chunks():
-                destination.write(chunk)
-            destination.close()
+    with fs.open(os.path.join(location,file.name), 'wb+') as destination:
+        for chunk in file.chunks():
+            destination.write(chunk)
+        destination.close()
 
 # jcohen02 - added to support request in issue #20
 # Start virtualbox application client passing specified configuration metadata
