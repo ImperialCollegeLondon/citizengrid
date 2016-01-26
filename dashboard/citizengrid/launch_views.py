@@ -343,6 +343,8 @@ def manage_instances(request, task, appid, instancerecord):
                             instance_info = {}
                             instance_info['id'] = instanceOS.id
                             instance_info['state'] = instanceOS.state
+                            if instance_info['state'] == 'running':
+                                instance_info['ip'] = instanceOS.public_dns_name
                             # Update instance state in DB
                             if instance_info['state'] != instance.status:
                                 instance.status = instance_info['state']
